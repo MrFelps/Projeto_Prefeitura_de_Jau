@@ -1,0 +1,7 @@
+# Arquivos pesados locais (manter no computador, não subir para o site)
+PDF/
+APRESENTAÇÃO/
+*.pptx
+*.pdf
+textos PI/
+*.docx

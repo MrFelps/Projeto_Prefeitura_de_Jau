@@ -1,0 +1,1961 @@
+/* RESET E TIPOGRAFIA BASE */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  /* IDENTIDADE VISUAL OFICIAL GOV.BR / DESIGN SYSTEM DO GOVERNO */
+  --gov-blue-dark: #0c326f;      /* Azul Marinho Institucional Gov */
+  --gov-blue: #1351b4;           /* Azul Clássico Interativo Gov.br */
+  --gov-blue-light: #2670e8;     /* Azul Claro de Destaque */
+  --gov-white-ice: #f8f9fa;      /* Branco Gelo Tradicional Gov */
+  --gov-white-pure: #ffffff;     /* Branco Puro para Cards */
+  --gov-gold: #ffcd07;           /* Amarelo Ouro / Dourado Gov */
+  --gov-gold-dark: #d9a400;      /* Dourado Escuro para Contraste */
+  --gov-green: #168821;          /* Verde Bandeira Gov para Filetes e Linhas */
+  --gov-green-light: #e6f4ea;    /* Fundo suave para tags verdes */
+  --gov-gray-border: #d2d6dc;    /* Linhas e bordas neutras */
+  --gov-text-dark: #1b263b;      /* Texto Principal Quase Preto */
+  --gov-text-muted: #556275;     /* Texto Secundário Legível */
+  --font-scale: 1;
+}
+
+body {
+  font-family: 'rawline', 'Rawline', 'Open Sans', system-ui, -apple-system, sans-serif;
+  background-color: #0d1527;
+  color: var(--gov-text-dark);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  font-size: calc(16px * var(--font-scale));
+}
+
+/* PAINEL LATERAL DE CONTROLE DO SIMULADOR (DEMONSTRAÇÃO BANCA SENAC) */
+.simulator-panel {
+  width: 320px;
+  background: #111827;
+  border-right: 1px solid #1f2937;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.panel-header .badge-live {
+  background: #10b981;
+  color: #064e3b;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.panel-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.panel-header p {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #1f2937;
+  padding-top: 14px;
+}
+
+.control-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #93c5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-ctrl {
+  background: #1f2937;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-ctrl:hover {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.btn-ctrl.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #fff;
+}
+
+.btn-highlight {
+  background: #059669;
+  border-color: #10b981;
+  color: #fff;
+}
+
+.btn-highlight:hover {
+  background: #10b981;
+}
+
+.timer-bar-container {
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+  transition: width 1s linear;
+}
+
+#timer-text {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.stats-list {
+  list-style: none;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #9ca3af;
+}
+
+.stats-list strong {
+  color: #e5e7eb;
+}
+
+/* ESTRUTURA DO TOTEM FÍSICO */
+.totem-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: radial-gradient(circle at center, #1e293b 0%, #0a0f1d 100%);
+  overflow-y: auto;
+}
+
+/* CARCAÇA / CHASSI DO TOTEM VERTICAL */
+.totem-frame {
+  width: 540px;
+  min-height: 960px;
+  height: 95vh;
+  max-height: 1050px;
+  background: #1e293b;
+  border-radius: 28px;
+  border: 12px solid #334155;
+  box-shadow: 
+    0 0 0 2px #475569,
+    0 25px 60px -15px rgba(0, 0, 0, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* TOPO DO CHASSI COM SENSOR E CÂMERA */
+.totem-top-sensor {
+  height: 38px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 2px solid #1e293b;
+}
+
+.camera-lens {
+  width: 10px;
+  height: 10px;
+  background: #0284c7;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #0284c7;
+}
+
+.pir-sensor {
+  width: 14px;
+  height: 14px;
+  background: #475569;
+  border-radius: 3px;
+  margin-left: 12px;
+  opacity: 0.6;
+}
+
+.chassis-brand {
+  position: absolute;
+  right: 16px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #64748b;
+}
+
+/* BASE INFERIOR DO CHASSI */
+.totem-bottom-chassis {
+  height: 32px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-top: 2px solid #1e293b;
+}
+
+.chassis-vent {
+  width: 60px;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+}
+
+.chassis-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #475569;
+}
+
+/* MODO TELA CHEIA (SEM MOLDURA) */
+.totem-frame.fullscreen-mode {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.totem-frame.fullscreen-mode .totem-top-sensor,
+.totem-frame.fullscreen-mode .totem-bottom-chassis {
+  display: none !important;
+}
+
+/* A TELA DO TOTEM (ÁREA ÚTIL DIGITAL - PADRÃO GOV.BR) */
+.totem-screen {
+  flex: 1;
+  background: var(--gov-white-ice);
+  color: var(--gov-text-dark);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CABEÇALHO OFICIAL GOV.BR */
+.totem-header {
+  padding: 10px 18px 12px;
+  background: var(--gov-white-pure);
+  border-bottom: 3px solid var(--gov-green); /* Filete Verde Gov */
+  box-shadow: 0 2px 10px rgba(0, 51, 102, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
+/* BARRA GOV.BR INSTITUCIONAL */
+.gov-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gov-gray-border);
+  padding-bottom: 6px;
+}
+
+.gov-brand-flag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gov-text-logo {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  letter-spacing: -0.5px;
+}
+
+.gov-dot {
+  color: var(--gov-gold-dark);
+}
+
+.gov-sep {
+  color: var(--gov-gray-border);
+  font-weight: 300;
+  font-size: 13px;
+}
+
+.gov-city-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gov-text-muted);
+}
+
+.gov-portal-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--gov-blue);
+  background: #e9f2ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.city-crest {
+  font-size: 24px;
+  background: var(--gov-blue-dark);
+  color: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  border-bottom: 2px solid var(--gov-gold);
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--gov-blue-dark);
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--gov-blue);
+  font-weight: 700;
+  display: block;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gov-white-ice);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--gov-gray-border);
+}
+
+.weather-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weather-icon {
+  font-size: 20px;
+}
+
+.temp {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--gov-blue-dark);
+}
+
+.city-label {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  display: block;
+  font-weight: 600;
+}
+
+.clock-widget {
+  text-align: right;
+}
+
+.clock-widget .time {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gov-blue);
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-widget .date {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  font-weight: 600;
+}
+
+/* BARRA DE ACESSIBILIDADE OFICIAL */
+.accessibility-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+  background: var(--gov-blue-dark);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border-top: 2px solid var(--gov-gold); /* Destaque Ouro Gov */
+}
+
+.btn-access {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-access:hover, .btn-access:active {
+  background: var(--gov-gold);
+  color: var(--gov-blue-dark);
+  border-color: var(--gov-gold);
+}
+
+.btn-access.active {
+  background: var(--gov-gold);
+  color: var(--gov-blue-dark);
+  border-color: var(--gov-gold-dark);
+  font-weight: 800;
+}
+
+/* CORPO DINÂMICO (ÁREA DE CONTEÚDO) */
+.totem-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  position: relative;
+  background: var(--gov-white-ice);
+  transition: transform 0.4s ease, padding 0.4s ease;
+}
+
+/* MODO CADEIRANTE / BAIXA ESTATURA */
+.totem-screen.mode-wheelchair .totem-body {
+  transform: translateY(22%);
+}
+
+.totem-screen.mode-wheelchair .totem-header {
+  transform: translateY(120px);
+  background: #ffffff;
+}
+
+/* TELAS DE CONTEÚDO */
+.view-screen {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.view-screen.active {
+  display: flex;
+}
+
+/* BANNER DE ALERTA DEFESA CIVIL (ESTILO GOV) */
+.alert-banner {
+  background: #fff8e6;
+  border: 1px solid #ffd566;
+  border-left: 4px solid var(--gov-gold-dark);
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.alert-tag {
+  font-size: 11px;
+  font-weight: 800;
+  color: #925400;
+  letter-spacing: 0.5px;
+}
+
+.alert-text {
+  font-size: 12px;
+  color: #593900;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.welcome-box h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+.welcome-box p {
+  font-size: 13px;
+  color: var(--gov-text-muted);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* GRADE DOS 4 MÓDULOS PRINCIPAIS (DESIGN GOV COM BORDAS VERDES SUTIS) */
+.modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.module-card {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-top: 4px solid var(--gov-green); /* Filete verde elegante e sutil */
+  border-radius: 12px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 152px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(12, 50, 111, 0.06);
+  transition: all 0.22s ease;
+  color: var(--gov-text-dark);
+}
+
+.module-card:hover, .module-card:active {
+  transform: translateY(-3px);
+  border-color: var(--gov-blue);
+  border-top-color: var(--gov-green);
+  box-shadow: 0 10px 20px rgba(19, 81, 180, 0.15);
+}
+
+.card-bus:hover { border-top-color: var(--gov-blue); }
+.card-shoes:hover { border-top-color: var(--gov-gold-dark); }
+.card-tourism:hover { border-top-color: var(--gov-green); }
+.card-services:hover { border-top-color: var(--gov-blue-dark); }
+
+.card-icon {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.card-content h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  margin-bottom: 4px;
+}
+
+.card-content p {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.card-arrow {
+  align-self: flex-end;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-blue);
+}
+
+/* BANNER DESTAQUE (COM FILETER VERDE GOV) */
+.featured-strip {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid var(--gov-green);
+  padding: 12px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.strip-icon {
+  font-size: 22px;
+}
+
+.strip-text {
+  font-size: 12px;
+  color: #14532d;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+/* CABEÇALHOS DE SUBTELAS */
+.screen-subhead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 2px solid var(--gov-gray-border);
+  padding-bottom: 12px;
+}
+
+.btn-back {
+  align-self: flex-start;
+  background: var(--gov-white-pure);
+  color: var(--gov-blue-dark);
+  border: 1px solid var(--gov-gray-border);
+  border-left: 3px solid var(--gov-blue);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.btn-back:hover {
+  background: var(--gov-blue);
+  color: #fff;
+  border-color: var(--gov-blue);
+}
+
+.screen-subhead h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+/* MÓDULO ÔNIBUS */
+.bus-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-tab {
+  flex: 1;
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  color: var(--gov-text-muted);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-tab.active {
+  background: var(--gov-blue);
+  color: #fff;
+  border-color: var(--gov-blue-dark);
+}
+
+.bus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bus-item {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-top: 3px solid var(--gov-green); /* Filete Verde */
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.bus-badge {
+  background: var(--gov-blue-dark);
+  color: var(--gov-gold);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-align: center;
+  min-width: 65px;
+}
+
+.bus-info {
+  flex: 1;
+}
+
+.bus-info h4 {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+.bus-info p {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+}
+
+.bus-status {
+  font-size: 11px;
+  display: block;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.bus-status.live { color: var(--gov-green); }
+.bus-status.waiting { color: var(--gov-gold-dark); }
+
+.btn-bus-action {
+  background: var(--gov-blue);
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-bus-action:hover {
+  background: var(--gov-blue-dark);
+}
+
+/* MÓDULO CALÇADO */
+.shoes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.store-card {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-top: 3px solid var(--gov-gold);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.store-img-placeholder {
+  background: var(--gov-blue-dark);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-gold);
+  border-bottom: 2px solid var(--gov-green); /* Filete Verde */
+}
+
+.store-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.store-body h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+.store-addr {
+  font-size: 11px;
+  color: var(--gov-blue);
+  font-weight: 600;
+}
+
+.store-desc {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  line-height: 1.35;
+}
+
+.btn-store-qr {
+  margin-top: 6px;
+  background: var(--gov-blue);
+  color: #fff;
+  border: none;
+  padding: 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-store-qr:hover {
+  background: var(--gov-blue-dark);
+}
+
+/* MÓDULO TURISMO */
+.tour-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tour-card {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-top: 3px solid var(--gov-green); /* Filete Verde */
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tour-icon {
+  font-size: 32px;
+}
+
+.tour-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tour-content h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+.tour-content p {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  line-height: 1.35;
+}
+
+.tour-time {
+  font-size: 10px;
+  color: var(--gov-green);
+  font-weight: 700;
+}
+
+.btn-tour-action {
+  margin-top: 6px;
+  align-self: flex-start;
+  background: var(--gov-blue);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* MÓDULO SERVIÇOS */
+.services-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.service-box {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-top: 3px solid var(--gov-blue);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.service-box h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  margin-bottom: 10px;
+}
+
+.phone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.phone-btn {
+  background: var(--gov-white-ice);
+  border: 1px solid var(--gov-gray-border);
+  border-radius: 6px;
+  padding: 10px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.phone-btn:hover {
+  background: #e9f2ff;
+  border-color: var(--gov-blue);
+}
+
+.p-num {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  display: block;
+}
+
+.p-label {
+  font-size: 10px;
+  color: var(--gov-text-muted);
+  font-weight: 600;
+}
+
+.ouvidoria-card {
+  background: var(--gov-white-ice);
+  border: 1px solid var(--gov-gray-border);
+  border-left: 3px solid var(--gov-green);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ouvidoria-icon {
+  font-size: 26px;
+}
+
+.ouvidoria-card strong {
+  font-size: 12px;
+  color: var(--gov-blue-dark);
+}
+
+.ouvidoria-card p {
+  font-size: 10px;
+  color: var(--gov-text-muted);
+}
+
+.btn-ouvidoria {
+  margin-left: auto;
+  background: var(--gov-gold);
+  color: var(--gov-blue-dark);
+  border: 1px solid var(--gov-gold-dark);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* RODAPÉ PERMANENTE (GOV.BR) */
+.totem-footer {
+  padding: 10px 16px;
+  background: var(--gov-white-pure);
+  border-top: 2px solid var(--gov-blue-dark);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.btn-footer-home {
+  background: var(--gov-blue);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  min-width: 65px;
+  transition: all 0.2s;
+}
+
+.btn-footer-home:hover {
+  background: var(--gov-blue-dark);
+}
+
+.dooh-carousel {
+  flex: 1;
+  background: var(--gov-white-ice);
+  border: 1px solid var(--gov-gray-border);
+  border-left: 3px solid var(--gov-green); /* Filete Verde */
+  border-radius: 8px;
+  padding: 6px 10px;
+  overflow: hidden;
+}
+
+.dooh-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--gov-blue);
+  letter-spacing: 0.5px;
+}
+
+#dooh-text {
+  font-size: 11px;
+  color: var(--gov-text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+/* BOTÃO ISOLADO NO CANTO INFERIOR: CONTATOS DE ACIONAMENTO DE SOCORRO */
+.btn-footer-emergency-corner {
+  background: var(--gov-white-pure);
+  border: 1.5px solid #d32f2f;
+  color: #b71c1c;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  max-width: 175px;
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.15);
+}
+
+.btn-footer-emergency-corner:hover {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.em-icon {
+  font-size: 16px;
+}
+
+.em-label {
+  line-height: 1.2;
+}
+
+/* TELA DE CONTATOS COM LATERAIS FOSCAS (PADRÃO GOV.BR) */
+.contacts-screen-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  background: rgba(12, 50, 111, 0.4);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.contacts-screen-backdrop.hidden {
+  display: none;
+}
+
+/* LATERAIS FOSCAS (EFEITO FROSTED BLUR GOV) */
+.frosted-side {
+  width: 24px;
+  height: 100%;
+  backdrop-filter: blur(25px);
+  background: linear-gradient(90deg, rgba(12, 50, 111, 0.8), rgba(248, 249, 250, 0.2));
+  flex-shrink: 0;
+}
+
+.frosted-right {
+  background: linear-gradient(270deg, rgba(12, 50, 111, 0.8), rgba(248, 249, 250, 0.2));
+}
+
+/* PAINEL CENTRAL FOCADO */
+.contacts-central-panel {
+  flex: 1;
+  background: var(--gov-white-ice);
+  border-left: 2px solid var(--gov-blue);
+  border-right: 2px solid var(--gov-blue);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(12, 50, 111, 0.25);
+}
+
+.contacts-panel-head {
+  padding: 16px;
+  background: var(--gov-white-pure);
+  border-bottom: 3px solid var(--gov-green); /* Filete Verde */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.badge-auto {
+  background: #fff8e6;
+  color: #925400;
+  border: 1px solid #ffd566;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.head-title-wrap h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+}
+
+.head-title-wrap p {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.btn-close-contacts {
+  background: var(--gov-blue);
+  border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-close-contacts:hover {
+  background: var(--gov-blue-dark);
+}
+
+.contacts-panel-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.section-title-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.emergency-strip {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+}
+
+.emergency-strip .strip-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: #991b1b;
+  letter-spacing: 0.5px;
+}
+
+.emergency-strip small {
+  font-size: 10px;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.social-strip {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-left: 4px solid var(--gov-blue);
+}
+
+.social-strip .strip-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  letter-spacing: 0.5px;
+}
+
+.social-strip small {
+  font-size: 10px;
+  color: var(--gov-blue);
+  font-weight: 600;
+}
+
+/* CARDS DE CONTATOS NO PADRÃO GOV */
+.contacts-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-card {
+  background: var(--gov-white-pure);
+  border: 1px solid var(--gov-gray-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.urgent-card {
+  border-left: 4px solid #dc2626;
+}
+
+.social-card {
+  border-left: 4px solid var(--gov-blue);
+}
+
+.admin-card {
+  border-left: 4px solid var(--gov-green);
+}
+
+.c-badge {
+  background: #dc2626;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.c-badge-social {
+  background: var(--gov-blue-dark);
+  color: var(--gov-gold);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.c-badge-admin {
+  background: var(--gov-green);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.c-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.c-head-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.c-head-line strong {
+  font-size: 13px;
+  color: var(--gov-blue-dark);
+  font-weight: 800;
+}
+
+.tag-24h {
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.tag-office {
+  background: #e8f0fe;
+  color: #1967d2;
+  border: 1px solid #d2e3fc;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.c-desc {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.c-cost {
+  font-size: 10px;
+  color: #5f6368;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.phone-highlight {
+  color: var(--gov-blue) !important;
+  font-weight: 800;
+  font-size: 13px !important;
+}
+
+.contacts-panel-foot {
+  padding: 12px 16px;
+  background: var(--gov-white-pure);
+  border-top: 2px solid var(--gov-gray-border);
+}
+
+.foot-note {
+  font-size: 11px;
+  color: var(--gov-text-muted);
+  line-height: 1.3;
+  display: block;
+  font-weight: 500;
+}
+
+/* MODAIS */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 50, 111, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop.hidden {
+  display: none;
+}
+
+.modal-card {
+  background: var(--gov-white-pure);
+  border: 2px solid var(--gov-blue);
+  border-top: 5px solid var(--gov-green); /* Filete Verde Gov */
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 40px rgba(12, 50, 111, 0.2);
+  color: var(--gov-text-dark);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.modal-header .modal-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+#modal-desc {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.qrcode-wrapper {
+  background: #fff;
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px auto;
+  min-height: 180px;
+  min-width: 180px;
+}
+
+.modal-footer-note {
+  font-size: 11px;
+  color: #34d399;
+}
+
+/* MODAL SOS */
+.sos-card {
+  border-color: #ef4444;
+}
+
+.sos-big-icon {
+  font-size: 48px;
+  display: block;
+}
+
+.sos-location {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.sos-location p {
+  color: #fca5a5;
+  margin-top: 4px;
+}
+
+.sos-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-sos-call {
+  background: #ef4444;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  display: block;
+}
+
+/* OVERLAYS DE ENERGIA (ESG) */
+.idle-overlay, .sleep-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.idle-overlay.hidden, .sleep-overlay.hidden {
+  display: none;
+}
+
+/* MODO VITRINE */
+.idle-overlay {
+  background: linear-gradient(180deg, rgba(3, 105, 161, 0.92) 0%, rgba(15, 23, 42, 0.95) 100%);
+  animation: pulseBg 8s infinite alternate;
+}
+
+@keyframes pulseBg {
+  0% { filter: brightness(0.9); }
+  100% { filter: brightness(1.1); }
+}
+
+.idle-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.idle-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.idle-slide h1 {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.idle-slide p {
+  font-size: 14px;
+  color: #e0f2fe;
+}
+
+.idle-touch-cta {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.touch-icon {
+  font-size: 42px;
+  animation: bounceTouch 1.5s infinite;
+}
+
+@keyframes bounceTouch {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* MODO STANDBY NOTURNO */
+.sleep-overlay {
+  background: #000;
+  color: #38bdf8;
+}
+
+.sleep-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sleep-icon {
+  font-size: 48px;
+}
+
+.sleep-content h2 {
+  font-size: 16px;
+  color: #64748b;
+  letter-spacing: 1px;
+}
+
+.sleep-content p {
+  font-size: 12px;
+  color: #475569;
+}
+
+.wake-hint {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #38bdf8;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: blinkDot 1s infinite;
+}
+
+@keyframes blinkDot {
+  50% { opacity: 0.2; }
+}
+
+/* TEMA ALTO CONTRASTE (ACESSIBILIDADE VISUAL) */
+.totem-screen.high-contrast {
+  background: #000 !important;
+}
+
+.totem-screen.high-contrast * {
+  background-color: #000 !important;
+  color: #ff0 !important;
+  border-color: #ff0 !important;
+  box-shadow: none !important;
+}
+
+.totem-screen.high-contrast .module-card,
+.totem-screen.high-contrast .bus-item,
+.totem-screen.high-contrast .store-card,
+.totem-screen.high-contrast .tour-card,
+.totem-screen.high-contrast .phone-btn {
+  border: 2px solid #ff0 !important;
+}
+
+/* ========================================================================= */
+/* ESTILOS DO ESTÚDIO 3D INTERATIVO 360° (THREE.JS / WEBGL)                  */
+/* ========================================================================= */
+.totem-frame.hidden,
+.totem-3d-stage.hidden {
+  display: none !important;
+}
+
+.btn-3d-mode {
+  margin-top: 4px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1.5px solid #38bdf8;
+  color: #38bdf8;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-3d-mode.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-color: #7dd3fc;
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+}
+
+.totem-3d-stage {
+  width: 100%;
+  height: calc(100vh - 40px);
+  max-height: 1050px;
+  background: #070d19;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+}
+
+/* BARRA SUPERIOR DO ESTÚDIO 3D */
+.totem-3d-topbar {
+  padding: 12px 18px;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  z-index: 20;
+}
+
+.totem-3d-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-3d {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+}
+
+.totem-3d-brand h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.totem-3d-brand p {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.totem-3d-screen-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0b1120;
+  padding: 5px 8px;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
+  flex-wrap: wrap;
+}
+
+.tabs-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.btn-3d-screen {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-3d-screen:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.btn-3d-screen.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #fff;
+}
+
+.totem-3d-angle-box {
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 4px 12px;
+  text-align: center;
+  min-width: 84px;
+}
+
+.totem-3d-angle-box .angle-lbl {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  font-weight: 700;
+}
+
+.totem-3d-angle-box strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: #38bdf8;
+  font-variant-numeric: tabular-nums;
+}
+
+/* VIEWPORT WEBGL CENTRAL */
+.totem-3d-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.totem-3d-viewport:active {
+  cursor: grabbing;
+}
+
+.totem-3d-canvas-mount {
+  width: 100%;
+  height: 100%;
+}
+
+.totem-3d-canvas-mount canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* LAYER DE HOTSPOTS NUMERADOS (1 a 7) */
+.totem-3d-hotspots-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hotspot-pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1.5px solid #38bdf8;
+  color: #f8fafc;
+  border-radius: 9999px;
+  padding: 4px 10px 4px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.hotspot-pin:hover,
+.hotspot-pin.active {
+  background: #0284c7;
+  border-color: #ffffff;
+  z-index: 25;
+}
+
+.hotspot-pin .pin-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: #000;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotspot-pin .pin-label {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* CARD DE INFORMAÇÃO TÉCNICA DO COMPONENTE 3D */
+.totem-3d-info-card {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 310px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid #38bdf8;
+  border-radius: 16px;
+  padding: 16px;
+  z-index: 30;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.totem-3d-info-card.hidden {
+  display: none;
+}
+
+.btn-close-3d-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.totem-3d-info-card .info-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 0.6px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.totem-3d-info-card h5 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+  padding-right: 22px;
+}
+
+.totem-3d-info-card p {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+/* DOCK INFERIOR DE CONTROLES 3D */
+.totem-3d-dock {
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  z-index: 20;
+}
+
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dock-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-right: 4px;
+}
+
+.btn-dock {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-dock:hover {
+  background: #334155;
+  border-color: #475569;
+  color: #fff;
+}
+
+.btn-dock.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #fff;
+}
+

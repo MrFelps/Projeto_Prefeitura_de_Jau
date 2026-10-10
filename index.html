@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Totem Inteligente Jaú - Mockup Funcional (Totemize)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fontes Oficiais do Gov.br (Design System do Governo): Rawline & Open Sans -->
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/rawline">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- QRCode.js via CDN para gerar QR Codes reais que o celular lê -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans select-none">
+
+  <!-- PAINEL DE CONTROLE EXTERNO DO MOCKUP (Para a Banca / Apresentação) -->
+  <aside id="simulator-controls" class="simulator-panel">
+    <div class="panel-header">
+      <span class="badge-live">Ao Vivo</span>
+      <h3>Painel de Demonstração (Senac / Prefeitura)</h3>
+      <p>Simulador de Ambiente e Sensores</p>
+    </div>
+    <div class="panel-body">
+      <div class="control-group">
+        <label>Modo de Exibição:</label>
+        <div class="btn-row">
+          <button id="btn-toggle-frame" class="btn-ctrl">Moldura 2D</button>
+          <button id="btn-fullscreen" class="btn-ctrl">Tela Cheia (Quiosque)</button>
+        </div>
+        <button id="btn-toggle-3d" class="btn-ctrl btn-3d-mode active">🧊 Visão 3D Interativa (360°)</button>
+      </div>
+
+      <div class="control-group">
+        <label>Simulação de Energia (ESG):</label>
+        <div class="btn-row">
+          <button id="btn-sim-idle" class="btn-ctrl">Modo Vitrine (Ocioso)</button>
+          <button id="btn-sim-sleep" class="btn-ctrl">Standby Noturno (00h-05h)</button>
+        </div>
+        <button id="btn-sim-pir" class="btn-ctrl btn-highlight">🚶 Sensor de Presença (Acordar)</button>
+      </div>
+
+      <div class="control-group">
+        <label>Timer de Inatividade Automática:</label>
+        <div class="timer-bar-container">
+          <div id="inactivity-progress" class="timer-bar"></div>
+        </div>
+        <small id="timer-text">Retorno automático em: 45s</small>
+      </div>
+
+      <div class="control-group">
+        <label>Estatísticas do Totem:</label>
+        <ul class="stats-list">
+          <li><strong>Consumo Atual:</strong> <span id="stat-power">145 W (Normal)</span></li>
+          <li><strong>Localização:</strong> Praça da República, Jaú/SP</li>
+          <li><strong>Rede:</strong> 5G Conectado (Sinal Forte)</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ESTRUTURA DO TOTEM FÍSICO -->
+  <main class="totem-wrapper">
+    <div id="totem-chassis" class="totem-frame">
+      <!-- Câmera superior e sensor do chassi físico -->
+      <div class="totem-top-sensor">
+        <div class="camera-lens"></div>
+        <div class="pir-sensor" title="Sensor PIR de Presença"></div>
+        <div class="chassis-brand">PREFEITURA DE JAÚ • TOTEMIZE</div>
+      </div>
+
+      <!-- TELA TOUCH VERTICAL (ASPECT RATIO 9:16) -->
+      <div id="totem-screen" class="totem-screen">
+
+        <!-- OVERLAY: MODO STANDBY NOTURNO (00:00 - 05:30) -->
+        <div id="screen-sleep-overlay" class="sleep-overlay hidden">
+          <div class="sleep-radar"></div>
+          <div class="sleep-content">
+            <span class="sleep-icon">🌙</span>
+            <h2>MODO ECONOMIA DE ENERGIA (ESG)</h2>
+            <p>Horário Noturno: Backlight Reduzido a 10% (Consumo: 15W)</p>
+            <div class="wake-hint">
+              <span class="pulse-dot"></span> Aproxime-se ou toque na tela para ativar
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERLAY: MODO VITRINE DINÂMICA (OCIOSO APÓS 45s) -->
+        <div id="screen-idle-overlay" class="idle-overlay hidden">
+          <div class="idle-slide">
+            <div class="idle-badge">Jaú Conectada • Cidade Inteligente</div>
+            <h1 id="idle-title">Bem-vindo à Capital do Calçado Feminino</h1>
+            <p id="idle-desc">Toque em qualquer lugar da tela para consultar ônibus, lojas e turismo.</p>
+            <div class="idle-touch-cta">
+              <span class="touch-ripple"></span>
+              <span class="touch-icon">👆</span>
+              <strong>TOQUE PARA COMEÇAR</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- BARRA SUPERIOR: HEADER PERMANENTE NO PADRÃO GOV.BR -->
+        <header id="totem-header" class="totem-header">
+          <!-- BARRA INSTITUCIONAL GOV.BR -->
+          <div class="gov-top-bar">
+            <div class="gov-brand-flag">
+              <span class="gov-text-logo">gov<span class="gov-dot">.br</span></span>
+              <span class="gov-sep">/</span>
+              <span class="gov-city-badge">Prefeitura de Jaú</span>
+            </div>
+            <span class="gov-portal-tag">Terminal Oficial de Serviços</span>
+          </div>
+
+          <div class="header-brand">
+            <div class="logo-box">
+              <span class="city-crest">🏛️</span>
+              <div>
+                <h1 class="brand-title">PREFEITURA DE JAÚ</h1>
+                <span class="brand-sub">Estância Turística • Cidade Conectada</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-info">
+            <div class="weather-widget">
+              <span class="weather-icon">☀️</span>
+              <div>
+                <span class="temp">28°C</span>
+                <span class="city-label">Jaú / SP</span>
+              </div>
+            </div>
+            <div class="clock-widget">
+              <span id="clock-time" class="time">14:32</span>
+              <span id="clock-date" class="date">Sex, 10 de Outubro</span>
+            </div>
+          </div>
+
+          <!-- BARRA DE ACESSIBILIDADE UNIVERSAL -->
+          <div class="accessibility-bar" role="toolbar" aria-label="Recursos de Acessibilidade">
+            <button id="btn-voice" class="btn-access" title="Ativar Leitura em Voz Alta" aria-label="Leitura por Voz">
+              <span class="icon">🔊</span>
+              <span class="txt">Áudio</span>
+            </button>
+            <button id="btn-vlibras" class="btn-access" title="Acessibilidade em Libras" aria-label="Tradutor de Libras">
+              <span class="icon">🦻</span>
+              <span class="txt">Libras</span>
+            </button>
+            <button id="btn-wheelchair" class="btn-access" title="Modo Cadeirante / Baixa Estatura" aria-label="Modo Cadeirante">
+              <span class="icon">♿</span>
+              <span class="txt">Alcance</span>
+            </button>
+            <button id="btn-contrast" class="btn-access" title="Modo Alto Contraste" aria-label="Alto Contraste">
+              <span class="icon">👁️</span>
+              <span class="txt">Contraste</span>
+            </button>
+            <button id="btn-font-plus" class="btn-access" title="Aumentar Fonte" aria-label="Aumentar Letra">
+              <span class="icon">A+</span>
+            </button>
+            <button id="btn-font-reset" class="btn-access" title="Tamanho Padrão da Fonte" aria-label="Fonte Padrão">
+              <span class="icon">A-</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- CONTAINER PRINCIPAL DINÂMICO (ÁREA DE NAVEGAÇÃO) -->
+        <section id="totem-main-content" class="totem-body">
+
+          <!-- 1. TELA PRINCIPAL (HOME) -->
+          <div id="view-home" class="view-screen active">
+            <!-- ALERTA MUNICIPAL / DEFESA CIVIL -->
+            <div class="alert-banner">
+              <span class="alert-tag">DEFESA CIVIL JAÚ</span>
+              <p class="alert-text">Previsão de tempo estável na região central. Campanha de vacinação ativa até 17h nos postos.</p>
+            </div>
+
+            <!-- CHAMADA PRINCIPAL -->
+            <div class="welcome-box">
+              <h2>Como podemos ajudar você hoje?</h2>
+              <p>Selecione um serviço tocando em uma das opções abaixo:</p>
+            </div>
+
+            <!-- GRADE DOS 4 PILARES ESTRATÉGICOS -->
+            <div class="modules-grid">
+              <!-- Módulo 1: Ônibus -->
+              <button class="module-card card-bus" data-view="view-bus">
+                <div class="card-glow"></div>
+                <div class="card-icon">🚌</div>
+                <div class="card-content">
+                  <h3>Ônibus & Mobilidade</h3>
+                  <p>Horários, linhas municipais em tempo real e itinerários da cidade.</p>
+                </div>
+                <span class="card-arrow">➜</span>
+              </button>
+
+              <!-- Módulo 2: Calçado & Comércio -->
+              <button class="module-card card-shoes" data-view="view-shoes">
+                <div class="card-glow"></div>
+                <div class="card-icon">👠</div>
+                <div class="card-content">
+                  <h3>Circuito do Calçado</h3>
+                  <p>Capital do Calçado Feminino: lojas de fábrica, catálogo e rotas.</p>
+                </div>
+                <span class="card-arrow">➜</span>
+              </button>
+
+              <!-- Módulo 3: Turismo & Cultura -->
+              <button class="module-card card-tourism" data-view="view-tourism">
+                <div class="card-glow"></div>
+                <div class="card-icon">🏛️</div>
+                <div class="card-content">
+                  <h3>Turismo & Lazer</h3>
+                  <p>Parque do Rio Jaú, patrimônios históricos e agenda de eventos.</p>
+                </div>
+                <span class="card-arrow">➜</span>
+              </button>
+
+              <!-- Módulo 4: Serviços ao Cidadão -->
+              <button class="module-card card-services" data-view="view-services">
+                <div class="card-glow"></div>
+                <div class="card-icon">📋</div>
+                <div class="card-content">
+                  <h3>Serviços ao Cidadão</h3>
+                  <p>Telefones úteis, Ouvidoria, Farmácia Municipal e solicitações.</p>
+                </div>
+                <span class="card-arrow">➜</span>
+              </button>
+            </div>
+
+            <!-- BANNER DE DESTAQUE LOCAL -->
+            <div class="featured-strip">
+              <div class="strip-icon">💡</div>
+              <div class="strip-text">
+                <strong>Projeto Cidade Inteligente:</strong> Informações sem papel (Paperless ESG). Envie qualquer rota para seu celular via QR Code.
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. TELA: MÓDULO ÔNIBUS & MOBILIDADE -->
+          <div id="view-bus" class="view-screen">
+            <div class="screen-subhead">
+              <button class="btn-back" data-view="view-home">⬅ Voltar ao Início</button>
+              <h2>🚌 Transporte Coletivo de Jaú</h2>
+            </div>
+
+            <div class="bus-filters">
+              <button class="filter-tab active" data-filter="all">Todas as Linhas</button>
+              <button class="filter-tab" data-filter="centro">Região Central</button>
+              <button class="filter-tab" data-filter="bairros">Bairros</button>
+            </div>
+
+            <div class="bus-list">
+              <!-- Linha 1 -->
+              <div class="bus-item" data-category="centro">
+                <div class="bus-badge">Linha 01</div>
+                <div class="bus-info">
+                  <h4>Circular Centro ⇄ Pouso Alegre</h4>
+                  <p>Via Rodoviária, Praça da República e Santa Casa</p>
+                  <span class="bus-status live">● Próximo ônibus: <strong>4 min</strong></span>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 01 - Centro / Pouso Alegre', 'Rodoviária ➜ Pç. da República ➜ Santa Casa ➜ Pouso Alegre', '06:00, 06:40, 07:20, 08:00, 08:40, 09:20, 10:00')">Ver Rota & QR</button>
+              </div>
+
+              <!-- Linha 2 -->
+              <div class="bus-item" data-category="bairros">
+                <div class="bus-badge">Linha 04</div>
+                <div class="bus-info">
+                  <h4>Jardim Pedro Ometto ⇄ Terminal</h4>
+                  <p>Via Av. João Ferraz Neto e Centro de Saúde</p>
+                  <span class="bus-status live">● Próximo ônibus: <strong>12 min</strong></span>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 04 - Pedro Ometto', 'Terminal ➜ Av. João Ferraz ➜ Centro Saúde ➜ Jd. Pedro Ometto', '06:15, 07:00, 07:45, 08:30, 09:15, 10:00')">Ver Rota & QR</button>
+              </div>
+
+              <!-- Linha 3 -->
+              <div class="bus-item" data-category="bairros">
+                <div class="bus-badge">Linha 07</div>
+                <div class="bus-info">
+                  <h4>Vila Nova ⇄ Shopping de Calçados</h4>
+                  <p>Via Território do Calçado e Av. Netinho Prado</p>
+                  <span class="bus-status waiting">● Próximo ônibus: <strong>21 min</strong></span>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 07 - Polo do Calçado', 'Centro ➜ Av. Netinho Prado ➜ Território Calçado ➜ Vila Nova', '07:00, 08:15, 09:30, 10:45, 12:00, 13:15')">Ver Rota & QR</button>
+              </div>
+
+              <!-- Linha 4 -->
+              <div class="bus-item" data-category="centro">
+                <div class="bus-badge">Linha 11</div>
+                <div class="bus-info">
+                  <h4>Distrito Industrial ⇄ Terminal Central</h4>
+                  <p>Horários expressos de trabalhadores</p>
+                  <span class="bus-status live">● Próximo ônibus: <strong>7 min</strong></span>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 11 - Distrito Industrial', 'Terminal ➜ Rodovia ➜ Polo Empresarial ➜ Distrito', '05:30, 06:10, 06:50, 07:30, 16:30, 17:15')">Ver Rota & QR</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. TELA: MÓDULO CIRCUITO DO CALÇADO & COMÉRCIO -->
+          <div id="view-shoes" class="view-screen">
+            <div class="screen-subhead">
+              <button class="btn-back" data-view="view-home">⬅ Voltar ao Início</button>
+              <h2>👠 Capital do Calçado Feminino</h2>
+            </div>
+
+            <div class="shoes-intro">
+              <p>Jaú é o maior polo de produção de calçados femininos da América Latina. Encontre lojas de fábrica, vitrines e polos de compras:</p>
+            </div>
+
+            <div class="shoes-grid">
+              <div class="store-card">
+                <div class="store-img-placeholder">🛍️ Território do Calçado</div>
+                <div class="store-body">
+                  <h4>Shopping Território do Calçado</h4>
+                  <p class="store-addr">📍 Av. Hermínio Pires de Oliveira Netto, 400</p>
+                  <p class="store-desc">Mais de 150 lojas com calçados femininos direto de fábrica, bolsas e praça de alimentação.</p>
+                  <button class="btn-store-qr" onclick="app.showStoreQR('Shopping Território do Calçado', 'Av. Hermínio Pires de Oliveira Netto, 400 - Jaú/SP', 'https://maps.google.com/?q=Territorio+do+Calcado+Jau')">📲 Abrir Rota no Celular</button>
+                </div>
+              </div>
+
+              <div class="store-card">
+                <div class="store-img-placeholder">👠 Circuito Rua Major Prado</div>
+                <div class="store-body">
+                  <h4>Polo Comercial Major Prado</h4>
+                  <p class="store-addr">📍 Rua Major Prado - Centro</p>
+                  <p class="store-desc">Comércio tradicional jauense com dezenas de sapatarias, moda feminina e vestuário.</p>
+                  <button class="btn-store-qr" onclick="app.showStoreQR('Rua Major Prado (Polo Comercial)', 'Rua Major Prado, Centro - Jaú/SP', 'https://maps.google.com/?q=Rua+Major+Prado+Jau')">📲 Abrir Rota no Celular</button>
+                </div>
+              </div>
+
+              <div class="store-card">
+                <div class="store-img-placeholder">✨ Calçados de Festa & Noivas</div>
+                <div class="store-body">
+                  <h4>Espaço Noivas e Festa Jaú</h4>
+                  <p class="store-addr">📍 Rua Amaral Gurgel, 210</p>
+                  <p class="store-desc">Calçados sob medida para casamentos, formaturas e eventos finos.</p>
+                  <button class="btn-store-qr" onclick="app.showStoreQR('Espaço Noivas e Festa Jaú', 'Rua Amaral Gurgel, 210 - Jaú/SP', 'https://maps.google.com/?q=Jaú+Calcados')">📲 Abrir Rota no Celular</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. TELA: TURISMO & CULTURA -->
+          <div id="view-tourism" class="view-screen">
+            <div class="screen-subhead">
+              <button class="btn-back" data-view="view-home">⬅ Voltar ao Início</button>
+              <h2>🏛️ Rota Cultural & Turística</h2>
+            </div>
+
+            <div class="tour-list">
+              <div class="tour-card">
+                <div class="tour-icon">🌳</div>
+                <div class="tour-content">
+                  <h4>Parque Municipal do Rio Jaú</h4>
+                  <p>Área verde para caminhada, pistas esportivas, lago, pedalinho e quiosques. Ideal para famílias e esportes.</p>
+                  <span class="tour-time">Aberto diariamente das 06h às 21h • Entrada Gratuita</span>
+                  <button class="btn-tour-action" onclick="app.showTourQR('Parque do Rio Jaú', 'Av. Dr. Quinzinho - Jaú/SP', 'https://maps.google.com/?q=Parque+do+Rio+Jau')">📲 Ver Como Chegar</button>
+                </div>
+              </div>
+
+              <div class="tour-card">
+                <div class="tour-icon">⛪</div>
+                <div class="tour-content">
+                  <h4>Igreja Matriz Nossa Senhora do Patrocínio</h4>
+                  <p>Patrimônio histórico e arquitetônico imponente erguido em estilo neogótico no coração da cidade.</p>
+                  <span class="tour-time">Praça da República, s/n - Centro</span>
+                  <button class="btn-tour-action" onclick="app.showTourQR('Igreja Matriz de Jaú', 'Praça da República - Centro, Jaú/SP', 'https://maps.google.com/?q=Igreja+Matriz+Jau')">📲 Ver Como Chegar</button>
+                </div>
+              </div>
+
+              <div class="tour-card">
+                <div class="tour-icon">🎭</div>
+                <div class="tour-content">
+                  <h4>Teatro Municipal Elza Munerato</h4>
+                  <p>Espaço para peças de teatro, apresentações de dança e festivais culturais da Secretaria de Cultura.</p>
+                  <span class="tour-time">Consulte a programação semanal no totem</span>
+                  <button class="btn-tour-action" onclick="app.showTourQR('Teatro Municipal Elza Munerato', 'Rua Paissandu, 1562 - Jaú/SP', 'https://maps.google.com/?q=Teatro+Municipal+Jau')">📲 Ver Programação</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. TELA: SERVIÇOS PÚBLICOS & PREFEITURA -->
+          <div id="view-services" class="view-screen">
+            <div class="screen-subhead">
+              <button class="btn-back" data-view="view-home">⬅ Voltar ao Início</button>
+              <h2>📋 Serviços ao Cidadão</h2>
+            </div>
+
+            <div class="services-columns">
+              <!-- Coluna Telefones Úteis -->
+              <div class="service-box">
+                <h3>🚨 Telefones de Emergência</h3>
+                <div class="phone-grid">
+                  <div class="phone-btn" onclick="app.falar('SAMU, ligue um nove dois')">
+                    <span class="p-num">192</span>
+                    <span class="p-label">SAMU</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.falar('Bombeiros, ligue um nove três')">
+                    <span class="p-num">193</span>
+                    <span class="p-label">Bombeiros</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.falar('Guarda Municipal de Jaú, ligue um cinco três')">
+                    <span class="p-num">153</span>
+                    <span class="p-label">Guarda Municipal</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.falar('Polícia Militar, ligue um nove zero')">
+                    <span class="p-num">190</span>
+                    <span class="p-label">Polícia Militar</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.falar('Defesa Civil, ligue um nove nove')">
+                    <span class="p-num">199</span>
+                    <span class="p-label">Defesa Civil</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.falar('Poupatempo Jaú')">
+                    <span class="p-num">0800</span>
+                    <span class="p-label">Poupatempo</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coluna Ouvidoria & Serviços -->
+              <div class="service-box">
+                <h3>🏛️ Ouvidoria e Zeladoria Urbana</h3>
+                <p>Abra solicitações de iluminação pública, tapa-buraco ou limpeza de calçadas diretamente pelo celular:</p>
+                <div class="ouvidoria-card">
+                  <div class="ouvidoria-icon">📱</div>
+                  <div>
+                    <strong>Ouvidoria Geral da Prefeitura</strong>
+                    <p>Escaneie o código para registrar protocolo sem filas.</p>
+                  </div>
+                  <button class="btn-ouvidoria" onclick="app.showGenericQR('Ouvidoria de Jaú', 'https://www.jau.sp.gov.br/ouvidoria')">Gerar QR Code</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- RODAPÉ PERMANENTE -->
+        <footer id="totem-footer" class="totem-footer">
+          <!-- Botão Home permanente -->
+          <button id="btn-home-footer" class="btn-footer-home" data-view="view-home" aria-label="Voltar para Início">
+            <span>🏠</span>
+            <span>INÍCIO</span>
+          </button>
+
+          <!-- Banner Rotativo DOOH (Publicidade Sustentável ESG) -->
+          <div class="dooh-carousel">
+            <div id="dooh-ad" class="dooh-ad-item">
+              <span class="dooh-badge">ANÚNCIO PARCEIRO</span>
+              <span id="dooh-text">Calçados Jaú: Visite a maior feira da região neste fim de semana!</span>
+            </div>
+          </div>
+
+          <!-- BOTÃO ISOLADO NO CANTO INFERIOR: CONTATOS DE ACIONAMENTO DE SOCORRO -->
+          <button id="btn-emergency-contacts" class="btn-footer-emergency-corner" aria-label="Contatos de Acionamento de Socorro">
+            <span class="em-icon">☎️</span>
+            <span class="em-label">Contatos de Acionamento de Socorro</span>
+          </button>
+        </footer>
+
+        <!-- MODAL GENÉRICO DE DETALHES COM QR CODE DINÂMICO -->
+        <div id="modal-qr" class="modal-backdrop hidden">
+          <div class="modal-card">
+            <button class="modal-close" onclick="app.closeModal()">✕</button>
+            <div class="modal-header">
+              <span class="modal-icon">📲</span>
+              <h3 id="modal-title">Levar no Celular</h3>
+            </div>
+            <p id="modal-desc">Aponte a câmera do seu smartphone para o QR Code abaixo:</p>
+            <div id="qrcode-container" class="qrcode-wrapper"></div>
+            <div class="modal-footer-note">
+              <span>🌱 <strong>ESG Paperless:</strong> Sem emissão de papel ou lixo urbano.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELA COM LATERAIS FOSCAS: CONTATOS DE ACIONAMENTO DE SOCORRO -->
+        <div id="modal-contacts" class="contacts-screen-backdrop hidden">
+          <div class="frosted-side frosted-left"></div>
+          
+          <div class="contacts-central-panel">
+            <div class="contacts-panel-head">
+              <div class="head-title-wrap">
+                <span class="badge-auto">Sistema Autoindependente</span>
+                <h2>Contatos de Acionamento de Socorro</h2>
+                <p>Lista direta de canais de atendimento e utilidade pública municipal</p>
+              </div>
+              <button class="btn-close-contacts" onclick="app.closeModal()">✕ Fechar</button>
+            </div>
+
+            <div class="contacts-panel-body">
+              <!-- BLOCO 1: EMERGÊNCIA E SEGURANÇA PÚBLICA -->
+              <div class="contacts-section">
+                <div class="section-title-strip emergency-strip">
+                  <span class="strip-badge">EMERGÊNCIA E SEGURANÇA PÚBLICA</span>
+                  <small>Linhas de atendimento imediato</small>
+                </div>
+                
+                <div class="contacts-cards-grid">
+                  <div class="contact-card urgent-card">
+                    <div class="c-badge">192</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>SAMU</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Atendimento pré-hospitalar móvel de urgência médica e traumas graves.</span>
+                      <small class="c-cost">Ligação gratuita</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card urgent-card">
+                    <div class="c-badge">193</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Corpo de Bombeiros</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Resgates, salvamentos, acidentes de trânsito e combate a incêndios.</span>
+                      <small class="c-cost">Ligação gratuita</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card urgent-card">
+                    <div class="c-badge">190</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Polícia Militar</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Atendimento a ocorrências criminais em andamento e segurança pública.</span>
+                      <small class="c-cost">Ligação gratuita</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card urgent-card">
+                    <div class="c-badge">153</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Guarda Civil Municipal de Jaú</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Patrulhamento preventivo, proteção de espaços públicos e apoio à população.</span>
+                      <small class="c-cost">Ligação gratuita</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BLOCO 2: PROTEÇÃO SOCIAL E DIREITOS HUMANOS -->
+              <div class="contacts-section">
+                <div class="section-title-strip social-strip">
+                  <span class="strip-badge">PROTEÇÃO SOCIAL E DIREITOS HUMANOS</span>
+                  <small>Canais oficiais de acolhimento e denúncia</small>
+                </div>
+
+                <div class="contacts-cards-grid">
+                  <div class="contact-card social-card">
+                    <div class="c-badge-social">180</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Central de Atendimento à Mulher</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Orientação e denúncias de violência doméstica, ameaça e feminicídio.</span>
+                      <small class="c-cost">Ligação gratuita • Atendimento anônimo</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card social-card">
+                    <div class="c-badge-social">100</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Disque Direitos Humanos (Igualdade Racial)</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Registro de denúncias de racismo, injúria racial e discriminação étnico-racial.</span>
+                      <small class="c-cost">Ligação gratuita • Ouvidoria Nacional</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card social-card">
+                    <div class="c-badge-social">100</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Proteção à Criança e ao Adolescente</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Denúncias de violência, negligência, trabalho infantil e abuso sexual de menores.</span>
+                      <small class="c-cost">Ligação gratuita • Articulado ao Conselho Tutelar</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card social-card">
+                    <div class="c-badge-social">188</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Centro de Valorização da Vida (CVV)</strong>
+                        <span class="tag-24h">24 HORAS</span>
+                      </div>
+                      <span class="c-desc">Apoio emocional confidencial e prevenção ao suicídio para pessoas em sofrimento mental.</span>
+                      <small class="c-cost">Ligação gratuita • Atendimento sob sigilo total</small>
+                    </div>
+                  </div>
+
+                  <div class="contact-card admin-card">
+                    <div class="c-badge-admin">MUNICIPAL</div>
+                    <div class="c-info">
+                      <div class="c-head-line">
+                        <strong>Plantão Social • Secretaria de Assistência Social de Jaú</strong>
+                        <span class="tag-office">08h às 17h</span>
+                      </div>
+                      <span class="phone-highlight">(14) 3602-5777</span>
+                      <span class="c-desc">Acolhimento e encaminhamento de pessoas em situação de vulnerabilidade e rua em Jaú.</span>
+                      <small class="c-cost">Segunda a sexta-feira • Expediente municipal</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="contacts-panel-foot">
+              <span class="foot-note">ℹ️ Terminal informativo autônomo. Para efetuar ligações, utilize o seu aparelho telefônico com os números indicados acima.</span>
+            </div>
+          </div>
+
+          <div class="frosted-side frosted-right"></div>
+        </div>
+
+      </div><!-- Fim do totem-screen -->
+
+      <!-- Base / Suporte inferior do chassi metálico -->
+      <div class="totem-bottom-chassis">
+        <div class="chassis-vent"></div>
+        <div class="chassis-label">SISTEMA INTELIGENTE DE UTILIDADE PÚBLICA</div>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- ESTÚDIO 3D INTERATIVO 360° (WEBGL / THREE.JS)                       -->
+    <!-- =================================================================== -->
+    <div id="totem-3d-stage" class="totem-3d-stage">
+      <!-- Barra Superior do Visualizador 3D -->
+      <div class="totem-3d-topbar">
+        <div class="totem-3d-brand">
+          <span class="badge-3d">ROTAÇÃO 360° INTERATIVA</span>
+          <div>
+            <h4>Totem Inteligente de Jaú • Modelo Conceitual 3D</h4>
+            <p>🖱️ Arraste para os lados para girar 360° • Scroll para Zoom • Clique nos pontos 1 a 7</p>
+          </div>
+        </div>
+
+        <!-- Seletor rápido de telas ao vivo dentro do Totem 3D -->
+        <div class="totem-3d-screen-tabs">
+          <span class="tabs-label">Tela no 3D:</span>
+          <button class="btn-3d-screen active" data-3d-screen="home">🏠 Início</button>
+          <button class="btn-3d-screen" data-3d-screen="bus">🚌 Ônibus</button>
+          <button class="btn-3d-screen" data-3d-screen="shoes">👠 Calçado</button>
+          <button class="btn-3d-screen" data-3d-screen="tourism">🏛️ Turismo</button>
+          <button class="btn-3d-screen" data-3d-screen="services">📋 Serviços</button>
+        </div>
+
+        <div class="totem-3d-angle-box">
+          <span class="angle-lbl">Ângulo 360°</span>
+          <strong id="totem-3d-angle-deg">28°</strong>
+        </div>
+      </div>
+
+      <!-- Área do Canvas WebGL + Hotspots 3D -->
+      <div class="totem-3d-viewport">
+        <div id="totem-3d-canvas-mount" class="totem-3d-canvas-mount"></div>
+        <div id="totem-3d-hotspots" class="totem-3d-hotspots-layer"></div>
+
+        <!-- Card Flutuante de Especificação Técnica (quando clica num ponto 1-7) -->
+        <div id="totem-3d-info-card" class="totem-3d-info-card hidden">
+          <button id="btn-close-3d-info" class="btn-close-3d-info">✕</button>
+          <span class="info-tag">ESPECIFICAÇÃO DO DOSSIÊ TÉCNICO</span>
+          <h5 id="totem-3d-info-title">1. Placa Solar Fotovoltaica</h5>
+          <p id="totem-3d-info-desc">Detalhes técnicos do componente selecionado.</p>
+        </div>
+      </div>
+
+      <!-- Dock Inferior de Câmeras e Recursos 3D -->
+      <div class="totem-3d-dock">
+        <div class="dock-group">
+          <span class="dock-label">Ângulos:</span>
+          <button class="btn-dock active" data-cam-preset="perspective">🧊 3/4 Perspectiva</button>
+          <button class="btn-dock" data-cam-preset="front">📱 Frente</button>
+          <button class="btn-dock" data-cam-preset="side">📐 Lateral (0,35m)</button>
+          <button class="btn-dock" data-cam-preset="back">🔧 Traseira (Manutenção)</button>
+          <button class="btn-dock" data-cam-preset="solar">☀️ Topo (Placa Solar)</button>
+        </div>
+
+        <div class="dock-group">
+          <button id="btn-3d-autorotate" class="btn-dock">🔄 Giro 360° Auto</button>
+          <button id="btn-3d-dimensions" class="btn-dock active">📏 Cotas (2,20m)</button>
+          <button id="btn-3d-hotspots" class="btn-dock active">📍 Pontos (1-7)</button>
+          <button id="btn-3d-theme" class="btn-dock">🎨 Acabamento: Dossiê Solar (Ouro)</button>
+          <button id="btn-3d-daynight" class="btn-dock">☀️ Ambiente: Dia (Praça)</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="totem3d.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
