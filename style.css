@@ -2061,19 +2061,27 @@ body {
 }
 
 /* ======================================================== */
-/* RESPONSIVIDADE E OTIMIZAÇÃO PARA TABLET EM PÉ (RETRATO)  */
+/* CORREÇÃO ANTI-DISTORÇÃO PARA TABLET EM PÉ E MONITORES    */
 /* ======================================================== */
 
-/* Modo Fullscreen Kiosk (Tablet em pé) */
+/* O totem mantém sua proporção áurea vertical de quiosque (9:16) sem esticar */
+.totem-frame {
+  width: min(520px, 92vw);
+  height: min(94vh, 980px);
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* Modo Fullscreen Kiosk (Tela Cheia Real no Tablet) */
 .totem-frame.fullscreen-tablet,
 .totem-frame.fullscreen-mode {
-  width: 100vw !important;
+  width: min(560px, 100vw) !important;
   height: 100vh !important;
   max-height: none !important;
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
 }
 
 .totem-frame.fullscreen-tablet .totem-top-sensor,
@@ -2083,7 +2091,7 @@ body {
   display: none !important;
 }
 
-/* Ajuste para Tablets e Dispositivos Móveis */
+/* Ajuste proporcional para Tablets (iPads, Android Tabs de 768px a 1024px) */
 @media (max-width: 1024px) {
   body {
     overflow-x: hidden;
@@ -2098,43 +2106,76 @@ body {
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
   }
 
-  /* No tablet, o painel começa colapsado para ver 100% o Totem ou 3D */
+  /* No tablet, o painel começa recolhido para ver o totem com foco total */
   .simulator-panel.collapsed {
     transform: translateX(-100%);
     margin-left: 0;
   }
 
   .totem-wrapper {
-    padding: 0 !important;
+    padding: 10px 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #111c33 0%, #060b17 100%);
   }
 
+  /* Garante que o Totem tenha proporção vertical ergonômica sem esticar horizontalmente */
   .totem-frame {
-    width: 100vw !important;
-    max-width: 650px;
-    height: 100vh !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
+    width: min(520px, 96vw) !important;
+    height: min(98vh, 1000px) !important;
+    max-width: 520px !important;
+    margin: 0 auto !important;
+    border-width: 8px !important;
+    border-radius: 20px !important;
   }
 
   .totem-3d-stage {
     width: 100vw !important;
     height: 100vh !important;
   }
+
+  /* Ajuste de tamanho de botões e espaçamento no tablet */
+  .modules-grid {
+    gap: 10px;
+  }
+
+  .module-card {
+    padding: 14px 12px;
+    min-height: 140px;
+  }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .card-content h3 {
+    font-size: 14px;
+  }
+
+  .card-content p {
+    font-size: 11px;
+    line-height: 1.3;
+  }
 }
 
-/* Orientação Retrato (Tablet em Pé) */
-@media (orientation: portrait) {
+/* Tablet em Pé (Orientação Portrait) */
+@media (orientation: portrait) and (max-width: 1024px) {
   .totem-frame {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: none !important;
-    border: none !important;
-    border-radius: 0 !important;
+    /* Em tablets verticais, enquadra com altura total e largura proporcional de quiosque */
+    height: 98vh !important;
+    width: min(520px, 96vw) !important;
+    border-radius: 18px !important;
   }
+
+  .totem-screen {
+    width: 100%;
+    height: 100%;
+  }
+
   .totem-wrapper {
     padding: 0 !important;
   }

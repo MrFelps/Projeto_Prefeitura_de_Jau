@@ -1709,11 +1709,31 @@ class Totem3DViewer {
 
   handleResize() {
     if (!this.container || !this.renderer || !this.camera) return;
-    const width = this.container.clientWidth || 800;
-    const height = this.container.clientHeight || 600;
-    this.camera.aspect = width / height;
+    const mount = this.container.querySelector('#totem-3d-canvas-mount') || this.container;
+    const width = mount.clientWidth || this.container.clientWidth || window.innerWidth;
+    const height = mount.clientHeight || this.container.clientHeight || window.innerHeight;
+    
+    if (width <= 0 || height <= 0) return;
+
+    const aspect = width / height;
+    this.camera.aspect = aspect;
+
+    // Correção anti-distorção para tablets e telas em pé (portrait):
+    // Em telas mais estreitas ou quadradas (aspect < 1.1), ajusta o FOV para o Totem de 2,20m caber inteiro sem deformar nem cortar
+    if (aspect < 0.75) {
+      this.camera.fov = 50;
+      this.camState.targetRadius = 4.2;
+    } else if (aspect < 1.0) {
+      this.camera.fov = 46;
+      this.camState.targetRadius = 3.8;
+    } else {
+      this.camera.fov = 40;
+      this.camState.targetRadius = 3.45;
+    }
+
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
+    this.renderer.setSize(width, height, true);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   }
 
   // =========================================================================
