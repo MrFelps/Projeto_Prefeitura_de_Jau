@@ -1760,39 +1760,39 @@ class Totem3DViewer {
 
     const colorPresets = {
       'raw': {
-        color: 0xd8dde3,
-        metalness: 0.92,
-        roughness: 0.30,
+        color: 0xf1f5f9,
+        metalness: 0.18,
+        roughness: 0.32,
         mapEnabled: true
       },
       'black': {
-        color: 0x181e28,
-        metalness: 0.70,
-        roughness: 0.38,
+        color: 0x334155,
+        metalness: 0.22,
+        roughness: 0.35,
         mapEnabled: false
       },
       'govblue': {
         color: 0x1351b4,
-        metalness: 0.65,
+        metalness: 0.20,
         roughness: 0.32,
         mapEnabled: false
       },
       'white': {
-        color: 0xf1f5f9,
-        metalness: 0.50,
-        roughness: 0.28,
-        mapEnabled: false
-      },
-      'gold': {
-        color: 0xd4af37,
-        metalness: 0.88,
+        color: 0xffffff,
+        metalness: 0.10,
         roughness: 0.25,
         mapEnabled: false
       },
+      'gold': {
+        color: 0xf59e0b,
+        metalness: 0.25,
+        roughness: 0.28,
+        mapEnabled: false
+      },
       'corten': {
-        color: 0x8b3a1a,
-        metalness: 0.60,
-        roughness: 0.68,
+        color: 0xb45309,
+        metalness: 0.20,
+        roughness: 0.55,
         mapEnabled: false
       }
     };
@@ -1806,12 +1806,12 @@ class Totem3DViewer {
     const chassis2D = document.getElementById('totem-chassis');
     if (chassis2D) {
       const chassisColors = {
-        'raw': 'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #64748b 100%)',
-        'black': '#0f172a',
+        'raw': '#e2e8f0',
+        'black': '#334155',
         'govblue': '#0c326f',
-        'white': '#f8fafc',
-        'gold': 'linear-gradient(135deg, #b45309 0%, #f59e0b 50%, #d97706 100%)',
-        'corten': '#7c2d12'
+        'white': '#ffffff',
+        'gold': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+        'corten': '#9a3412'
       };
       chassis2D.style.background = chassisColors[colorKey] || chassisColors['raw'];
     }
@@ -1855,24 +1855,29 @@ class Totem3DViewer {
     const aspect = width / height;
     this.camera.aspect = aspect;
 
-    // Correção anti-distorção para tablets e telas em pé (portrait) com ZOOM MÁXIMO:
-    // O Totem tem 2,20m de altura. Ajustamos FOV e raio orbital para preencher a tela inteira verticalmente sem cortar o topo nem a base
+    // Correção anti-distorção para tablets e telas em pé (portrait) com VISIBILIDADE 100% TOTAL:
+    // O Totem tem 2,20m de altura com base chumbada. Alinhamos a altura do foco e o raio orbital
+    // para que a base inferior e o topo solar fiquem perfeitamente visíveis sem ser cortados
     if (aspect < 0.65) {
-      // Telas muito compridas em pé (celulares)
-      this.camera.fov = 46;
-      this.camState.targetRadius = 3.20;
+      // Telas compridas em pé (celulares)
+      this.camera.fov = 48;
+      this.camState.targetRadius = 3.35;
+      this.camState.targetLookY = 1.05;
     } else if (aspect < 0.85) {
       // Tablets verticais (iPads Portrait, tablets Android 3:4 ou 9:16)
-      this.camera.fov = 42;
-      this.camState.targetRadius = 2.85;
+      this.camera.fov = 44;
+      this.camState.targetRadius = 3.05;
+      this.camState.targetLookY = 1.05;
     } else if (aspect < 1.15) {
       // Tablets quase quadrados ou rotação intermediária
-      this.camera.fov = 39;
-      this.camState.targetRadius = 2.70;
+      this.camera.fov = 40;
+      this.camState.targetRadius = 2.85;
+      this.camState.targetLookY = 1.05;
     } else {
       // Desktop / Telas widescreen
-      this.camera.fov = 36;
-      this.camState.targetRadius = 2.65;
+      this.camera.fov = 37;
+      this.camState.targetRadius = 2.78;
+      this.camState.targetLookY = 1.05;
     }
 
     this.camera.updateProjectionMatrix();

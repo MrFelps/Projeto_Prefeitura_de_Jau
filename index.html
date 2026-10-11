@@ -722,44 +722,73 @@
         <div id="totem-3d-canvas-mount" class="totem-3d-canvas-mount"></div>
         <div id="totem-3d-hotspots" class="totem-3d-hotspots-layer"></div>
 
-        <!-- Seletor Flutuante de Cores da Carcaça de Ferro/Metal -->
+        <!-- Seletor Flutuante Completo de Cores da Carcaça (Tabela Espectro + Branco ao Preto) -->
         <div id="totem-color-picker-modal" class="totem-color-picker-panel hidden">
           <div class="color-picker-header">
-            <span>🎨 Cor da Carcaça (Ferro/Metal)</span>
+            <span>🎨 Tabela de Cores do Totem (Ferro, Placa & Costas)</span>
             <button id="btn-close-color-picker" class="btn-close-picker">✕</button>
           </div>
-          <p class="color-picker-desc">Escolha o acabamento do metal para simular o protótipo:</p>
-          <div class="color-options-grid">
-            <button class="color-opt active" data-metal-color="raw">
-              <span class="color-swatch swatch-raw"></span>
-              <span class="color-title">Metal Cru Industrial</span>
-              <small>Aço escovado sem pintura</small>
-            </button>
-            <button class="color-opt" data-metal-color="black">
-              <span class="color-swatch swatch-black"></span>
-              <span class="color-title">Preto Fosco (Grafite)</span>
-              <small>Pintura Eletrostática</small>
-            </button>
-            <button class="color-opt" data-metal-color="govblue">
-              <span class="color-swatch swatch-blue"></span>
-              <span class="color-title">Azul Oficial Gov.br</span>
-              <small>Padrão Institucional</small>
-            </button>
-            <button class="color-opt" data-metal-color="white">
-              <span class="color-swatch swatch-white"></span>
-              <span class="color-title">Branco Gelo Urbano</span>
-              <small>Acabamento Hospitalar/Limpo</small>
-            </button>
-            <button class="color-opt" data-metal-color="gold">
-              <span class="color-swatch swatch-gold"></span>
-              <span class="color-title">Bronze / Ouro Solar</span>
-              <small>Edição Especial Dossiê</small>
-            </button>
-            <button class="color-opt" data-metal-color="corten">
-              <span class="color-swatch swatch-corten"></span>
-              <span class="color-title">Aço Corten / Ferrugem</span>
-              <small>Design Arquitetônico Praça</small>
-            </button>
+          <p class="color-picker-desc">Arraste no quadro (do Branco ao Preto passando pela cor) ou escolha a tonalidade na barra:</p>
+
+          <!-- 1. Quadro 2D: Do Branco (esq) à Cor Selecionada (dir) até o Preto (base) -->
+          <div class="color-sv-wrap" id="color-sv-wrap">
+            <canvas id="color-sv-canvas" width="280" height="135"></canvas>
+            <div id="color-sv-cursor" class="color-sv-cursor"></div>
+          </div>
+
+          <!-- 2. Barra de Matiz (Todas as Cores Principais: Azul, Ciano, Verde, Amarelo, Vermelho, Roxo...) -->
+          <div class="color-hue-wrap" id="color-hue-wrap">
+            <canvas id="color-hue-canvas" width="280" height="18"></canvas>
+            <div id="color-hue-cursor" class="color-hue-cursor"></div>
+          </div>
+
+          <!-- Indicador da Cor Atual + Input Nativo -->
+          <div class="color-current-row">
+            <div class="color-current-left">
+              <span id="color-live-preview" class="color-live-preview" style="background: #8e96a0;"></span>
+              <span id="color-hex-label" class="color-hex-label">#8E96A0 (Neutro Natural)</span>
+            </div>
+            <button id="btn-reset-neutral-color" class="btn-reset-neutral" title="Voltar ao Aço Neutro Natural">↺ Neutro Natural</button>
+          </div>
+
+          <!-- 3. Tabela Rápida: Escala do Branco ao Preto Neutro + Cores Principais -->
+          <div class="color-table-label">Escala Neutra (Branco ➔ Cinza Natural ➔ Preto) & Cores Principais:</div>
+          <div class="color-matrix-grid" id="color-matrix-grid">
+            <!-- Linha 1: Escala Neutra do Branco ao Preto -->
+            <button class="swatch-cell" data-hex="#ffffff" title="Branco Puro" style="background:#ffffff;"></button>
+            <button class="swatch-cell" data-hex="#e2e8f0" title="Cinza Gelo Claro" style="background:#e2e8f0;"></button>
+            <button class="swatch-cell" data-hex="#cbd5e1" title="Alumínio Claro" style="background:#cbd5e1;"></button>
+            <button class="swatch-cell" data-hex="#94a3b8" title="Aço Escovado Claro" style="background:#94a3b8;"></button>
+            <button class="swatch-cell active" data-hex="#8e96a0" title="Aço Neutro Natural (Padrão)" style="background:#8e96a0;"></button>
+            <button class="swatch-cell" data-hex="#64748b" title="Ferro Médio Natural" style="background:#64748b;"></button>
+            <button class="swatch-cell" data-hex="#475569" title="Cinza Chumbo" style="background:#475569;"></button>
+            <button class="swatch-cell" data-hex="#334155" title="Grafite Escuro" style="background:#334155;"></button>
+            <button class="swatch-cell" data-hex="#1e293b" title="Antracite Noturno" style="background:#1e293b;"></button>
+            <button class="swatch-cell" data-hex="#0f172a" title="Preto Fosco" style="background:#0f172a;"></button>
+
+            <!-- Linha 2: Tons de Azul (Do Azul Claro ao Azul Marinho Escuro) + Cores Principais -->
+            <button class="swatch-cell" data-hex="#93c5fd" title="Azul Céu Claro" style="background:#93c5fd;"></button>
+            <button class="swatch-cell" data-hex="#38bdf8" title="Azul Ciano" style="background:#38bdf8;"></button>
+            <button class="swatch-cell" data-hex="#0284c7" title="Azul Celeste" style="background:#0284c7;"></button>
+            <button class="swatch-cell" data-hex="#2563eb" title="Azul Royal" style="background:#2563eb;"></button>
+            <button class="swatch-cell" data-hex="#1351b4" title="Azul Oficial Gov.br" style="background:#1351b4;"></button>
+            <button class="swatch-cell" data-hex="#1e3a8a" title="Azul Marinho" style="background:#1e3a8a;"></button>
+            <button class="swatch-cell" data-hex="#0c326f" title="Azul Institucional Escuro" style="background:#0c326f;"></button>
+            <button class="swatch-cell" data-hex="#0d9488" title="Verde Petróleo / Teal" style="background:#0d9488;"></button>
+            <button class="swatch-cell" data-hex="#168821" title="Verde Gov" style="background:#168821;"></button>
+            <button class="swatch-cell" data-hex="#065f46" title="Verde Musgo Escuro" style="background:#065f46;"></button>
+
+            <!-- Linha 3: Demais Cores Principais (Ouro, Bronze, Corten, Terracota, Vermelho, Vinho, Roxo) -->
+            <button class="swatch-cell" data-hex="#fde047" title="Amarelo Solar Claro" style="background:#fde047;"></button>
+            <button class="swatch-cell" data-hex="#eab308" title="Ouro Solar" style="background:#eab308;"></button>
+            <button class="swatch-cell" data-hex="#d97706" title="Bronze Dossiê" style="background:#d97706;"></button>
+            <button class="swatch-cell" data-hex="#b45309" title="Cobre Escovado" style="background:#b45309;"></button>
+            <button class="swatch-cell" data-hex="#8b3a1a" title="Aço Corten" style="background:#8b3a1a;"></button>
+            <button class="swatch-cell" data-hex="#dc2626" title="Vermelho Institucional" style="background:#dc2626;"></button>
+            <button class="swatch-cell" data-hex="#7f1d1d" title="Vinho Escuro" style="background:#7f1d1d;"></button>
+            <button class="swatch-cell" data-hex="#7c3aed" title="Violeta" style="background:#7c3aed;"></button>
+            <button class="swatch-cell" data-hex="#4338ca" title="Índigo" style="background:#4338ca;"></button>
+            <button class="swatch-cell" data-hex="#000000" title="Preto Absoluto" style="background:#000000;"></button>
           </div>
         </div>
 
