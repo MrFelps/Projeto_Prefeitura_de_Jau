@@ -48,7 +48,7 @@ class Totem3DViewer {
     this.hotspotElements = [];
     this.activeHotspotId = null;
 
-    // Canvas 2D para textura dinâmica da tela 43" e do cabeçalho
+    // Canvas 2D para textura dinâmica da tela 43", cabeçalho, painel inferior (Placa Jaú) e porta traseira de ferro
     this.screenCanvas = document.createElement('canvas');
     this.screenCanvas.width = 720;
     this.screenCanvas.height = 1280;
@@ -60,6 +60,21 @@ class Totem3DViewer {
     this.headerCanvas.height = 220;
     this.headerCtx = this.headerCanvas.getContext('2d');
     this.headerTexture = null;
+
+    this.lowerConsoleCanvas = document.createElement('canvas');
+    this.lowerConsoleCanvas.width = 512;
+    this.lowerConsoleCanvas.height = 420;
+    this.lowerConsoleCtx = this.lowerConsoleCanvas.getContext('2d');
+    this.lowerTexture = null;
+
+    this.rearCanvas = document.createElement('canvas');
+    this.rearCanvas.width = 512;
+    this.rearCanvas.height = 1400;
+    this.rearCtx = this.rearCanvas.getContext('2d');
+    this.rearTexture = null;
+
+    // Cor metálica atual (padrão: Aço/Ferro Escovado Neutro Natural)
+    this.currentMetalHex = '#8e96a0';
 
     this.initialized = false;
     this.animFrameId = null;
@@ -76,22 +91,22 @@ class Totem3DViewer {
     const width = this.container.clientWidth || 800;
     const height = this.container.clientHeight || 600;
 
-    // 1. Cena (Fundo Claro de Estúdio Arquitetônico)
+    // 1. Cena (Fundo Neutro Natural de Estúdio Arquitetônico)
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xeef2f6);
-    this.scene.fog = new THREE.FogExp2(0xeef2f6, 0.045);
+    this.scene.background = new THREE.Color(0xdbe2ea);
+    this.scene.fog = new THREE.FogExp2(0xdbe2ea, 0.035);
 
     // 2. Câmera
     this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
 
-    // 3. Renderizador WebGL com sombras suaves e tone mapping realista
+    // 3. Renderizador WebGL com sombras suaves e exposição natural (sem estouro de branco)
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 0.96;
 
     const canvasMount = this.container.querySelector('#totem-3d-canvas-mount') || this.container;
     canvasMount.innerHTML = '';
@@ -106,9 +121,9 @@ class Totem3DViewer {
     this.setupInteractionEvents(this.renderer.domElement);
     this.setupUIControls();
 
-    // Atualiza tela de 43" periodicamente (relógio ao vivo)
+    // Atualiza texturas dinâmicas (tela 43", Placa de Jaú e ferro traseiro)
     this.updateScreenTexture();
-    this.updateHeaderTexture();
+    this.updateMetalPlatesTextures(this.currentMetalHex);
     setInterval(() => {
       if (this.initialized) this.updateScreenTexture();
     }, 5000);
@@ -120,20 +135,20 @@ class Totem3DViewer {
   }
 
   // =========================================================================
-  // ILUMINAÇÃO (MODO DIA E NOITE)
+  // ILUMINAÇÃO EQUILIBRADA E NATURAL (MODO DIA E NOITE)
   // =========================================================================
   setupLights() {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.95);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.62);
     this.scene.add(ambient);
     this.dynamicLights.ambient = ambient;
 
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 0.85);
+    const hemi = new THREE.HemisphereLight(0xf8fafc, 0x64748b, 0.48);
     hemi.position.set(0, 10, 0);
     this.scene.add(hemi);
     this.dynamicLights.hemi = hemi;
 
-    // Luz Solar Principal
-    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.45);
+    // Luz Solar Principal equilibrada (sem filtro branco estourado)
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.05);
     dirLight.position.set(4.5, 7.5, 5.0);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
@@ -144,14 +159,14 @@ class Totem3DViewer {
     this.scene.add(dirLight);
     this.dynamicLights.sun = dirLight;
 
-    // Luz de preenchimento traseira (para destacar a porta de manutenção no giro 360°)
-    const backLight = new THREE.DirectionalLight(0xe2e8f0, 0.8);
+    // Luz de preenchimento traseira natural (para destacar a porta de ferro no giro 360°)
+    const backLight = new THREE.DirectionalLight(0xcbd5e1, 0.52);
     backLight.position.set(-4.0, 4.0, -5.0);
     this.scene.add(backLight);
     this.dynamicLights.back = backLight;
 
-    // Brilho emitido pela tela frontal e fitas LED laterais
-    const screenGlow = new THREE.PointLight(0x38bdf8, 0.45, 3.2);
+    // Brilho sutil emitido pela tela frontal
+    const screenGlow = new THREE.PointLight(0x38bdf8, 0.25, 2.8);
     screenGlow.position.set(0, 1.15, 0.65);
     this.scene.add(screenGlow);
     this.dynamicLights.screenGlow = screenGlow;
@@ -287,30 +302,30 @@ class Totem3DViewer {
   createTotemModel() {
     this.totemGroup = new THREE.Group();
 
-    // Materiais principais do chassi: METAL CLARO / ALUMÍNIO & AÇO ESCOVADO CLARO
+    // Materiais principais do chassi: AÇO / FERRO ESCOVADO NEUTRO NATURAL (sem filtro branco estourado)
     const rawMetalTextureCanvas = document.createElement('canvas');
     rawMetalTextureCanvas.width = 512;
     rawMetalTextureCanvas.height = 512;
     const mctx = rawMetalTextureCanvas.getContext('2d');
-    // Base em cinza-prata bem claro
-    mctx.fillStyle = '#e5eaf0';
+    // Base neutra para multiplicar fielmente qualquer cor escolhida na tabela
+    mctx.fillStyle = '#e4e8ee';
     mctx.fillRect(0, 0, 512, 512);
-    // Riscos finos sutis de escovado claro
-    mctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+    // Riscos finos horizontais de aço/ferro escovado natural
+    mctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
     mctx.lineWidth = 1;
-    for (let i = 0; i < 400; i++) {
+    for (let i = 0; i < 380; i++) {
       const y = Math.random() * 512;
       mctx.beginPath();
       mctx.moveTo(0, y);
-      mctx.lineTo(512, y + (Math.random() - 0.5) * 4);
+      mctx.lineTo(512, y + (Math.random() - 0.5) * 3);
       mctx.stroke();
     }
-    mctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
-    for (let i = 0; i < 300; i++) {
+    mctx.strokeStyle = 'rgba(51, 65, 85, 0.16)';
+    for (let i = 0; i < 380; i++) {
       const y = Math.random() * 512;
       mctx.beginPath();
       mctx.moveTo(0, y);
-      mctx.lineTo(512, y + (Math.random() - 0.5) * 4);
+      mctx.lineTo(512, y + (Math.random() - 0.5) * 3);
       mctx.stroke();
     }
     const brushedMetalTex = new THREE.CanvasTexture(rawMetalTextureCanvas);
@@ -318,36 +333,34 @@ class Totem3DViewer {
     brushedMetalTex.wrapT = THREE.RepeatWrapping;
     brushedMetalTex.repeat.set(2, 4);
 
-    // Nota: Em Three.js sem HDR externo, metalness baixo (0.18) garante que o cinza fique bem CLARO e iluminado!
+    // Chassi em Aço/Ferro Natural Neutro (#8e96a0) — sem emissive artificial
     const bodyMat = new THREE.MeshStandardMaterial({
       map: brushedMetalTex,
-      color: 0xf1f5f9,          // Cinza-prata bem claro
-      metalness: 0.18,          // Mantém brilho metálico sem escurecer o difuso
-      roughness: 0.32,
-      emissive: 0x334155,
-      emissiveIntensity: 0.10
+      color: 0x8e96a0,
+      metalness: 0.30,
+      roughness: 0.42
     });
     this.dynamicMaterials.body = bodyMat;
 
     const darkPanelMat = new THREE.MeshStandardMaterial({
-      color: 0x94a3b8,
-      metalness: 0.20,
-      roughness: 0.35
+      color: 0x334155,
+      metalness: 0.35,
+      roughness: 0.40
     });
 
-    // Material de união / chanfro sutil em cinza claro
+    // Material de união / chanfro estrutural em ferro neutro
     const rawSeamMat = new THREE.MeshStandardMaterial({
-      color: 0xcbd5e1,
-      metalness: 0.20,
-      roughness: 0.30
+      color: 0x64748b,
+      metalness: 0.32,
+      roughness: 0.38
     });
     this.dynamicMaterials.accentTrim = rawSeamMat;
 
-    // Friso lateral em cinza claro
+    // Friso lateral metálico neutro
     const ledStripMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      metalness: 0.20,
-      roughness: 0.30
+      color: 0x78828f,
+      metalness: 0.30,
+      roughness: 0.38
     });
     this.dynamicMaterials.ledStrip = ledStripMat;
 
@@ -355,8 +368,8 @@ class Totem3DViewer {
     // 1. BASE METÁLICA CHUMBADA + PEDESTAL DE FIXAÇÃO (0,00m a 0,16m)
     // -----------------------------------------------------------------------
     const concreteBaseMat = new THREE.MeshStandardMaterial({
-      color: 0xcbd5e1,
-      roughness: 0.65,
+      color: 0x94a3b8,
+      roughness: 0.75,
       metalness: 0.10
     });
     const basePedestal = new THREE.Mesh(
@@ -368,12 +381,13 @@ class Totem3DViewer {
     basePedestal.receiveShadow = true;
     this.totemGroup.add(basePedestal);
 
-    // Flange metálica em chapa de aço claro
+    // Flange metálica em chapa de ferro natural
     const flangeMat = new THREE.MeshStandardMaterial({
-      color: 0xdbe2ea,
-      metalness: 0.22,
-      roughness: 0.32
+      color: 0x64748b,
+      metalness: 0.35,
+      roughness: 0.38
     });
+    this.dynamicMaterials.flange = flangeMat;
     const flange = new THREE.Mesh(
       new THREE.BoxGeometry(0.76, 0.04, 0.40),
       flangeMat
@@ -384,7 +398,7 @@ class Totem3DViewer {
 
     // 6 Chumbadores / Parafusos sextavados de fixação estrutural
     const boltGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 6);
-    const boltMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.30, roughness: 0.22 });
+    const boltMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.45, roughness: 0.30 });
     [
       [-0.34, 0.145, 0.16], [0, 0.145, 0.16], [0.34, 0.145, 0.16],
       [-0.34, 0.145, -0.16], [0, 0.145, -0.16], [0.34, 0.145, -0.16]
@@ -516,16 +530,14 @@ class Totem3DViewer {
     this.totemGroup.add(signalDot);
 
     // -----------------------------------------------------------------------
-    // 4. FACE FRONTAL: CABEÇALHO LUMINOSO + CÂMERA + SENSOR PIR
-    //    Posicionados abaixo do início da quina arredondada (y <= 2.02m)
+    // 4. FACE FRONTAL: PLACA SUPERIOR DE IDENTIFICAÇÃO DA MARCA (JAÚ, SP)
+    //    Sem câmera em cima. Fica apenas a placa de Jaú, SP e a tela do totem.
     // -----------------------------------------------------------------------
     this.headerTexture = new THREE.CanvasTexture(this.headerCanvas);
     const headerSignMat = new THREE.MeshStandardMaterial({
       map: this.headerTexture,
-      emissiveMap: this.headerTexture,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.55,
-      roughness: 0.2
+      roughness: 0.36,
+      metalness: 0.26
     });
     this.dynamicMaterials.headerSign = headerSignMat;
 
@@ -533,50 +545,18 @@ class Totem3DViewer {
       new THREE.PlaneGeometry(0.58, 0.22),
       headerSignMat
     );
-    headerPanel.position.set(0, 1.84, 0.180);
+    headerPanel.position.set(0, 1.88, 0.180);
     this.totemGroup.add(headerPanel);
-
-    // Barra de Sensores Superior (Câmera de Segurança + Sensor PIR)
-    const sensorBar = new THREE.Mesh(
-      new THREE.BoxGeometry(0.58, 0.042, 0.012),
-      darkPanelMat
-    );
-    sensorBar.position.set(0, 1.985, 0.178);
-    this.totemGroup.add(sensorBar);
-
-    // Lente da Câmera de Monitoramento
-    const camRing = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.013, 0.013, 0.018, 20),
-      new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1 })
-    );
-    camRing.rotation.x = Math.PI / 2;
-    camRing.position.set(0, 1.985, 0.182);
-    this.totemGroup.add(camRing);
-
-    const camLens = new THREE.Mesh(
-      new THREE.SphereGeometry(0.008, 16, 16),
-      new THREE.MeshBasicMaterial({ color: 0x0284c7 })
-    );
-    camLens.position.set(0, 1.985, 0.189);
-    this.totemGroup.add(camLens);
-
-    // Sensor PIR de Presença ao lado da câmera
-    const pirSensor = new THREE.Mesh(
-      new THREE.BoxGeometry(0.024, 0.016, 0.015),
-      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 })
-    );
-    pirSensor.position.set(0.055, 1.985, 0.182);
-    this.totemGroup.add(pirSensor);
 
     // -----------------------------------------------------------------------
     // 5. TELA TOUCHSCREEN 43" FULL HD (VIDRO TEMPERADO 8mm)
     // -----------------------------------------------------------------------
     // Moldura protetora da tela (Bezel IP65)
     const screenBezel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.60, 1.02, 0.014),
+      new THREE.BoxGeometry(0.60, 1.06, 0.014),
       darkPanelMat
     );
-    screenBezel.position.set(0, 1.19, 0.176);
+    screenBezel.position.set(0, 1.18, 0.176);
     this.totemGroup.add(screenBezel);
 
     // Display LCD ativo com Textura Canvas 2D Ao Vivo
@@ -586,260 +566,33 @@ class Totem3DViewer {
       map: this.screenTexture,
       emissiveMap: this.screenTexture,
       emissive: 0xffffff,
-      emissiveIntensity: 0.78,
-      roughness: 0.12,
+      emissiveIntensity: 0.16,
+      roughness: 0.18,
       metalness: 0.05
     });
     this.dynamicMaterials.screenDisplay = screenDisplayMat;
 
     const screenMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.55, 0.96),
+      new THREE.PlaneGeometry(0.55, 1.00),
       screenDisplayMat
     );
-    screenMesh.position.set(0, 1.19, 0.184);
+    screenMesh.position.set(0, 1.18, 0.184);
     this.totemGroup.add(screenMesh);
 
-    // -----------------------------------------------------------------------
-    // 6. PAINEL FRONTAL INFERIOR: ALTO-FALANTES + CARREGADORES USB + BOTÃO SOS + PLACA JAÚ
-    // -----------------------------------------------------------------------
-    const lowerConsoleCanvas = document.createElement('canvas');
-    lowerConsoleCanvas.width = 512;
-    lowerConsoleCanvas.height = 420;
-    const lctx = lowerConsoleCanvas.getContext('2d');
-
-    // Fundo metálico claro (aço/alumínio escovado claro)
-    lctx.fillStyle = '#e2e8f0';
-    lctx.fillRect(0, 0, 512, 420);
-
-    // Faixa de ícones de conectividade (QR, Wi-Fi, Solar, Acessibilidade)
-    lctx.fillStyle = '#f8fafc';
-    lctx.fillRect(24, 18, 464, 74);
-    lctx.strokeStyle = '#94a3b8';
-    lctx.lineWidth = 2;
-    lctx.strokeRect(24, 18, 464, 74);
-
-    const badges = [
-      { icon: '📲', label: 'QR CODE' },
-      { icon: '📶', label: 'WI-FI 5G' },
-      { icon: '♿', label: 'LIBRAS/VOZ' },
-      { icon: '☀️', label: 'SOLAR ESG' }
-    ];
-    badges.forEach((b, i) => {
-      const bx = 52 + i * 112;
-      lctx.font = '24px sans-serif';
-      lctx.textAlign = 'center';
-      lctx.fillText(b.icon, bx + 36, 52);
-      lctx.fillStyle = '#0c326f';
-      lctx.font = 'bold 12px sans-serif';
-      lctx.fillText(b.label, bx + 36, 76);
-    });
-
-    // Seção de Carregadores USB e Som Direcional (Caixa Esquerda Clara)
-    lctx.save();
-    lctx.fillStyle = '#f1f5f9';
-    lctx.fillRect(24, 110, 286, 118);
-    lctx.strokeStyle = '#94a3b8';
-    lctx.lineWidth = 2;
-    lctx.strokeRect(24, 110, 286, 118);
-    lctx.beginPath();
-    lctx.rect(26, 112, 282, 114);
-    lctx.clip();
-
-    lctx.fillStyle = '#0c326f';
-    lctx.font = 'bold 12px sans-serif';
-    lctx.textAlign = 'left';
-    lctx.fillText('⚡ CARREGADORES USB & ÁUDIO 10W', 36, 133, 264);
-
-    // Desenho da grelha de som direcional
-    lctx.fillStyle = '#64748b';
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 10; c++) {
-        lctx.beginPath();
-        lctx.arc(46 + c * 14, 156 + r * 14, 3.5, 0, Math.PI * 2);
-        lctx.fill();
-      }
-    }
-
-    // Desenho das 2 portas USB iluminadas
-    [218, 262].forEach(ux => {
-      lctx.fillStyle = '#1351b4';
-      lctx.fillRect(ux, 150, 28, 44);
-      lctx.fillStyle = '#ffffff';
-      lctx.fillRect(ux + 6, 158, 16, 28);
-      lctx.fillStyle = '#0c326f';
-      lctx.font = 'bold 10px sans-serif';
-      lctx.textAlign = 'center';
-      lctx.fillText('USB', ux + 14, 210);
-    });
-    lctx.restore();
-
-    // Caixa Direita: Moldura do Botão Físico de Acionamento de Socorro (SOS)
-    lctx.save();
-    lctx.fillStyle = '#fef2f2';
-    lctx.fillRect(322, 110, 166, 118);
-    lctx.strokeStyle = '#dc2626';
-    lctx.lineWidth = 2;
-    lctx.strokeRect(322, 110, 166, 118);
-    lctx.beginPath();
-    lctx.rect(324, 112, 162, 114);
-    lctx.clip();
-
-    lctx.fillStyle = '#b91c1c';
-    lctx.font = 'bold 11px sans-serif';
-    lctx.textAlign = 'center';
-    lctx.fillText('🚨 BOTÃO DE SOCORRO', 405, 130, 150);
-    lctx.fillStyle = '#7f1d1d';
-    lctx.font = 'bold 10px sans-serif';
-    lctx.fillText('SAMU 192 • GCM 153', 405, 218, 150);
-    lctx.restore();
-
-    // Placa Metálica Institucional da Prefeitura de Jaú em aço escovado claro
-    const plateGrad = lctx.createLinearGradient(24, 248, 488, 395);
-    plateGrad.addColorStop(0, '#ffffff');
-    plateGrad.addColorStop(1, '#f1f5f9');
-    lctx.fillStyle = plateGrad;
-    lctx.fillRect(24, 248, 464, 145);
-    lctx.strokeStyle = '#94a3b8';
-    lctx.lineWidth = 2;
-    lctx.strokeRect(24, 248, 464, 145);
-
-    lctx.fillStyle = '#0c326f';
-    lctx.font = 'bold 21px sans-serif';
-    lctx.textAlign = 'center';
-    lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294, 436);
-    lctx.fillStyle = '#168821';
-    lctx.font = 'bold 15px sans-serif';
-    lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326, 436);
-    lctx.fillStyle = '#475569';
-    lctx.font = '13px sans-serif';
-    lctx.fillText('Projeto Integrador Senac Jaú • Totemize Smart City', 256, 356, 436);
-
-    const lowerTex = new THREE.CanvasTexture(lowerConsoleCanvas);
-    const lowerPanelMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.56, 0.46),
-      new THREE.MeshStandardMaterial({
-        map: lowerTex,
-        roughness: 0.35,
-        metalness: 0.12
-      })
-    );
-    lowerPanelMesh.position.set(0, 0.42, 0.180);
-    this.totemGroup.add(lowerPanelMesh);
-
-    // BOTÃO FÍSICO SOS EMERGÊNCIA 3D (Em alto-relevo iluminado na frente)
-    const sosBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.052, 0.056, 0.018, 24),
-      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.25, roughness: 0.3 })
-    );
-    sosBase.rotation.x = Math.PI / 2;
-    sosBase.position.set(0.18, 0.48, 0.184);
-    this.totemGroup.add(sosBase);
-
-    const sosBtn = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.038, 0.04, 0.026, 24),
-      new THREE.MeshStandardMaterial({
-        color: 0xef4444,
-        emissive: 0xdc2626,
-        emissiveIntensity: 0.65,
-        roughness: 0.2
-      })
-    );
-    sosBtn.rotation.x = Math.PI / 2;
-    sosBtn.position.set(0.18, 0.48, 0.190);
-    this.totemGroup.add(sosBtn);
+    // A PARTE DE BAIXO É TOTALMENTE LIMPA: APENAS O FERRO MACIÇO DA CARCAÇA E BASE!
+    // (Removidos: painel QR/USB/Áudio e botão SOS a pedido do usuário)
 
     // -----------------------------------------------------------------------
-    // 7. FACE TRASEIRA COMPLETA EM METAL CLARO (PARA VISUALIZAÇÃO 360°!)
+    // 7. FACE TRASEIRA COMPLETA EM FERRO/AÇO NATURAL (PARA VISUALIZAÇÃO 360°!)
     // Porta de Manutenção Antivandalismo, Fechaduras, Aletas de Exaustão e Plaqueta IP65
     // -----------------------------------------------------------------------
-    const rearCanvas = document.createElement('canvas');
-    rearCanvas.width = 512;
-    rearCanvas.height = 1400;
-    const rctx = rearCanvas.getContext('2d');
-
-    rctx.fillStyle = '#e2e8f0';
-    rctx.fillRect(0, 0, 512, 1400);
-
-    // Contorno da porta técnica traseira
-    rctx.strokeStyle = '#94a3b8';
-    rctx.lineWidth = 5;
-    rctx.strokeRect(36, 40, 440, 1320);
-    rctx.strokeStyle = '#cbd5e1';
-    rctx.lineWidth = 2;
-    rctx.strokeRect(42, 46, 428, 1308);
-
-    // Venezianas / Grelhas de ventilação superior (dissipação térmica)
-    for (let i = 0; i < 9; i++) {
-      rctx.fillStyle = '#64748b';
-      rctx.fillRect(86, 85 + i * 22, 340, 10);
-      rctx.fillStyle = '#f8fafc';
-      rctx.fillRect(86, 82 + i * 22, 340, 3);
-    }
-
-    // Painel Institucional Traseiro Claro
-    rctx.fillStyle = '#ffffff';
-    rctx.fillRect(68, 340, 376, 420);
-    rctx.strokeStyle = '#94a3b8';
-    rctx.lineWidth = 3;
-    rctx.strokeRect(68, 340, 376, 420);
-
-    rctx.fillStyle = '#0c326f';
-    rctx.font = 'bold 22px sans-serif';
-    rctx.textAlign = 'center';
-    rctx.fillText('PREFEITURA DE JAÚ', 256, 405);
-    rctx.fillStyle = '#1e293b';
-    rctx.font = 'bold 30px sans-serif';
-    rctx.fillText('TOTEM INTELIGENTE', 256, 448);
-    rctx.fillStyle = '#168821';
-    rctx.font = 'bold 17px sans-serif';
-    rctx.fillText('☀️ ENERGIA HÍBRIDA (SOLAR 35Wp + 220V)', 256, 495);
-
-    // Especificações Técnicas na Plaqueta Traseira
-    const specs = [
-      '• Estrutura: Chapa de Metal Escovado Claro',
-      '• Proteção: Vidro Temperado 8mm + Grau IP65',
-      '• Exaustão: Venezianas com Cooler Termostático',
-      '• Painel Solar Topo: 35Wp (64x21cm Embutido)',
-      '• Bateria na Base: Backup LiFePO4 24h (Zona Fria)',
-      '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)',
-      '• Peso Aproximado: 120 kg'
-    ];
-    rctx.fillStyle = '#334155';
-    rctx.font = 'bold 14.5px sans-serif';
-    rctx.textAlign = 'left';
-    specs.forEach((line, idx) => {
-      rctx.fillText(line, 88, 548 + idx * 28, 340);
-    });
-
-    // Aviso de Acesso Técnico Restrito
-    rctx.fillStyle = '#f1f5f9';
-    rctx.fillRect(106, 810, 300, 64);
-    rctx.strokeStyle = '#64748b';
-    rctx.lineWidth = 2;
-    rctx.strokeRect(106, 810, 300, 64);
-    rctx.fillStyle = '#0f172a';
-    rctx.font = 'bold 15px sans-serif';
-    rctx.textAlign = 'center';
-    rctx.fillText('⚡ ACESSO TÉCNICO RESTRITO', 256, 838);
-    rctx.fillStyle = '#475569';
-    rctx.font = 'bold 11.5px sans-serif';
-    rctx.fillText('SISTEMA ELÉTRICO SOLAR + REDE 220V', 256, 858);
-
-    // Venezianas de ventilação inferior
-    for (let i = 0; i < 8; i++) {
-      rctx.fillStyle = '#64748b';
-      rctx.fillRect(86, 1080 + i * 22, 340, 10);
-      rctx.fillStyle = '#f8fafc';
-      rctx.fillRect(86, 1077 + i * 22, 340, 3);
-    }
-
-    const rearTex = new THREE.CanvasTexture(rearCanvas);
+    this.rearTexture = new THREE.CanvasTexture(this.rearCanvas);
     const rearDoorMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(0.62, 1.82),
       new THREE.MeshStandardMaterial({
-        map: rearTex,
-        roughness: 0.35,
-        metalness: 0.15
+        map: this.rearTexture,
+        roughness: 0.40,
+        metalness: 0.28
       })
     );
     rearDoorMesh.rotation.y = Math.PI;
@@ -861,33 +614,350 @@ class Totem3DViewer {
   }
 
   // =========================================================================
-  // RENDERIZAÇÃO DINÂMICA DO CABEÇALHO SUPERIOR E TELA TOUCH 43" (FUNDO CLARO)
+  // UTILITÁRIOS DE COR E RENDERIZAÇÃO NATURAL DA PLACA DE JAÚ E COSTAS DE FERRO
   // =========================================================================
-  updateHeaderTexture() {
-    const ctx = this.headerCtx;
-    const w = this.headerCanvas.width;
-    const h = this.headerCanvas.height;
+  hexToRgbObj(hex) {
+    const clean = (hex || '#8e96a0').replace('#', '');
+    const num = parseInt(clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean, 16) || 0x8e96a0;
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    };
+  }
 
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(1, '#e2e8f0');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
+  rgbToHexStr(r, g, b) {
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+    return '#' + [clamp(r), clamp(g), clamp(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+  }
 
-    // Moldura metálica escovada limpa
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(8, 8, w - 16, h - 16);
+  shiftColorBrightness(hex, factor) {
+    const { r, g, b } = this.hexToRgbObj(hex);
+    if (factor >= 0) {
+      // Clareia suavemente sem estourar para branco puro
+      return this.rgbToHexStr(
+        r + (235 - r) * factor,
+        g + (238 - g) * factor,
+        b + (242 - b) * factor
+      );
+    } else {
+      const f = 1 + factor;
+      return this.rgbToHexStr(r * f, g * f, b * f);
+    }
+  }
 
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#0c326f';
-    ctx.font = '800 64px sans-serif';
-    ctx.fillText('JAÚ', w / 2, 105);
-    ctx.fillStyle = '#1351b4';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
+  drawBrushedGrain(ctx, x, y, w, h, alphaLight = 0.07, alphaDark = 0.08) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${alphaLight})`;
+    for (let ly = y; ly < y + h; ly += 4) {
+      ctx.beginPath();
+      ctx.moveTo(x, ly);
+      ctx.lineTo(x + w, ly);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = `rgba(15, 23, 42, ${alphaDark})`;
+    for (let ly = y + 2; ly < y + h; ly += 4) {
+      ctx.beginPath();
+      ctx.moveTo(x, ly);
+      ctx.lineTo(x + w, ly);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 
-    if (this.headerTexture) this.headerTexture.needsUpdate = true;
+  drawCornerRivets(ctx, x, y, w, h, inset = 12) {
+    const pts = [
+      [x + inset, y + inset],
+      [x + w - inset, y + inset],
+      [x + inset, y + h - inset],
+      [x + w - inset, y + h - inset]
+    ];
+    pts.forEach(([rx, ry]) => {
+      ctx.beginPath();
+      ctx.arc(rx, ry, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#475569';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(rx - 1, ry - 1, 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fill();
+    });
+  }
+
+  updateMetalPlatesTextures(baseHex = '#8e96a0') {
+    this.currentMetalHex = baseHex;
+    const { r, g, b } = this.hexToRgbObj(baseHex);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // Evita efeito "negativo" ou branco estourado: mesmo quando o usuário escolhe branco,
+    // a placa metálica e a porta traseira mantêm tom metálico natural de aço/ferro escovado
+    const metalBase = lum > 0.85 ? '#cfd6df' : baseHex;
+    const metalLight = this.shiftColorBrightness(metalBase, 0.18);
+    const metalMid = this.shiftColorBrightness(metalBase, 0.06);
+    const metalDark = this.shiftColorBrightness(metalBase, -0.22);
+    const metalBorder = this.shiftColorBrightness(metalBase, -0.35);
+
+    const isDarkMetal = lum < 0.42;
+    const titleColor = isDarkMetal ? '#f8fafc' : '#0c326f';
+    const subTitleColor = isDarkMetal ? '#93c5fd' : '#1351b4';
+    const bodyTextColor = isDarkMetal ? '#e2e8f0' : '#1e293b';
+    const mutedTextColor = isDarkMetal ? '#cbd5e1' : '#334155';
+    const greenBadgeColor = isDarkMetal ? '#4ade80' : '#15803d';
+
+    // -----------------------------------------------------------------------
+    // 1. PLACA SUPERIOR DE JAÚ (HEADER) — Aço Escovado Natural
+    // -----------------------------------------------------------------------
+    {
+      const ctx = this.headerCtx;
+      const w = this.headerCanvas.width;
+      const h = this.headerCanvas.height;
+
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, metalLight);
+      grad.addColorStop(0.5, metalBase);
+      grad.addColorStop(1, metalDark);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      this.drawBrushedGrain(ctx, 0, 0, w, h, 0.08, 0.08);
+
+      // Moldura chanfrada de ferro/aço natural
+      ctx.strokeStyle = metalBorder;
+      ctx.lineWidth = 6;
+      ctx.strokeRect(6, 6, w - 12, h - 12);
+      ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(12, 12, w - 24, h - 24);
+
+      this.drawCornerRivets(ctx, 8, 8, w - 16, h - 16, 16);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = titleColor;
+      ctx.font = '800 62px sans-serif';
+      ctx.fillText('JAÚ', w / 2, 104);
+      ctx.fillStyle = subTitleColor;
+      ctx.font = 'bold 23px sans-serif';
+      ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
+
+      if (this.headerTexture) this.headerTexture.needsUpdate = true;
+    }
+
+    // -----------------------------------------------------------------------
+    // 2. PAINEL INFERIOR FRONTAL + PLACA MUNICIPAL DE JAÚ — Aço Escovado Natural
+    // -----------------------------------------------------------------------
+    {
+      const lctx = this.lowerConsoleCtx;
+      lctx.fillStyle = metalBase;
+      lctx.fillRect(0, 0, 512, 420);
+      this.drawBrushedGrain(lctx, 0, 0, 512, 420, 0.06, 0.08);
+
+      // Faixa de ícones de conectividade em chapa escovada natural
+      lctx.fillStyle = metalLight;
+      lctx.fillRect(24, 18, 464, 74);
+      lctx.strokeStyle = metalBorder;
+      lctx.lineWidth = 2.5;
+      lctx.strokeRect(24, 18, 464, 74);
+
+      const badges = [
+        { icon: '📲', label: 'QR CODE' },
+        { icon: '📶', label: 'WI-FI 5G' },
+        { icon: '♿', label: 'LIBRAS/VOZ' },
+        { icon: '☀️', label: 'SOLAR ESG' }
+      ];
+      badges.forEach((b, i) => {
+        const bx = 52 + i * 112;
+        lctx.font = '23px sans-serif';
+        lctx.textAlign = 'center';
+        lctx.fillText(b.icon, bx + 36, 51);
+        lctx.fillStyle = titleColor;
+        lctx.font = 'bold 12px sans-serif';
+        lctx.fillText(b.label, bx + 36, 75);
+      });
+
+      // Seção de Carregadores USB e Som Direcional (Caixa Esquerda em Metal Natural)
+      lctx.save();
+      lctx.fillStyle = metalMid;
+      lctx.fillRect(24, 110, 286, 118);
+      lctx.strokeStyle = metalBorder;
+      lctx.lineWidth = 2.5;
+      lctx.strokeRect(24, 110, 286, 118);
+      lctx.beginPath();
+      lctx.rect(26, 112, 282, 114);
+      lctx.clip();
+
+      lctx.fillStyle = titleColor;
+      lctx.font = 'bold 12px sans-serif';
+      lctx.textAlign = 'left';
+      lctx.fillText('⚡ CARREGADORES USB & ÁUDIO 10W', 36, 133, 264);
+
+      // Grelha de som direcional perfurada no metal
+      lctx.fillStyle = '#1e293b';
+      for (let rIdx = 0; rIdx < 4; rIdx++) {
+        for (let cIdx = 0; cIdx < 10; cIdx++) {
+          lctx.beginPath();
+          lctx.arc(46 + cIdx * 14, 156 + rIdx * 14, 3.5, 0, Math.PI * 2);
+          lctx.fill();
+        }
+      }
+
+      // 2 portas USB embutidas
+      [218, 262].forEach(ux => {
+        lctx.fillStyle = '#0f172a';
+        lctx.fillRect(ux, 150, 28, 44);
+        lctx.fillStyle = '#38bdf8';
+        lctx.fillRect(ux + 6, 158, 16, 28);
+        lctx.fillStyle = titleColor;
+        lctx.font = 'bold 10px sans-serif';
+        lctx.textAlign = 'center';
+        lctx.fillText('USB', ux + 14, 210);
+      });
+      lctx.restore();
+
+      // Caixa Direita: Moldura do Botão Físico de Socorro (SOS)
+      lctx.save();
+      lctx.fillStyle = isDarkMetal ? '#451a1a' : '#e5d4d4';
+      lctx.fillRect(322, 110, 166, 118);
+      lctx.strokeStyle = '#b91c1c';
+      lctx.lineWidth = 2.5;
+      lctx.strokeRect(322, 110, 166, 118);
+      lctx.beginPath();
+      lctx.rect(324, 112, 162, 114);
+      lctx.clip();
+
+      lctx.fillStyle = isDarkMetal ? '#fca5a5' : '#991b1b';
+      lctx.font = 'bold 11px sans-serif';
+      lctx.textAlign = 'center';
+      lctx.fillText('🚨 BOTÃO DE SOCORRO', 405, 130, 150);
+      lctx.fillStyle = isDarkMetal ? '#fecaca' : '#7f1d1d';
+      lctx.font = 'bold 10px sans-serif';
+      lctx.fillText('SAMU 192 • GCM 153', 405, 218, 150);
+      lctx.restore();
+
+      // PLACA DE JAÚ (Placa Institucional em Aço Inox / Ferro Escovado Natural)
+      const plateGrad = lctx.createLinearGradient(24, 248, 488, 395);
+      plateGrad.addColorStop(0, metalLight);
+      plateGrad.addColorStop(0.5, metalMid);
+      plateGrad.addColorStop(1, metalDark);
+      lctx.fillStyle = plateGrad;
+      lctx.fillRect(24, 248, 464, 145);
+      this.drawBrushedGrain(lctx, 24, 248, 464, 145, 0.08, 0.08);
+
+      lctx.strokeStyle = metalBorder;
+      lctx.lineWidth = 3;
+      lctx.strokeRect(24, 248, 464, 145);
+      this.drawCornerRivets(lctx, 24, 248, 464, 145, 14);
+
+      lctx.fillStyle = titleColor;
+      lctx.font = 'bold 21px sans-serif';
+      lctx.textAlign = 'center';
+      lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294, 426);
+      lctx.fillStyle = greenBadgeColor;
+      lctx.font = 'bold 14.5px sans-serif';
+      lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326, 426);
+      lctx.fillStyle = mutedTextColor;
+      lctx.font = 'bold 13px sans-serif';
+      lctx.fillText('Projeto Integrador Senac Jaú • Totemize Smart City', 256, 356, 426);
+
+      if (this.lowerTexture) this.lowerTexture.needsUpdate = true;
+    }
+
+    // -----------------------------------------------------------------------
+    // 3. PARTE DE FERRO DAS COSTAS (PORTA TRASEIRA + VENEZIANAS + PLAQUETA TÉCNICA)
+    // -----------------------------------------------------------------------
+    {
+      const rctx = this.rearCtx;
+      const doorGrad = rctx.createLinearGradient(0, 0, 512, 1400);
+      doorGrad.addColorStop(0, metalMid);
+      doorGrad.addColorStop(0.5, metalBase);
+      doorGrad.addColorStop(1, metalDark);
+      rctx.fillStyle = doorGrad;
+      rctx.fillRect(0, 0, 512, 1400);
+      this.drawBrushedGrain(rctx, 0, 0, 512, 1400, 0.06, 0.09);
+
+      // Fresta/contorno estrutural da porta de ferro traseira
+      rctx.strokeStyle = '#334155';
+      rctx.lineWidth = 6;
+      rctx.strokeRect(36, 40, 440, 1320);
+      rctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      rctx.lineWidth = 2;
+      rctx.strokeRect(42, 46, 428, 1308);
+
+      // Venezianas / Grelhas de ventilação superior estampadas no ferro
+      for (let i = 0; i < 9; i++) {
+        rctx.fillStyle = '#1e293b';
+        rctx.fillRect(86, 85 + i * 22, 340, 10);
+        rctx.fillStyle = metalLight;
+        rctx.fillRect(86, 82 + i * 22, 340, 3);
+      }
+
+      // Plaqueta Institucional & Técnica Traseira em Aço Escovado Natural (sem branco estourado)
+      const rearPlateGrad = rctx.createLinearGradient(68, 340, 444, 760);
+      rearPlateGrad.addColorStop(0, metalLight);
+      rearPlateGrad.addColorStop(1, metalMid);
+      rctx.fillStyle = rearPlateGrad;
+      rctx.fillRect(68, 340, 376, 420);
+      this.drawBrushedGrain(rctx, 68, 340, 376, 420, 0.07, 0.07);
+
+      rctx.strokeStyle = metalBorder;
+      rctx.lineWidth = 3.5;
+      rctx.strokeRect(68, 340, 376, 420);
+      this.drawCornerRivets(rctx, 68, 340, 376, 420, 16);
+
+      rctx.fillStyle = titleColor;
+      rctx.font = 'bold 22px sans-serif';
+      rctx.textAlign = 'center';
+      rctx.fillText('PREFEITURA DE JAÚ', 256, 405);
+      rctx.fillStyle = bodyTextColor;
+      rctx.font = 'bold 29px sans-serif';
+      rctx.fillText('TOTEM INTELIGENTE', 256, 448);
+      rctx.fillStyle = greenBadgeColor;
+      rctx.font = 'bold 16.5px sans-serif';
+      rctx.fillText('☀️ ENERGIA HÍBRIDA (SOLAR 35Wp + 220V)', 256, 495);
+
+      const specs = [
+        '• Estrutura: Chapa de Aço/Ferro Escovado Natural',
+        '• Proteção: Vidro Temperado 8mm + Grau IP65',
+        '• Exaustão: Venezianas com Cooler Termostático',
+        '• Painel Solar Topo: 35Wp (64x21cm Embutido)',
+        '• Bateria na Base: Backup LiFePO4 24h (Zona Fria)',
+        '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)',
+        '• Peso Aproximado: 120 kg'
+      ];
+      rctx.fillStyle = bodyTextColor;
+      rctx.font = 'bold 14.5px sans-serif';
+      rctx.textAlign = 'left';
+      specs.forEach((line, idx) => {
+        rctx.fillText(line, 88, 548 + idx * 28, 340);
+      });
+
+      // Plaqueta de Aviso de Acesso Técnico Restrito em metal natural
+      rctx.fillStyle = metalLight;
+      rctx.fillRect(106, 810, 300, 64);
+      rctx.strokeStyle = metalBorder;
+      rctx.lineWidth = 2.5;
+      rctx.strokeRect(106, 810, 300, 64);
+      rctx.fillStyle = bodyTextColor;
+      rctx.font = 'bold 15px sans-serif';
+      rctx.textAlign = 'center';
+      rctx.fillText('⚡ ACESSO TÉCNICO RESTRITO', 256, 838);
+      rctx.fillStyle = mutedTextColor;
+      rctx.font = 'bold 11.5px sans-serif';
+      rctx.fillText('SISTEMA ELÉTRICO SOLAR + REDE 220V', 256, 858);
+
+      // Venezianas de ventilação inferior no ferro traseiro
+      for (let i = 0; i < 8; i++) {
+        rctx.fillStyle = '#1e293b';
+        rctx.fillRect(86, 1080 + i * 22, 340, 10);
+        rctx.fillStyle = metalLight;
+        rctx.fillRect(86, 1077 + i * 22, 340, 3);
+      }
+
+      if (this.rearTexture) this.rearTexture.needsUpdate = true;
+    }
   }
 
   updateScreenTexture() {
@@ -1420,12 +1490,12 @@ class Totem3DViewer {
         cam: { theta: 0.18, phi: 0.42, radius: 1.95, targetY: 1.95 }
       },
       {
-        id: 'sensors',
+        id: 'brand',
         num: '2',
-        title: 'Quina Arredondada + Câmera HD & PIR',
-        desc: 'Borda superior frontal com curvatura ergonômica suave (11 cm de raio no topo) logo acima da câmera frontal de segurança e do sensor PIR de presença.',
-        pos: new THREE.Vector3(0.0, 1.99, 0.19),
-        cam: { theta: 0.65, phi: 1.25, radius: 1.85, targetY: 1.88 }
+        title: 'Painel Superior de Marca: Jaú, SP',
+        desc: 'Placa superior de identificação em chapa metálica escovada com acabamento natural e espaço para a marca/frase identificadora do município.',
+        pos: new THREE.Vector3(0.0, 1.88, 0.19),
+        cam: { theta: 0.15, phi: 1.35, radius: 2.05, targetY: 1.88 }
       },
       {
         id: 'screen',
@@ -1436,24 +1506,16 @@ class Totem3DViewer {
         cam: { theta: 0.0, phi: 1.48, radius: 2.20, targetY: 1.18 }
       },
       {
-        id: 'usb_sos',
-        num: '4',
-        title: 'Som 10W + Carregadores USB + SOS',
-        desc: 'Alto-falantes direcionais de 10W para leitura em voz alta, 2 portas USB para recarga gratuita de celulares e botão físico SOS ligado à Guarda Municipal.',
-        pos: new THREE.Vector3(0.22, 0.48, 0.19),
-        cam: { theta: 0.15, phi: 1.48, radius: 1.85, targetY: 0.52 }
-      },
-      {
         id: 'structure',
-        num: '5',
+        num: '4',
         title: 'Chassi Monobloco em Metal Cru (Aço Escovado)',
-        desc: 'Formato monolítico puro (0,70m × 2,20m × 0,35m) em chapa maciça de metal cru industrial sem pintura, quina superior arredondada e acabamento escovado antivandalismo IP65.',
+        desc: 'Corpo monolítico maciço (0,70m × 2,20m × 0,35m) em chapa de ferro/metal cru industrial sem pintura, quina arredondada e base limpa sem adereços.',
         pos: new THREE.Vector3(-0.36, 1.15, 0.05),
         cam: { theta: -1.52, phi: 1.38, radius: 2.85, targetY: 1.12 }
       },
       {
         id: 'rear',
-        num: '6',
+        num: '5',
         title: 'Porta Traseira & Exaustão Térmica',
         desc: 'Costas retas com porta técnica de manutenção, fechadura dupla antivandalismo, venezianas de ventilação natural e plaqueta técnica IP65.',
         pos: new THREE.Vector3(0.0, 1.25, -0.19),
@@ -1461,7 +1523,7 @@ class Totem3DViewer {
       },
       {
         id: 'base',
-        num: '7',
+        num: '6',
         title: 'Base Chumbada & Piso Tátil NBR 9050',
         desc: 'Base metálica retangular chumbada em fundação de concreto na calçada de pedra portuguesa, cercada por piso tátil direcional e de alerta.',
         pos: new THREE.Vector3(-0.28, 0.08, 0.42),
@@ -1706,31 +1768,8 @@ class Totem3DViewer {
       });
     }
 
-    // 6. Seletor de Cor da Carcaça de Ferro/Metal
-    const btnOpenColorPicker = document.getElementById('btn-open-color-picker');
-    const btnCloseColorPicker = document.getElementById('btn-close-color-picker');
-    const colorPickerModal = document.getElementById('totem-color-picker-modal');
-
-    if (btnOpenColorPicker && colorPickerModal) {
-      btnOpenColorPicker.addEventListener('click', () => {
-        colorPickerModal.classList.toggle('hidden');
-      });
-    }
-
-    if (btnCloseColorPicker && colorPickerModal) {
-      btnCloseColorPicker.addEventListener('click', () => {
-        colorPickerModal.classList.add('hidden');
-      });
-    }
-
-    document.querySelectorAll('[data-metal-color]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const colorKey = btn.getAttribute('data-metal-color');
-        this.setMetalColor(colorKey);
-        document.querySelectorAll('[data-metal-color]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+    // 6. Tabela Completa de Cores (Espectro de Matiz + Degradê Branco ao Preto + 30 Cores Principais)
+    this.initColorTablePicker();
 
     // 7. Alternar Iluminação Dia / Noite
     const btnNight = document.getElementById('btn-3d-daynight');
@@ -1754,84 +1793,325 @@ class Totem3DViewer {
     }
   }
 
-  // Método para mudar a cor da carcaça do totem (parte do ferro)
-  setMetalColor(colorKey) {
-    if (!this.dynamicMaterials.body) return;
+  // =========================================================================
+  // TABELA COMPLETA DE CORES 2D (DO BRANCO AO PRETO + TODAS AS CORES DO ESPECTRO)
+  // =========================================================================
+  hsvToRgb(h, s, v) {
+    const c = v * s;
+    const hh = ((h % 360) + 360) % 360 / 60;
+    const x = c * (1 - Math.abs((hh % 2) - 1));
+    let r1 = 0, g1 = 0, b1 = 0;
+    if (hh >= 0 && hh < 1) { r1 = c; g1 = x; b1 = 0; }
+    else if (hh >= 1 && hh < 2) { r1 = x; g1 = c; b1 = 0; }
+    else if (hh >= 2 && hh < 3) { r1 = 0; g1 = c; b1 = x; }
+    else if (hh >= 3 && hh < 4) { r1 = 0; g1 = x; b1 = c; }
+    else if (hh >= 4 && hh < 5) { r1 = x; g1 = 0; b1 = c; }
+    else { r1 = c; g1 = 0; b1 = x; }
+    const m = v - c;
+    return {
+      r: Math.round((r1 + m) * 255),
+      g: Math.round((g1 + m) * 255),
+      b: Math.round((b1 + m) * 255)
+    };
+  }
 
-    const colorPresets = {
-      'raw': {
-        color: 0xf1f5f9,
-        metalness: 0.18,
-        roughness: 0.32,
-        mapEnabled: true
-      },
-      'black': {
-        color: 0x334155,
-        metalness: 0.22,
-        roughness: 0.35,
-        mapEnabled: false
-      },
-      'govblue': {
-        color: 0x1351b4,
-        metalness: 0.20,
-        roughness: 0.32,
-        mapEnabled: false
-      },
-      'white': {
-        color: 0xffffff,
-        metalness: 0.10,
-        roughness: 0.25,
-        mapEnabled: false
-      },
-      'gold': {
-        color: 0xf59e0b,
-        metalness: 0.25,
-        roughness: 0.28,
-        mapEnabled: false
-      },
-      'corten': {
-        color: 0xb45309,
-        metalness: 0.20,
-        roughness: 0.55,
-        mapEnabled: false
+  rgbToHsv(r, g, b) {
+    const rn = r / 255, gn = g / 255, bn = b / 255;
+    const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+    const d = max - min;
+    let h = 0;
+    const s = max === 0 ? 0 : d / max;
+    const v = max;
+    if (max !== min) {
+      switch (max) {
+        case rn: h = (gn - bn) / d + (gn < bn ? 6 : 0); break;
+        case gn: h = (bn - rn) / d + 2; break;
+        case bn: h = (rn - gn) / d + 4; break;
+      }
+      h *= 60;
+    }
+    return { h, s, v };
+  }
+
+  initColorTablePicker() {
+    const btnOpenColorPicker = document.getElementById('btn-open-color-picker');
+    const btnCloseColorPicker = document.getElementById('btn-close-color-picker');
+    const colorPickerModal = document.getElementById('totem-color-picker-modal');
+
+    const svCanvas = document.getElementById('color-sv-canvas');
+    const svWrap = document.getElementById('color-sv-wrap');
+    const svCursor = document.getElementById('color-sv-cursor');
+
+    const hueCanvas = document.getElementById('color-hue-canvas');
+    const hueWrap = document.getElementById('color-hue-wrap');
+    const hueCursor = document.getElementById('color-hue-cursor');
+
+    const btnResetNeutral = document.getElementById('btn-reset-neutral-color');
+
+    if (btnOpenColorPicker && colorPickerModal) {
+      btnOpenColorPicker.addEventListener('click', () => {
+        colorPickerModal.classList.toggle('hidden');
+      });
+    }
+
+    if (btnCloseColorPicker && colorPickerModal) {
+      btnCloseColorPicker.addEventListener('click', () => {
+        colorPickerModal.classList.add('hidden');
+      });
+    }
+
+    // Estado interno do seletor 2D (Começa em Azul Gov 215° e posição do Aço Natural #8e96a0)
+    // A barra de matiz começa em Azul (210°) e percorre Ciano -> Verde -> Amarelo -> Laranja -> Vermelho -> Roxo -> Azul
+    this.pickerState = {
+      hueOffset: 210, // Começa no Azul como primeira cor da barra!
+      hue: 213,
+      s: 0.11,
+      v: 0.63
+    };
+
+    const drawHueSpectrum = () => {
+      if (!hueCanvas) return;
+      const ctx = hueCanvas.getContext('2d');
+      const w = hueCanvas.width;
+      const h = hueCanvas.height;
+      const grad = ctx.createLinearGradient(0, 0, w, 0);
+      const steps = 12;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const deg = (this.pickerState.hueOffset + t * 360) % 360;
+        const { r, g, b } = this.hsvToRgb(deg, 1, 1);
+        grad.addColorStop(t, this.rgbToHexStr(r, g, b));
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    };
+
+    const drawSVBox = (hueDeg) => {
+      if (!svCanvas) return;
+      const ctx = svCanvas.getContext('2d');
+      const w = svCanvas.width;
+      const h = svCanvas.height;
+
+      // 1. Cor pura selecionada no fundo
+      const pure = this.hsvToRgb(hueDeg, 1, 1);
+      ctx.fillStyle = this.rgbToHexStr(pure.r, pure.g, pure.b);
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. Degradê horizontal: Branco (#ffffff) na esquerda -> Transparente na direita
+      const whiteGrad = ctx.createLinearGradient(0, 0, w, 0);
+      whiteGrad.addColorStop(0, 'rgba(255,255,255,1)');
+      whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = whiteGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // 3. Degradê vertical: Transparente no topo -> Preto (#000000) embaixo
+      const blackGrad = ctx.createLinearGradient(0, 0, 0, h);
+      blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      blackGrad.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = blackGrad;
+      ctx.fillRect(0, 0, w, h);
+    };
+
+    const updateCursorsUI = () => {
+      if (svCursor) {
+        svCursor.style.left = `${(this.pickerState.s * 100).toFixed(1)}%`;
+        svCursor.style.top = `${((1 - this.pickerState.v) * 100).toFixed(1)}%`;
+      }
+      if (hueCursor) {
+        const relHue = ((this.pickerState.hue - this.pickerState.hueOffset) % 360 + 360) % 360;
+        hueCursor.style.left = `${((relHue / 360) * 100).toFixed(1)}%`;
       }
     };
 
-    const cfg = colorPresets[colorKey] || colorPresets['raw'];
-    this.dynamicMaterials.body.color.setHex(cfg.color);
-    this.dynamicMaterials.body.metalness = cfg.metalness;
-    this.dynamicMaterials.body.roughness = cfg.roughness;
+    const applyFromPickerState = (customLabel = null) => {
+      const { r, g, b } = this.hsvToRgb(this.pickerState.hue, this.pickerState.s, this.pickerState.v);
+      const hex = this.rgbToHexStr(r, g, b);
+      this.setCustomHexColor(hex, customLabel);
+      updateCursorsUI();
+    };
 
-    // Sincroniza também a moldura do Totem 2D caso o usuário abra o menu
+    drawHueSpectrum();
+    drawSVBox(this.pickerState.hue);
+    updateCursorsUI();
+
+    // Arrastar no quadro 2D (Branco -> Cor -> Preto)
+    if (svWrap && svCanvas) {
+      let draggingSV = false;
+      const handleSVPointer = (clientX, clientY) => {
+        const rect = svWrap.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+        this.pickerState.s = x / (rect.width || 1);
+        this.pickerState.v = 1 - (y / (rect.height || 1));
+        document.querySelectorAll('.swatch-cell').forEach(b => b.classList.remove('active'));
+        applyFromPickerState();
+      };
+
+      svWrap.addEventListener('mousedown', (e) => {
+        draggingSV = true;
+        handleSVPointer(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (draggingSV) handleSVPointer(e.clientX, e.clientY);
+      });
+      window.addEventListener('mouseup', () => { draggingSV = false; });
+
+      svWrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          draggingSV = true;
+          handleSVPointer(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      svWrap.addEventListener('touchmove', (e) => {
+        if (draggingSV && e.touches.length === 1) {
+          handleSVPointer(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      svWrap.addEventListener('touchend', () => { draggingSV = false; });
+    }
+
+    // Arrastar na barra de Matiz (do Azul até a última cor do espectro)
+    if (hueWrap && hueCanvas) {
+      let draggingHue = false;
+      const handleHuePointer = (clientX) => {
+        const rect = hueWrap.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const ratio = x / (rect.width || 1);
+        this.pickerState.hue = (this.pickerState.hueOffset + ratio * 360) % 360;
+        // Se a saturação estava muito baixa (ex: branco/cinza), eleva suavemente para mostrar a cor escolhida
+        if (this.pickerState.s < 0.18) this.pickerState.s = 0.72;
+        if (this.pickerState.v < 0.25) this.pickerState.v = 0.78;
+        drawSVBox(this.pickerState.hue);
+        document.querySelectorAll('.swatch-cell').forEach(b => b.classList.remove('active'));
+        applyFromPickerState();
+      };
+
+      hueWrap.addEventListener('mousedown', (e) => {
+        draggingHue = true;
+        handleHuePointer(e.clientX);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (draggingHue) handleHuePointer(e.clientX);
+      });
+      window.addEventListener('mouseup', () => { draggingHue = false; });
+
+      hueWrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          draggingHue = true;
+          handleHuePointer(e.touches[0].clientX);
+        }
+      }, { passive: true });
+      hueWrap.addEventListener('touchmove', (e) => {
+        if (draggingHue && e.touches.length === 1) {
+          handleHuePointer(e.touches[0].clientX);
+        }
+      }, { passive: true });
+      hueWrap.addEventListener('touchend', () => { draggingHue = false; });
+    }
+
+    // Clique nas 30 células da Tabela de Cores Principais
+    document.querySelectorAll('.swatch-cell[data-hex]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hex = btn.getAttribute('data-hex');
+        const title = btn.getAttribute('title') || hex;
+        document.querySelectorAll('.swatch-cell').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const { r, g, b } = this.hexToRgbObj(hex);
+        const hsv = this.rgbToHsv(r, g, b);
+        if (hsv.s > 0.02) this.pickerState.hue = hsv.h;
+        this.pickerState.s = hsv.s;
+        this.pickerState.v = hsv.v;
+        drawSVBox(this.pickerState.hue);
+        updateCursorsUI();
+        this.setCustomHexColor(hex, `${title} (${hex.toUpperCase()})`);
+      });
+    });
+
+    // Botão de Resetar para Aço Natural Neutro (#8e96a0)
+    if (btnResetNeutral) {
+      btnResetNeutral.addEventListener('click', () => {
+        const neutralHex = '#8e96a0';
+        const { r, g, b } = this.hexToRgbObj(neutralHex);
+        const hsv = this.rgbToHsv(r, g, b);
+        this.pickerState.hue = hsv.h;
+        this.pickerState.s = hsv.s;
+        this.pickerState.v = hsv.v;
+        drawSVBox(this.pickerState.hue);
+        updateCursorsUI();
+        document.querySelectorAll('.swatch-cell').forEach(sw => {
+          sw.classList.toggle('active', sw.getAttribute('data-hex') === neutralHex);
+        });
+        this.setCustomHexColor(neutralHex, 'Aço Natural (#8E96A0)');
+      });
+    }
+  }
+
+  // Aplica qualquer cor Hexadecimal (do Branco ao Preto, passando por todas as cores)
+  // de forma natural tanto no Totem quanto na Placa de Jaú e na Parte de Ferro das Costas
+  setCustomHexColor(hex, labelText = null) {
+    if (!this.dynamicMaterials.body) return;
+    const cleanHex = (hex || '#8e96a0').trim();
+    const { r, g, b } = this.hexToRgbObj(cleanHex);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // Atualiza o material principal do corpo de ferro do Totem 3D
+    this.dynamicMaterials.body.color.set(cleanHex);
+    // Ajusta metalness/roughness para que tanto cores claras quanto escuras pareçam metal/ferro natural sem filtro negativo
+    this.dynamicMaterials.body.metalness = lum > 0.82 ? 0.18 : 0.30;
+    this.dynamicMaterials.body.roughness = lum < 0.18 ? 0.36 : 0.42;
+
+    // Atualiza chanfros estruturais, frisos laterais e flange da base em tom harmônico
+    const seamHex = this.shiftColorBrightness(cleanHex, -0.22);
+    const stripHex = this.shiftColorBrightness(cleanHex, -0.10);
+    if (this.dynamicMaterials.accentTrim) this.dynamicMaterials.accentTrim.color.set(seamHex);
+    if (this.dynamicMaterials.ledStrip) this.dynamicMaterials.ledStrip.color.set(stripHex);
+    if (this.dynamicMaterials.flange) this.dynamicMaterials.flange.color.set(seamHex);
+
+    // Atualiza a Placa Superior de Jaú, a Placa Inferior de Jaú e a Parte de Ferro das Costas
+    this.updateMetalPlatesTextures(cleanHex);
+
+    // Atualiza preview e rótulo na Tabela de Cores
+    const previewEl = document.getElementById('color-live-preview');
+    const labelEl = document.getElementById('color-hex-label');
+    if (previewEl) previewEl.style.background = cleanHex;
+    if (labelEl) labelEl.textContent = labelText || `Cor Selecionada (${cleanHex.toUpperCase()})`;
+
+    // Sincroniza também a moldura do Totem 2D
     const chassis2D = document.getElementById('totem-chassis');
     if (chassis2D) {
-      const chassisColors = {
-        'raw': '#e2e8f0',
-        'black': '#334155',
-        'govblue': '#0c326f',
-        'white': '#ffffff',
-        'gold': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-        'corten': '#9a3412'
-      };
-      chassis2D.style.background = chassisColors[colorKey] || chassisColors['raw'];
+      chassis2D.style.background = cleanHex;
     }
+  }
+
+  // Compatibilidade com presets nomeados
+  setMetalColor(colorKey) {
+    const presetHexMap = {
+      'raw': '#8e96a0',
+      'black': '#1e293b',
+      'govblue': '#1351b4',
+      'white': '#f8fafc',
+      'gold': '#d97706',
+      'corten': '#9a3412'
+    };
+    this.setCustomHexColor(presetHexMap[colorKey] || '#8e96a0');
   }
 
   applyDayNightMode() {
     if (this.isNightMode) {
       this.scene.background.setHex(0x0f172a);
       this.scene.fog.color.setHex(0x0f172a);
-      this.dynamicLights.ambient.intensity = 0.45;
-      this.dynamicLights.sun.intensity = 0.45;
-      this.dynamicLights.screenGlow.intensity = 1.15;
-      this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.95;
+      this.dynamicLights.ambient.intensity = 0.40;
+      this.dynamicLights.sun.intensity = 0.42;
+      this.dynamicLights.screenGlow.intensity = 0.90;
+      this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.55;
     } else {
-      this.scene.background.setHex(0xeef2f6);
-      this.scene.fog.color.setHex(0xeef2f6);
-      this.dynamicLights.ambient.intensity = 0.95;
-      this.dynamicLights.sun.intensity = 1.45;
-      this.dynamicLights.screenGlow.intensity = 0.45;
-      this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.78;
+      this.scene.background.setHex(0xdbe2ea);
+      this.scene.fog.color.setHex(0xdbe2ea);
+      this.dynamicLights.ambient.intensity = 0.62;
+      this.dynamicLights.sun.intensity = 1.05;
+      this.dynamicLights.screenGlow.intensity = 0.25;
+      this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.16;
     }
   }
 
