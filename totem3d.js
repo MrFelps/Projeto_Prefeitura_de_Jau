@@ -1200,63 +1200,152 @@ class Totem3DViewer {
     // Chamada Bem-vindo a Jaú
     ctx.textAlign = 'center';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 34px sans-serif';
-    ctx.fillText('BEM-VINDO A JAÚ • COMO AJUDAR HOJE?', w / 2, startY + 132);
+    ctx.font = '800 32px sans-serif';
+    ctx.fillText('COMO PODEMOS AJUDAR VOCÊ HOJE?', w / 2, startY + 128);
 
-    // Grade de 6 Cards em Fundo Claro (Padrão Gov.br)
+    // Grade dos 4 Pilares Estratégicos — Design Tátil de Quiosque Físico
     const cards = [
-      { icon: '🚌', title: 'ÔNIBUS & ROTAS', sub: 'Itinerários GPS em tempo real', color: '#1351b4' },
-      { icon: '👠', title: 'CIRCUITO CALÇADO', sub: 'Lojas de fábrica e rotas', color: '#d97706' },
-      { icon: '🏛️', title: 'TURISMO & LAZER', sub: 'Parques, Matriz e Teatro', color: '#168821' },
-      { icon: '📋', title: 'SERVIÇOS PÚBLICOS', sub: 'Ouvidoria, Saúde e 156', color: '#0c326f' },
-      { icon: '🗺️', title: 'MAPA INTERATIVO', sub: 'Rotas via QR Code sem papel', color: '#2563eb' },
-      { icon: '🚨', title: 'SEGURANÇA & SOS', sub: 'Guarda 153, SAMU e Apoio', color: '#dc2626' }
+      {
+        icon: '🚌',
+        tag: 'TEMPO REAL',
+        title: 'ÔNIBUS & MOBILIDADE',
+        sub: 'Linhas municipais e horários em tempo real',
+        action: 'CONSULTAR LINHAS',
+        color: '#1351b4',
+        accentBg: '#e8f0fe',
+        tagColor: '#0c326f',
+        borderColor: '#93c5fd'
+      },
+      {
+        icon: '👠',
+        tag: 'POLO CALÇADISTA',
+        title: 'CIRCUITO DO CALÇADO',
+        sub: 'Lojas de fábrica, catálogo e rotas de compras',
+        action: 'VER LOJAS & ROTAS',
+        color: '#ea580c',
+        accentBg: '#fff7ed',
+        tagColor: '#9a3412',
+        borderColor: '#fed7aa'
+      },
+      {
+        icon: '🏛️',
+        tag: 'ESTÂNCIA TURÍSTICA',
+        title: 'TURISMO & LAZER',
+        sub: 'Parque do Rio Jaú, patrimônio e eventos',
+        action: 'EXPLORAR JAÚ',
+        color: '#168821',
+        accentBg: '#f0fdf4',
+        tagColor: '#14532d',
+        borderColor: '#bbf7d0'
+      },
+      {
+        icon: '📋',
+        tag: 'AUTOATENDIMENTO',
+        title: 'SERVIÇOS AO CIDADÃO',
+        sub: 'Ouvidoria, Telefones úteis e Farmácia',
+        action: 'ACESSAR SERVIÇOS',
+        color: '#d97706',
+        accentBg: '#fffbeb',
+        tagColor: '#78350f',
+        borderColor: '#fde68a'
+      }
     ];
 
     cards.forEach((c, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const cx = 32 + col * 336;
-      const cy = startY + 165 + row * 195;
-      const cw = 320;
-      const ch = 175;
+      const cx = 36 + col * 332;
+      const cy = startY + 155 + row * 265;
+      const cw = 316;
+      const ch = 245;
 
+      // Card Background & Sombra Tátil Física
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(cx, cy, cw, ch);
-      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
-      ctx.lineWidth = 2;
+
+      // Borda e chanfro mecânico
+      ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
+      ctx.lineWidth = 2.5;
       ctx.strokeRect(cx, cy, cw, ch);
 
-      // Filete superior colorido padrão Gov.br
+      // Barra tátil lateral esquerda sólida (identidade de cada módulo)
       ctx.fillStyle = hc ? '#ffff00' : c.color;
-      ctx.fillRect(cx, cy, cw, 8);
+      ctx.fillRect(cx, cy, 9, ch);
 
+      // Topo: Badge de Ícone + Tag de Categoria
+      // Box do ícone
+      ctx.fillStyle = hc ? '#000000' : c.accentBg;
+      ctx.fillRect(cx + 20, cy + 18, 54, 54);
+      ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(cx + 20, cy + 18, 54, 54);
+      ctx.textAlign = 'center';
+      ctx.font = '34px sans-serif';
+      ctx.fillText(c.icon, cx + 47, cy + 56);
+
+      // Tag de Categoria
+      ctx.fillStyle = hc ? '#000000' : c.accentBg;
+      ctx.fillRect(cx + cw - 150, cy + 22, 134, 28);
+      ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
+      ctx.strokeRect(cx + cw - 150, cy + 22, 134, 28);
+      ctx.fillStyle = hc ? '#ffff00' : c.tagColor;
+      ctx.font = '800 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(c.tag, cx + cw - 83, cy + 41);
+
+      // Título do Card
       ctx.textAlign = 'left';
-      ctx.font = '46px sans-serif';
-      ctx.fillText(c.icon, cx + 22, cy + 68);
+      ctx.fillStyle = hc ? '#ffff00' : c.tagColor;
+      ctx.font = '800 20.5px sans-serif';
+      ctx.fillText(c.title, cx + 20, cy + 104);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = '800 23px sans-serif';
-      ctx.fillText(c.title, cx + 22, cy + 116);
-
+      // Subtítulo descritivo
       ctx.fillStyle = hc ? '#ffff00' : '#475569';
-      ctx.font = '18px sans-serif';
-      ctx.fillText(c.sub, cx + 22, cy + 148);
+      ctx.font = '600 15px sans-serif';
+      ctx.fillText(c.sub, cx + 20, cy + 132);
+
+      // Linha tracejada divisória
+      ctx.strokeStyle = hc ? '#ffff00' : 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(cx + 18, cy + 185);
+      ctx.lineTo(cx + cw - 18, cy + 185);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Barra de Ação Inferior (Feedback tátil: Toque para acessar + Círculo com seta)
+      ctx.fillStyle = hc ? '#ffff00' : c.color;
+      ctx.font = '800 13px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(c.action, cx + 20, cy + 215);
+
+      // Círculo com seta
+      ctx.beginPath();
+      ctx.arc(cx + cw - 36, cy + 210, 15, 0, Math.PI * 2);
+      ctx.fillStyle = hc ? '#ffff00' : c.color;
+      ctx.fill();
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
+      ctx.font = '800 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('➔', cx + cw - 36, cy + 215);
     });
 
     // Faixa ESG Paperless com QR Code
-    const esgY = startY + 760;
-    if (esgY < 1050) {
+    const esgY = startY + 705;
+    if (esgY < 1040) {
       ctx.fillStyle = hc ? '#000000' : '#f0fdf4';
-      ctx.fillRect(32, esgY, w - 64, 92);
+      ctx.fillRect(36, esgY, w - 72, 84);
       ctx.strokeStyle = hc ? '#ffff00' : '#168821';
-      ctx.strokeRect(32, esgY, w - 64, 92);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(36, esgY, w - 72, 84);
       ctx.fillStyle = hc ? '#ffff00' : '#168821';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText('🌱 CIDADE INTELIGENTE ESG (100% PAPERLESS)', 54, esgY + 40);
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('🌱 PROJETO CIDADE INTELIGENTE (100% PAPERLESS ESG)', 56, esgY + 36);
       ctx.fillStyle = hc ? '#ffff00' : '#14532d';
-      ctx.font = '19px sans-serif';
-      ctx.fillText('Escaneie o QR Code na tela para levar rotas e horários no celular.', 54, esgY + 72);
+      ctx.font = '600 15.5px sans-serif';
+      ctx.fillText('Informações sem papel: envie rotas e serviços para seu celular via QR Code.', 56, esgY + 64);
     }
   }
 

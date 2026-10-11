@@ -800,22 +800,22 @@ body {
   font-weight: 500;
 }
 
-/* GRADE DOS 4 MÓDULOS PRINCIPAIS (SE AJUSTA À ALTURA DA TELA SEM SCROLL) */
+/* GRADE DOS 4 MÓDULOS PRINCIPAIS — DESIGN TÁTIL DE QUIOSQUE URBANO (ANTI-GENÉRICO DE IA) */
 .modules-grid {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* CARDS COM SENSAÇÃO FÍSICA DE TOQUE E IDENTIDADE FORTE */
 .module-card {
-  background: var(--gov-white-pure);
-  border: 1px solid var(--gov-gray-border);
-  border-top: 4px solid var(--gov-green); /* Filete verde elegante e sutil */
-  border-radius: 12px;
-  padding: 12px;
+  background: #ffffff;
+  border: 2.5px solid #d2d6dc;
+  border-radius: 14px;
+  padding: 14px 14px 10px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -824,48 +824,169 @@ body {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(12, 50, 111, 0.06);
-  transition: all 0.22s ease;
+  box-shadow: 0 4px 0 #cbd5e1, 0 6px 14px rgba(12, 50, 111, 0.08);
+  transition: all 0.12s ease;
   color: var(--gov-text-dark);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.module-card:hover, .module-card:active {
-  transform: translateY(-2px);
-  border-color: var(--gov-blue);
-  border-top-color: var(--gov-green);
-  box-shadow: 0 10px 20px rgba(19, 81, 180, 0.15);
+/* Efeito tátil de botão físico afundando ao tocar (feedback mecânico instantâneo) */
+.module-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #cbd5e1, 0 2px 6px rgba(12, 50, 111, 0.12);
 }
 
-.card-bus:hover { border-top-color: var(--gov-blue); }
-.card-shoes:hover { border-top-color: var(--gov-gold-dark); }
-.card-tourism:hover { border-top-color: var(--gov-green); }
-.card-services:hover { border-top-color: var(--gov-blue-dark); }
+.module-card .card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
 
-.card-icon {
-  font-size: 26px;
-  margin-bottom: 4px;
+.card-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.4);
+}
+
+.card-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
 }
 
 .card-content h3 {
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 800;
-  color: var(--gov-blue-dark);
-  margin-bottom: 3px;
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .card-content p {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--gov-text-muted);
-  line-height: 1.3;
-  font-weight: 500;
+  line-height: 1.35;
+  font-weight: 600;
 }
 
-.card-arrow {
-  align-self: flex-end;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--gov-blue);
+.card-bottom-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0,0,0,0.1);
 }
+
+.card-action-text {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-arrow-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* 1. MÓDULO ÔNIBUS: AZUL CÍVICO DE MOBILIDADE URBANA */
+.card-bus {
+  border-color: #93c5fd;
+  border-left: 6px solid #1351b4;
+  box-shadow: 0 4px 0 #93c5fd, 0 6px 14px rgba(19, 81, 180, 0.1);
+}
+.card-bus .card-icon-badge {
+  background: #e8f0fe;
+  color: #1351b4;
+  border: 1.5px solid #bfdbfe;
+}
+.card-bus .card-tag {
+  background: #e8f0fe;
+  color: #0c326f;
+}
+.card-bus h3 { color: #0c326f; }
+.card-bus .card-action-text { color: #1351b4; }
+.card-bus .card-arrow-circle { background: #1351b4; }
+.card-bus:hover { background: #f8fbff; }
+
+/* 2. MÓDULO CALÇADO: TERRACOTA / COURO INDUSTRIAL DE JAÚ */
+.card-shoes {
+  border-color: #fed7aa;
+  border-left: 6px solid #ea580c;
+  box-shadow: 0 4px 0 #fed7aa, 0 6px 14px rgba(234, 88, 12, 0.1);
+}
+.card-shoes .card-icon-badge {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1.5px solid #ffedd5;
+}
+.card-shoes .card-tag {
+  background: #fff7ed;
+  color: #9a3412;
+}
+.card-shoes h3 { color: #9a3412; }
+.card-shoes .card-action-text { color: #ea580c; }
+.card-shoes .card-arrow-circle { background: #ea580c; }
+.card-shoes:hover { background: #fffdfb; }
+
+/* 3. MÓDULO TURISMO: VERDE PATRIMÔNIO & PARQUES DE JAÚ */
+.card-tourism {
+  border-color: #bbf7d0;
+  border-left: 6px solid #168821;
+  box-shadow: 0 4px 0 #bbf7d0, 0 6px 14px rgba(22, 136, 33, 0.1);
+}
+.card-tourism .card-icon-badge {
+  background: #f0fdf4;
+  color: #168821;
+  border: 1.5px solid #dcfce7;
+}
+.card-tourism .card-tag {
+  background: #f0fdf4;
+  color: #14532d;
+}
+.card-tourism h3 { color: #14532d; }
+.card-tourism .card-action-text { color: #168821; }
+.card-tourism .card-arrow-circle { background: #168821; }
+.card-tourism:hover { background: #fbfdfb; }
+
+/* 4. MÓDULO SERVIÇOS: AZUL ESCURO INSTITUCIONAL & OURO GOV */
+.card-services {
+  border-color: #fde68a;
+  border-left: 6px solid #d97706;
+  box-shadow: 0 4px 0 #fde68a, 0 6px 14px rgba(217, 119, 6, 0.1);
+}
+.card-services .card-icon-badge {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1.5px solid #fef3c7;
+}
+.card-services .card-tag {
+  background: #fffbeb;
+  color: #78350f;
+}
+.card-services h3 { color: #78350f; }
+.card-services .card-action-text { color: #d97706; }
+.card-services .card-arrow-circle { background: #d97706; }
+.card-services:hover { background: #fffdf7; }
 
 /* BANNER DESTAQUE (COM FILETE VERDE GOV) */
 .featured-strip {
