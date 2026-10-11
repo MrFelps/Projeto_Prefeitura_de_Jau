@@ -287,34 +287,64 @@ class Totem3DViewer {
   createTotemModel() {
     this.totemGroup = new THREE.Group();
 
-    // Materiais principais do chassi (Aço Galvanizado + ACM com pintura eletrostática)
+    // Materiais principais do chassi: METAL CRU / AÇO ESCOVADO INDUSTRIAL (SEM PINTURA)
+    const rawMetalTextureCanvas = document.createElement('canvas');
+    rawMetalTextureCanvas.width = 512;
+    rawMetalTextureCanvas.height = 512;
+    const mctx = rawMetalTextureCanvas.getContext('2d');
+    // Base de metal cru cinza-prateado
+    mctx.fillStyle = '#b0b7c0';
+    mctx.fillRect(0, 0, 512, 512);
+    // Riscos finos sutis de aço escovado industrial
+    mctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    mctx.lineWidth = 1;
+    for (let i = 0; i < 400; i++) {
+      const y = Math.random() * 512;
+      mctx.beginPath();
+      mctx.moveTo(0, y);
+      mctx.lineTo(512, y + (Math.random() - 0.5) * 4);
+      mctx.stroke();
+    }
+    mctx.strokeStyle = 'rgba(71, 85, 105, 0.12)';
+    for (let i = 0; i < 350; i++) {
+      const y = Math.random() * 512;
+      mctx.beginPath();
+      mctx.moveTo(0, y);
+      mctx.lineTo(512, y + (Math.random() - 0.5) * 4);
+      mctx.stroke();
+    }
+    const brushedMetalTex = new THREE.CanvasTexture(rawMetalTextureCanvas);
+    brushedMetalTex.wrapS = THREE.RepeatWrapping;
+    brushedMetalTex.wrapT = THREE.RepeatWrapping;
+    brushedMetalTex.repeat.set(2, 4);
+
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x1c2128,
-      metalness: 0.72,
-      roughness: 0.32
+      map: brushedMetalTex,
+      color: 0xd8dde3,          // Prata de metal cru sem pintura
+      metalness: 0.92,          // Alta refletividade de metal cru
+      roughness: 0.30,          // Aspereza de metal industrial escovado
     });
     this.dynamicMaterials.body = bodyMat;
 
     const darkPanelMat = new THREE.MeshStandardMaterial({
-      color: 0x0d1117,
-      metalness: 0.65,
+      color: 0x334155,
+      metalness: 0.85,
+      roughness: 0.28
+    });
+
+    // Material de união / chanfro sutil de metal escovado escuro (sem cor amarela)
+    const rawSeamMat = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      metalness: 0.90,
       roughness: 0.25
     });
+    this.dynamicMaterials.accentTrim = rawSeamMat;
 
-    // Material de destaque lateral (Bronze/Ouro do Dossiê ou Azul Ciano Nexus)
-    const accentTrimMat = new THREE.MeshStandardMaterial({
-      color: 0xd97706,
-      metalness: 0.82,
-      roughness: 0.22
-    });
-    this.dynamicMaterials.accentTrim = accentTrimMat;
-
-    // Fita de LED lateral de baixo consumo
+    // Fita de LED desativada (neutra em metal cru)
     const ledStripMat = new THREE.MeshStandardMaterial({
-      color: 0xfbbf24,
-      emissive: 0xf59e0b,
-      emissiveIntensity: 0.9,
-      roughness: 0.2
+      color: 0x94a3b8,
+      metalness: 0.9,
+      roughness: 0.3
     });
     this.dynamicMaterials.ledStrip = ledStripMat;
 
@@ -322,9 +352,9 @@ class Totem3DViewer {
     // 1. BASE METÁLICA CHUMBADA + PEDESTAL DE FIXAÇÃO (0,00m a 0,16m)
     // -----------------------------------------------------------------------
     const concreteBaseMat = new THREE.MeshStandardMaterial({
-      color: 0x334155,
-      roughness: 0.6,
-      metalness: 0.3
+      color: 0x64748b,
+      roughness: 0.7,
+      metalness: 0.2
     });
     const basePedestal = new THREE.Mesh(
       new THREE.BoxGeometry(0.84, 0.10, 0.48),
@@ -335,11 +365,11 @@ class Totem3DViewer {
     basePedestal.receiveShadow = true;
     this.totemGroup.add(basePedestal);
 
-    // Flange metálica chumbada com parafusos sextavados
+    // Flange metálica em chapa de aço cru
     const flangeMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      metalness: 0.85,
-      roughness: 0.25
+      color: 0x64748b,
+      metalness: 0.92,
+      roughness: 0.28
     });
     const flange = new THREE.Mesh(
       new THREE.BoxGeometry(0.76, 0.04, 0.40),
@@ -349,9 +379,9 @@ class Totem3DViewer {
     flange.castShadow = true;
     this.totemGroup.add(flange);
 
-    // 6 Chumbadores / Parafusos de fixação estrutural
+    // 6 Chumbadores / Parafusos sextavados de fixação estrutural
     const boltGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 6);
-    const boltMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+    const boltMat = new THREE.MeshStandardMaterial({ color: 0xcfd4dc, metalness: 0.95, roughness: 0.18 });
     [
       [-0.34, 0.145, 0.16], [0, 0.145, 0.16], [0.34, 0.145, 0.16],
       [-0.34, 0.145, -0.16], [0, 0.145, -0.16], [0.34, 0.145, -0.16]
@@ -363,9 +393,7 @@ class Totem3DViewer {
 
     // -----------------------------------------------------------------------
     // 2. CORPO ESTRUTURAL "QUADRADÃO" COM QUINA SUPERIOR FRONTAL ARREDONDADA
-    //    - Vista de Frente: Retângulo puro (0,70m L x 2,20m A)
-    //    - Vista de Lado: Retângulo de 0,35m P com canto superior frontal arredondado
-    //    - Vista de Cima: Faixa frontal arredondada (0,11m) + Área plana traseira (0,24m)
+    //    Em chapa maciça de metal cru (aço escovado puro sem pintura)
     // -----------------------------------------------------------------------
     const sideProfile = new THREE.Shape();
     const zBack = -0.175;   // Costa reta
@@ -373,16 +401,16 @@ class Totem3DViewer {
     const yBottom = 0.12;   // Acima da base chumbada
     const yTop = 2.20;      // Topo plano (altura máxima 2,20m)
     const curveDropY = 0.16; // Quanto a curva desce na quina frontal (até y = 2.04m)
-    const curveDepthZ = 0.11; // Largura da faixa arredondada vista de cima ("parte riscadinha")
-    const zCurveStart = zFront - curveDepthZ; // z = +0.065m (divisa entre área solar plana e quina arredondada)
+    const curveDepthZ = 0.11; // Largura da faixa arredondada vista de cima
+    const zCurveStart = zFront - curveDepthZ; // z = +0.065m
 
     // Traçado 2D da Vista de Lado (X_shape = Z_world, Y_shape = Y_world)
     sideProfile.moveTo(zBack, yBottom);
     sideProfile.lineTo(zFront, yBottom);
     sideProfile.lineTo(zFront, yTop - curveDropY);
-    // Quina superior frontal suavemente arredondada (canto superior direito na vista lateral)
+    // Quina superior frontal suavemente arredondada
     sideProfile.quadraticCurveTo(zFront, yTop, zCurveStart, yTop);
-    // Parte plana superior onde fica o painel solar ("parte sem risco" na vista de cima)
+    // Parte plana superior onde fica o painel solar
     sideProfile.lineTo(zBack, yTop);
     sideProfile.lineTo(zBack, yBottom);
 
@@ -398,42 +426,19 @@ class Totem3DViewer {
 
     const mainCabinetGeo = new THREE.ExtrudeGeometry(sideProfile, extrudeSettings);
     const mainCabinet = new THREE.Mesh(mainCabinetGeo, bodyMat);
-    // Rotaciona para que o perfil 2D fique no plano Y-Z (lado) e a extrusão no eixo X (0,70m de largura)
     mainCabinet.rotation.y = -Math.PI / 2;
     mainCabinet.position.set(0.346, 0, 0);
     mainCabinet.castShadow = true;
     mainCabinet.receiveShadow = true;
     this.totemGroup.add(mainCabinet);
 
-    // Frisos sutis na quina arredondada superior frontal (marca a "parte riscadinha" vista de cima)
-    const curveSeamMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      metalness: 0.8,
-      roughness: 0.3
-    });
+    // Chanfro sutil na junção superior em metal cru (sem detalhes amarelos ou LEDs laterais)
     const dividerBar = new THREE.Mesh(
-      new THREE.BoxGeometry(0.696, 0.006, 0.012),
-       accentTrimMat
+      new THREE.BoxGeometry(0.696, 0.004, 0.008),
+      rawSeamMat
     );
-    dividerBar.position.set(0, 2.202, zCurveStart);
+    dividerBar.position.set(0, 2.201, zCurveStart);
     this.totemGroup.add(dividerBar);
-
-    // FRISOS ARQUITETÔNICOS LATERAIS RENTES AO "QUADRADÃO" (Sem cilindros salientes)
-    [-1, 1].forEach(side => {
-      const xPos = side * 0.351;
-
-      // Faixa metálica vertical Dourado/Bronze (ou Azul no tema Nexus)
-      const sideFinGeo = new THREE.BoxGeometry(0.006, 1.84, 0.055);
-      const sideFin = new THREE.Mesh(sideFinGeo, accentTrimMat);
-      sideFin.position.set(xPos, 1.06, 0.02);
-      this.totemGroup.add(sideFin);
-
-      // Fita de LED vertical embutida na lateral
-      const ledGeo = new THREE.BoxGeometry(0.008, 1.78, 0.012);
-      const ledMesh = new THREE.Mesh(ledGeo, ledStripMat);
-      ledMesh.position.set(xPos, 1.06, 0.062);
-      this.totemGroup.add(ledMesh);
-    });
 
     // -----------------------------------------------------------------------
     // 3. TOPO PLANO COM PLACA SOLAR EMBUTIDA (INVISÍVEL PARA QUEM OLHA DE FRENTE!)
@@ -659,21 +664,21 @@ class Totem3DViewer {
       lctx.fillText('USB', ux + 14, 212);
     });
 
-    // Placa Metálica Institucional da Prefeitura de Jaú na base
+    // Placa Metálica Institucional da Prefeitura de Jaú em aço escovado
     const plateGrad = lctx.createLinearGradient(24, 248, 488, 395);
     plateGrad.addColorStop(0, '#1e293b');
     plateGrad.addColorStop(1, '#0f172a');
     lctx.fillStyle = plateGrad;
     lctx.fillRect(24, 248, 464, 145);
-    lctx.strokeStyle = '#eab308';
-    lctx.lineWidth = 3;
+    lctx.strokeStyle = '#94a3b8';
+    lctx.lineWidth = 2;
     lctx.strokeRect(24, 248, 464, 145);
 
     lctx.fillStyle = '#f8fafc';
     lctx.font = 'bold 21px sans-serif';
     lctx.textAlign = 'center';
     lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294);
-    lctx.fillStyle = '#fbbf24';
+    lctx.fillStyle = '#cbd5e1';
     lctx.font = 'bold 15px sans-serif';
     lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326);
     lctx.fillStyle = '#94a3b8';
@@ -842,27 +847,18 @@ class Totem3DViewer {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Moldura luminosa
-    ctx.strokeStyle = this.designTheme === 'nexus' ? '#38bdf8' : '#f59e0b';
-    ctx.lineWidth = 6;
+    // Moldura metálica escovada limpa (sem amarelo)
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 4;
     ctx.strokeRect(8, 8, w - 16, h - 16);
 
     ctx.textAlign = 'center';
-    if (this.designTheme === 'nexus') {
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = '800 44px sans-serif';
-      ctx.fillText('JAÚ CONECTADA', w / 2, 95);
-      ctx.fillStyle = '#38bdf8';
-      ctx.font = 'bold 26px sans-serif';
-      ctx.fillText('NEXUS • SMART CITY 5G', w / 2, 148);
-    } else {
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = '800 64px sans-serif';
-      ctx.fillText('JAÚ', w / 2, 105);
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
-    }
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '800 64px sans-serif';
+    ctx.fillText('JAÚ', w / 2, 105);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
 
     if (this.headerTexture) this.headerTexture.needsUpdate = true;
   }
@@ -1408,8 +1404,8 @@ class Totem3DViewer {
       {
         id: 'structure',
         num: '5',
-        title: 'Bloco "Quadradão" Aço & ACM + LED',
-        desc: 'Formato retangular puro visto de frente (0,70m × 2,20m) e perfil lateral de 0,35m com quina superior frontal arredondada, pintura eletrostática IP65 e fita LED lateral.',
+        title: 'Chassi Monobloco em Metal Cru (Aço Escovado)',
+        desc: 'Formato monolítico puro (0,70m × 2,20m × 0,35m) em chapa maciça de metal cru industrial sem pintura, quina superior arredondada e acabamento escovado antivandalismo IP65.',
         pos: new THREE.Vector3(-0.36, 1.15, 0.05),
         cam: { theta: -1.52, phi: 1.38, radius: 2.85, targetY: 1.12 }
       },
