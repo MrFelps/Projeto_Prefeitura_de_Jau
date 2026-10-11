@@ -25,7 +25,7 @@
 }
 
 body {
-  font-family: 'rawline', 'Rawline', 'Open Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Public Sans', 'Rawline', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #eef2f6;
   color: var(--gov-text-dark);
   min-height: 100vh;
@@ -666,44 +666,99 @@ body {
   font-weight: 600;
 }
 
-/* BARRA DE ACESSIBILIDADE OFICIAL */
-.accessibility-bar {
+/* LAYOUT CENTRAL DO TOTEM: MENU LATERAL DE ACESSIBILIDADE + CONTEÚDO */
+.totem-middle-layout {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  justify-content: space-between;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+  background: var(--gov-white-ice);
+}
+
+/* MENU LATERAL DE ACESSIBILIDADE OFICIAL (ABNT NBR 9050 / GOV.BR) */
+.kiosk-access-sidebar {
+  width: 78px;
   background: var(--gov-blue-dark);
-  padding: 6px 10px;
-  border-radius: 8px;
-  border-top: 2px solid var(--gov-gold); /* Destaque Ouro Gov */
-}
-
-.btn-access {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+  border-right: 3px solid var(--gov-gold);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 10px 4px;
+  gap: 8px;
+  flex-shrink: 0;
+  z-index: 30;
+  box-shadow: 3px 0 12px rgba(12, 50, 111, 0.18);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.4s ease;
 }
 
-.btn-access:hover, .btn-access:active {
+.sidebar-pill-tag {
   background: var(--gov-gold);
   color: var(--gov-blue-dark);
-  border-color: var(--gov-gold);
+  font-size: 9px;
+  font-weight: 900;
+  padding: 3px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
-.btn-access.active {
+.btn-sidebar-access {
+  width: 68px;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-sidebar-access .sb-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.btn-sidebar-access .sb-txt {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.btn-sidebar-access:hover, .btn-sidebar-access:active {
   background: var(--gov-gold);
   color: var(--gov-blue-dark);
   border-color: var(--gov-gold-dark);
-  font-weight: 800;
+  transform: scale(1.03);
+}
+
+.btn-sidebar-access.active {
+  background: var(--gov-gold);
+  color: var(--gov-blue-dark);
+  border-color: var(--gov-gold-dark);
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(255, 205, 7, 0.6);
+}
+
+.sb-divider {
+  width: 78%;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 3px 0;
+}
+
+.btn-font {
+  min-height: 48px;
 }
 
 /* CORPO DINÂMICO (ÁREA DE CONTEÚDO SEM BARRA DE ROLAGEM LATERAL) */
@@ -715,7 +770,7 @@ body {
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 10px 12px;
+  padding: 12px 14px;
   position: relative;
   background: var(--gov-white-ice);
   transition: transform 0.4s ease, padding 0.4s ease;
@@ -727,13 +782,106 @@ body {
   height: 0;
 }
 
+/* QUADRADINHO FIXO DO VLIBRAS NO CANTO INFERIOR DIREITO DA TELA */
+.vlibras-kiosk-box {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 138px;
+  background: #ffffff;
+  border: 2.5px solid var(--gov-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(12, 50, 111, 0.22), 0 2px 6px rgba(0,0,0,0.08);
+  z-index: 45;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vlibras-kiosk-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(12, 50, 111, 0.32);
+}
+
+.vlibras-box-top {
+  width: 100%;
+  background: var(--gov-blue);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.vlibras-gov-text {
+  letter-spacing: -0.3px;
+}
+
+.vlibras-badge-title {
+  color: var(--gov-gold);
+  letter-spacing: 0.5px;
+}
+
+.vlibras-status-dot {
+  width: 7px;
+  height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #4ade80;
+  animation: pulse 1.8s infinite;
+}
+
+.vlibras-avatar-stage {
+  padding: 6px 6px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.vlibras-caption-box {
+  width: 100%;
+  background: #f0f7ff;
+  border-top: 1px solid #dbeafe;
+  padding: 4px 4px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.vlibras-caption-box .v-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gov-blue-dark);
+  line-height: 1.2;
+}
+
+.vlibras-caption-box .v-sub {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--gov-text-muted);
+  line-height: 1.2;
+}
+
 /* MODO CADEIRANTE / BAIXA ESTATURA */
 .totem-screen.mode-wheelchair .totem-body {
-  transform: translateY(22%);
+  transform: translateY(18%);
+}
+
+.totem-screen.mode-wheelchair .kiosk-access-sidebar {
+  justify-content: flex-end;
+  padding-bottom: 24px;
 }
 
 .totem-screen.mode-wheelchair .totem-header {
-  transform: translateY(120px);
+  transform: translateY(80px);
   background: #ffffff;
 }
 
@@ -741,7 +889,7 @@ body {
 .view-screen {
   display: none;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -758,49 +906,51 @@ body {
 /* BANNER DE ALERTA DEFESA CIVIL (ESTILO GOV) */
 .alert-banner {
   background: #fff8e6;
-  border: 1px solid #ffd566;
-  border-left: 4px solid var(--gov-gold-dark);
-  padding: 8px 12px;
-  border-radius: 8px;
+  border: 1.5px solid #ffd566;
+  border-left: 5px solid var(--gov-gold-dark);
+  padding: 10px 14px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .alert-tag {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   color: #925400;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .alert-text {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: #593900;
-  line-height: 1.3;
+  line-height: 1.35;
   font-weight: 600;
 }
 
 .welcome-box {
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .welcome-box h2 {
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--gov-blue-dark);
+  letter-spacing: -0.3px;
 }
 
 .welcome-box p {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--gov-text-muted);
-  margin-top: 1px;
-  font-weight: 500;
+  margin-top: 2px;
+  font-weight: 600;
 }
 
-/* GRADE DOS 4 MÓDULOS PRINCIPAIS — DESIGN TÁTIL DE QUIOSQUE URBANO (ANTI-GENÉRICO DE IA) */
+/* GRADE DOS 4 MÓDULOS PRINCIPAIS — DESIGN TÁTIL DE QUIOSQUE URBANO */
 .modules-grid {
   flex: 1;
   min-height: 0;
@@ -810,16 +960,53 @@ body {
   gap: 12px;
 }
 
+/* FAIXA DE UTILIDADE PÚBLICA & CANAIS RÁPIDOS DE JAÚ (PREENCHIMENTO HARMONIOSO) */
+.city-quick-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.quick-service-pill {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--gov-blue-dark);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.quick-service-pill .q-icon {
+  font-size: 15px;
+}
+
+.quick-service-pill .q-txt {
+  font-size: 11px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.quick-service-pill .q-txt strong {
+  font-weight: 800;
+  color: var(--gov-blue);
+}
+
 /* CARDS COM SENSAÇÃO FÍSICA DE TOQUE E IDENTIDADE FORTE */
 .module-card {
   background: #ffffff;
   border: 2.5px solid #d2d6dc;
   border-radius: 14px;
-  padding: 14px 14px 10px 14px;
+  padding: 16px 14px 12px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 0;
+  min-height: 180px;
   text-align: left;
   cursor: pointer;
   position: relative;
@@ -841,42 +1028,42 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .card-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
   flex-shrink: 0;
   box-shadow: inset 0 1px 2px rgba(255,255,255,0.4);
 }
 
 .card-tag {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 6px;
 }
 
 .card-content h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.2px;
-  margin-bottom: 4px;
-  line-height: 1.2;
+  margin-bottom: 5px;
+  line-height: 1.25;
 }
 
 .card-content p {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--gov-text-muted);
-  line-height: 1.35;
+  line-height: 1.4;
   font-weight: 600;
 }
 
@@ -884,26 +1071,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(0,0,0,0.1);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0,0,0,0.12);
 }
 
 .card-action-text {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .card-arrow-circle {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   color: #ffffff;
 }

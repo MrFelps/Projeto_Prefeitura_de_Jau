@@ -6,9 +6,9 @@
   <title>Totem Inteligente Jaú - Mockup Funcional (Totemize)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Fontes Oficiais do Gov.br (Design System do Governo): Rawline & Open Sans -->
+  <!-- Fontes Oficiais do Gov.br / Design System: Public Sans & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/rawline">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- QRCode.js via CDN para gerar QR Codes reais que o celular lê -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
@@ -173,36 +173,54 @@
               <span id="clock-date" class="date">Sex, 10 de Outubro</span>
             </div>
           </div>
-
-          <!-- BARRA DE ACESSIBILIDADE UNIVERSAL -->
-          <div class="accessibility-bar" role="toolbar" aria-label="Recursos de Acessibilidade">
-            <button id="btn-voice" class="btn-access" title="Ativar Leitura em Voz Alta" aria-label="Leitura por Voz">
-              <span class="icon">🔊</span>
-              <span class="txt">Áudio</span>
-            </button>
-            <button id="btn-vlibras" class="btn-access" title="Acessibilidade em Libras" aria-label="Tradutor de Libras">
-              <span class="icon">🦻</span>
-              <span class="txt">Libras</span>
-            </button>
-            <button id="btn-wheelchair" class="btn-access" title="Modo Cadeirante / Baixa Estatura" aria-label="Modo Cadeirante">
-              <span class="icon">♿</span>
-              <span class="txt">Alcance</span>
-            </button>
-            <button id="btn-contrast" class="btn-access" title="Modo Alto Contraste" aria-label="Alto Contraste">
-              <span class="icon">👁️</span>
-              <span class="txt">Contraste</span>
-            </button>
-            <button id="btn-font-plus" class="btn-access" title="Aumentar Fonte" aria-label="Aumentar Letra">
-              <span class="icon">A+</span>
-            </button>
-            <button id="btn-font-reset" class="btn-access" title="Tamanho Padrão da Fonte" aria-label="Fonte Padrão">
-              <span class="icon">A-</span>
-            </button>
-          </div>
         </header>
 
-        <!-- CONTAINER PRINCIPAL DINÂMICO (ÁREA DE NAVEGAÇÃO) -->
-        <section id="totem-main-content" class="totem-body">
+        <!-- LAYOUT CENTRAL DO TOTEM (MENU LATERAL DE ACESSIBILIDADE + CONTEÚDO TOUCH) -->
+        <div class="totem-middle-layout">
+
+          <!-- MENU LATERAL DE ACESSIBILIDADE OFICIAL (ABNT NBR 9050 / GOV.BR) -->
+          <aside class="kiosk-access-sidebar" role="toolbar" aria-label="Menu Lateral de Acessibilidade">
+            <div class="sidebar-pill-tag">ACESSO</div>
+
+            <!-- 1. ALCANCE (MODO CADEIRANTE / BAIXA ESTATURA) - NO TOPO CONFORME SOLICITADO -->
+            <button id="btn-wheelchair" class="btn-sidebar-access" title="Modo Cadeirante / Baixa Estatura (Alcance NBR 9050)" aria-label="Modo Cadeirante">
+              <span class="sb-icon">♿</span>
+              <span class="sb-txt">Alcance</span>
+            </button>
+
+            <!-- 2. CONTRASTE (ALTO CONTRASTE PRETO E AMARELO) -->
+            <button id="btn-contrast" class="btn-sidebar-access" title="Modo Alto Contraste" aria-label="Alto Contraste">
+              <span class="sb-icon">👁️</span>
+              <span class="sb-txt">Contraste</span>
+            </button>
+
+            <!-- 3. LIBRAS (TRADUTOR DE LIBRAS / VLIBRAS) -->
+            <button id="btn-vlibras" class="btn-sidebar-access active" title="Tradutor de Libras (VLibras)" aria-label="Libras">
+              <span class="sb-icon">🦻</span>
+              <span class="sb-txt">Libras</span>
+            </button>
+
+            <!-- 4. ÁUDIO (LEITURA EM VOZ ALTA) -->
+            <button id="btn-voice" class="btn-sidebar-access" title="Ativar Leitura em Voz Alta" aria-label="Leitura por Voz">
+              <span class="sb-icon">🔊</span>
+              <span class="sb-txt">Áudio</span>
+            </button>
+
+            <div class="sb-divider"></div>
+
+            <!-- CONTROLES DE TAMANHO DE FONTE (A+ / A-) -->
+            <button id="btn-font-plus" class="btn-sidebar-access btn-font" title="Aumentar Tamanho da Letra" aria-label="Aumentar Letra">
+              <span class="sb-icon">A+</span>
+              <span class="sb-txt">Maior</span>
+            </button>
+            <button id="btn-font-reset" class="btn-sidebar-access btn-font" title="Tamanho Padrão da Letra" aria-label="Fonte Padrão">
+              <span class="sb-icon">A-</span>
+              <span class="sb-txt">Padrão</span>
+            </button>
+          </aside>
+
+          <!-- CONTAINER PRINCIPAL DINÂMICO (ÁREA DE NAVEGAÇÃO) -->
+          <section id="totem-main-content" class="totem-body">
 
           <!-- 1. TELA PRINCIPAL (HOME) -->
           <div id="view-home" class="view-screen active">
@@ -285,11 +303,31 @@
               </button>
             </div>
 
+            <!-- FAIXA DE UTILIDADE PÚBLICA & CANAIS RÁPIDOS DE JAÚ -->
+            <div class="city-quick-bar">
+              <div class="quick-service-pill">
+                <span class="q-icon">🚑</span>
+                <span class="q-txt">SAMU <strong>192</strong></span>
+              </div>
+              <div class="quick-service-pill">
+                <span class="q-icon">🛡️</span>
+                <span class="q-txt">Guarda <strong>153</strong></span>
+              </div>
+              <div class="quick-service-pill">
+                <span class="q-icon">📞</span>
+                <span class="q-txt">Ouvidoria <strong>156</strong></span>
+              </div>
+              <div class="quick-service-pill">
+                <span class="q-icon">💊</span>
+                <span class="q-txt">Farmácia <strong>24h</strong></span>
+              </div>
+            </div>
+
             <!-- BANNER DE DESTAQUE LOCAL -->
             <div class="featured-strip">
-              <div class="strip-icon">💡</div>
+              <div class="strip-icon">🌱</div>
               <div class="strip-text">
-                <strong>Projeto Cidade Inteligente:</strong> Informações sem papel (Paperless ESG). Envie qualquer rota para seu celular via QR Code.
+                <strong>Projeto Jaú Conectada (100% Paperless ESG):</strong> Toque em qualquer serviço para enviar a rota com horários direto ao seu celular via QR Code.
               </div>
             </div>
           </div>
@@ -494,6 +532,56 @@
           </div>
 
         </section>
+
+          <!-- QUADRADINHO FIXO DO VLIBRAS (MENININHO DO GOVERNO NO CANTO INFERIOR DIREITO) -->
+          <div id="vlibras-kiosk-box" class="vlibras-kiosk-box" title="VLibras - Tradutor de Língua de Sinais do Governo Federal">
+            <div class="vlibras-box-top">
+              <span class="vlibras-gov-text">gov<span class="gov-dot">.br</span></span>
+              <span class="vlibras-badge-title">VLibras</span>
+              <span class="vlibras-status-dot" title="Tradutor Ativo"></span>
+            </div>
+            <div class="vlibras-avatar-stage">
+              <svg class="vlibras-avatar-svg" viewBox="0 0 120 120" width="76" height="76">
+                <!-- Fundo circular acolhedor -->
+                <circle cx="60" cy="60" r="54" fill="#e8f0fe"/>
+                <!-- Camisa polo azul escuro oficial Gov.br -->
+                <path d="M 28 116 C 28 85 40 76 60 76 C 80 76 92 85 92 116 Z" fill="#0c326f"/>
+                <!-- Gola polo dourada -->
+                <path d="M 46 76 L 60 92 L 74 76 L 68 76 L 60 84 L 52 76 Z" fill="#ffcd07"/>
+                <!-- Crachá do Governo -->
+                <rect x="70" y="86" width="12" height="15" rx="2" fill="#ffffff"/>
+                <rect x="72" y="89" width="8" height="4" rx="1" fill="#1351b4"/>
+                <!-- Pescoço -->
+                <rect x="52" y="62" width="16" height="18" rx="4" fill="#ffd1b3"/>
+                <!-- Cabeça do Mascote Ícaro -->
+                <ellipse cx="60" cy="46" rx="22" ry="24" fill="#ffd1b3"/>
+                <!-- Cabelo Castanho do Mascote -->
+                <path d="M 38 42 C 38 25 48 18 60 18 C 72 18 82 25 82 42 C 77 34 70 32 60 32 C 48 32 42 36 38 42 Z" fill="#5c3a21"/>
+                <!-- Olhos amigáveis -->
+                <circle cx="52" cy="45" r="2.8" fill="#1e293b"/>
+                <circle cx="68" cy="45" r="2.8" fill="#1e293b"/>
+                <circle cx="53" cy="44" r="0.9" fill="#ffffff"/>
+                <circle cx="69" cy="44" r="0.9" fill="#ffffff"/>
+                <!-- Sobrancelhas -->
+                <path d="M 48 39 Q 52 37 56 39" stroke="#5c3a21" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <path d="M 64 39 Q 68 37 72 39" stroke="#5c3a21" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <!-- Sorriso receptivo -->
+                <path d="M 60 48 L 59 52 L 62 52" stroke="#e0a98b" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                <path d="M 53 56 Q 60 62 67 56" stroke="#b91c1c" stroke-width="2" fill="#ffffff" stroke-linecap="round"/>
+                <!-- Mãos sinalizando em Libras (Boas-vindas) -->
+                <ellipse cx="36" cy="80" rx="8" ry="7" fill="#ffd1b3" transform="rotate(-15 36 80)"/>
+                <path d="M 30 75 Q 36 68 40 76" stroke="#e0a98b" stroke-width="1.5" fill="none"/>
+                <ellipse cx="84" cy="80" rx="8" ry="7" fill="#ffd1b3" transform="rotate(15 84 80)"/>
+                <path d="M 90 75 Q 84 68 80 76" stroke="#e0a98b" stroke-width="1.5" fill="none"/>
+              </svg>
+            </div>
+            <div class="vlibras-caption-box">
+              <strong class="v-title">Tradutor Oficial</strong>
+              <small class="v-sub">Língua de Sinais</small>
+            </div>
+          </div>
+
+        </div> <!-- /.totem-middle-layout -->
 
         <!-- RODAPÉ PERMANENTE -->
         <footer id="totem-footer" class="totem-footer">

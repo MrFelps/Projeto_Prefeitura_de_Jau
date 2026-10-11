@@ -1066,52 +1066,87 @@ class Totem3DViewer {
       ctx.fillText('Interface rebaixada para cadeirantes (NBR 9050)', w / 2, 140);
     }
 
-    // Header da Tela Touch (Fundo Claro Institucional)
+    // 1. Header da Tela Touch (Fundo Claro Institucional - 115px de altura)
     ctx.fillStyle = hc ? '#000000' : '#ffffff';
-    ctx.fillRect(0, wcOffset, w, 175);
+    ctx.fillRect(0, wcOffset, w, 115);
     ctx.strokeStyle = hc ? '#ffff00' : '#168821';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
-    ctx.moveTo(0, wcOffset + 175);
-    ctx.lineTo(w, wcOffset + 175);
+    ctx.moveTo(0, wcOffset + 115);
+    ctx.lineTo(w, wcOffset + 115);
     ctx.stroke();
 
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 30px sans-serif';
-    ctx.fillText('🏛️ PREFEITURA DE JAÚ', 32, wcOffset + 58);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('🏛️ PREFEITURA DE JAÚ', 28, wcOffset + 48);
     ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('Estância Turística • Totemize Smart City', 32, wcOffset + 90);
+    ctx.font = 'bold 19px sans-serif';
+    ctx.fillText('Estância Turística • Terminal Oficial', 28, wcOffset + 80);
 
     // Relógio e Clima no canto direito
     ctx.textAlign = 'right';
     ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
-    ctx.font = '800 36px sans-serif';
-    ctx.fillText(timeStr, w - 32, wcOffset + 58);
+    ctx.font = '800 34px sans-serif';
+    ctx.fillText(timeStr, w - 28, wcOffset + 50);
     ctx.fillStyle = hc ? '#ffff00' : '#334155';
-    ctx.font = 'bold 22px sans-serif';
-    ctx.fillText('☀️ 28°C Jaú/SP', w - 32, wcOffset + 92);
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('☀️ 28°C Jaú/SP', w - 28, wcOffset + 82);
 
-    // Barra de Acessibilidade Universal
-    const accBtns = ['🔊 Áudio', '🦻 Libras', '♿ Alcance', '👁️ Contraste', 'A+'];
-    accBtns.forEach((lbl, idx) => {
-      const bx = 30 + idx * 134;
-      const by = wcOffset + 112;
-      ctx.fillStyle = hc ? '#000000' : '#f1f5f9';
-      ctx.fillRect(bx, by, 124, 46);
-      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(bx, by, 124, 46);
-      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = 'bold 18px sans-serif';
+    const footY = h - 130;
+    const bodyY = wcOffset + 128;
+
+    // 2. MENU LATERAL DE ACESSIBILIDADE UNIVERSAL (ABNT NBR 9050 / GOV.BR)
+    const sbW = 82;
+    const sbH = footY - (wcOffset + 115);
+    ctx.fillStyle = hc ? '#000000' : '#0c326f';
+    ctx.fillRect(0, wcOffset + 115, sbW, sbH);
+    ctx.strokeStyle = hc ? '#ffff00' : '#ffcd07';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(sbW, wcOffset + 115);
+    ctx.lineTo(sbW, footY);
+    ctx.stroke();
+
+    // Tag Superior do Menu Lateral
+    ctx.fillStyle = hc ? '#000000' : '#ffcd07';
+    ctx.fillRect(10, wcOffset + 125, sbW - 20, 22);
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
+    ctx.font = '900 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ACESSO', sbW / 2, wcOffset + 140);
+
+    // Botões Verticais de Acessibilidade (Ordem: Alcance no topo, Contraste, Libras, Áudio, A+/A-)
+    const sideBtns = [
+      { icon: '♿', label: 'Alcance', active: this.isWheelchair },
+      { icon: '👁️', label: 'Contraste', active: hc },
+      { icon: '🦻', label: 'Libras', active: true },
+      { icon: '🔊', label: 'Áudio', active: false },
+      { icon: 'A+', label: 'Maior', active: false },
+      { icon: 'A-', label: 'Padrão', active: false }
+    ];
+
+    sideBtns.forEach((b, idx) => {
+      const by = wcOffset + 158 + idx * 72;
+      const bw = sbW - 16;
+      const bh = 62;
+      const bx = 8;
+
+      ctx.fillStyle = b.active ? (hc ? '#ffff00' : '#ffcd07') : (hc ? '#111827' : 'rgba(255,255,255,0.12)');
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeStyle = b.active ? (hc ? '#ffff00' : '#d9a400') : 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(bx, by, bw, bh);
+
+      ctx.fillStyle = b.active ? '#0c326f' : (hc ? '#ffff00' : '#ffffff');
+      ctx.font = '22px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(lbl, bx + 62, by + 30);
+      ctx.fillText(b.icon, bx + bw / 2, by + 30);
+      ctx.font = '800 11px sans-serif';
+      ctx.fillText(b.label, bx + bw / 2, by + 50);
     });
 
-    // Conteúdo Central de acordo com a aba selecionada
-    const bodyY = wcOffset + 200;
-
+    // 3. Conteúdo Central de acordo com a aba selecionada
     if (this.screenState === 'bus') {
       this.drawBusScreen(ctx, w, bodyY, hc);
     } else if (this.screenState === 'shoes') {
@@ -1124,84 +1159,110 @@ class Totem3DViewer {
       this.drawHomeScreen(ctx, w, bodyY, hc);
     }
 
-    // Rodapé Fixo Claro com DOOH e Botão de Emergência
-    const footY = h - 130;
-    ctx.fillStyle = hc ? '#000000' : '#ffffff';
-    ctx.fillRect(0, footY, w, 130);
-    ctx.strokeStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, footY, w, 130);
+    // 4. QUADRADINHO FIXO DO VLIBRAS NO CANTO INFERIOR DIREITO DA TELA
+    const vBoxW = 142;
+    const vBoxH = 168;
+    const vBoxX = w - vBoxW - 14;
+    const vBoxY = footY - vBoxH - 14;
 
-    // Botão Início
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(vBoxX, vBoxY, vBoxW, vBoxH);
+    ctx.strokeStyle = hc ? '#ffff00' : '#1351b4';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(vBoxX, vBoxY, vBoxW, vBoxH);
+
+    // Cabeçalho da caixinha VLibras
     ctx.fillStyle = hc ? '#000000' : '#1351b4';
-    ctx.fillRect(24, footY + 22, 110, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.strokeRect(24, footY + 22, 110, 86);
-    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🏠 INÍCIO', 79, footY + 72);
-
-    // Carrossel DOOH (Contido estritamente dentro do seu retângulo claro)
-    ctx.save();
-    ctx.fillStyle = hc ? '#000000' : '#f8fafc';
-    ctx.fillRect(148, footY + 22, 344, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(148, footY + 22, 344, 86);
-    ctx.beginPath();
-    ctx.rect(152, footY + 24, 336, 82);
-    ctx.clip();
+    ctx.fillRect(vBoxX, vBoxY, vBoxW, 26);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('ANÚNCIO PARCEIRO • DOOH ESG', 164, footY + 50, 314);
-    ctx.fillStyle = hc ? '#ffff00' : '#1e293b';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('👠 Feira do Calçado de Jaú!', 164, footY + 82, 314);
-    ctx.restore();
-
-    // Botão Contatos de Acionamento de Socorro (Contido estritamente nas bordas)
-    ctx.save();
-    ctx.fillStyle = hc ? '#000000' : '#ffffff';
-    ctx.fillRect(506, footY + 22, 190, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#d32f2f';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(506, footY + 22, 190, 86);
+    ctx.fillText('gov.br • VLibras', vBoxX + 8, vBoxY + 18);
+    // Ponto verde ativo
     ctx.beginPath();
-    ctx.rect(510, footY + 25, 182, 80);
-    ctx.clip();
-    ctx.fillStyle = hc ? '#ffff00' : '#b71c1c';
-    ctx.font = 'bold 15px sans-serif';
+    ctx.arc(vBoxX + vBoxW - 12, vBoxY + 13, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#4ade80';
+    ctx.fill();
+
+    // Mascote Ícaro (Ilustração vetorial em canvas)
+    const avX = vBoxX + vBoxW / 2;
+    const avY = vBoxY + 76;
+    // Círculo de fundo
+    ctx.beginPath();
+    ctx.arc(avX, avY, 34, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8f0fe';
+    ctx.fill();
+    // Camisa polo azul
+    ctx.beginPath();
+    ctx.arc(avX, avY + 30, 26, Math.PI, 0, false);
+    ctx.fillStyle = '#0c326f';
+    ctx.fill();
+    // Gola amarela
+    ctx.fillStyle = '#ffcd07';
+    ctx.fillRect(avX - 6, avY + 6, 12, 10);
+    // Cabeça
+    ctx.beginPath();
+    ctx.arc(avX, avY - 4, 15, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd1b3';
+    ctx.fill();
+    // Cabelo castanho
+    ctx.beginPath();
+    ctx.arc(avX, avY - 10, 15, Math.PI * 0.9, Math.PI * 2.1);
+    ctx.fillStyle = '#5c3a21';
+    ctx.fill();
+    // Olhos e sorriso
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(avX - 6, avY - 5, 3, 3);
+    ctx.fillRect(avX + 3, avY - 5, 3, 3);
+    ctx.strokeStyle = '#b91c1c';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(avX, avY + 1, 5, 0, Math.PI);
+    ctx.stroke();
+
+    // Rodapé da caixinha VLibras
+    ctx.fillStyle = '#f0f7ff';
+    ctx.fillRect(vBoxX, vBoxY + vBoxH - 34, vBoxW, 34);
+    ctx.strokeStyle = '#dbeafe';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(vBoxX, vBoxY + vBoxH - 34);
+    ctx.lineTo(vBoxX + vBoxW, vBoxY + vBoxH - 34);
+    ctx.stroke();
+    ctx.fillStyle = '#0c326f';
+    ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('☎️ CONTATOS DE', 601, footY + 54, 172);
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('SOCORRO • 192/153', 601, footY + 82, 172);
-    ctx.restore();
+    ctx.fillText('Tradutor Oficial', avX, vBoxY + vBoxH - 19);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px sans-serif';
+    ctx.fillText('Língua de Sinais', avX, vBoxY + vBoxH - 7);
 
     if (this.screenTexture) this.screenTexture.needsUpdate = true;
   }
 
   drawHomeScreen(ctx, w, startY, hc) {
+    const offX = 94;
+    const contentW = w - offX - 16;
+
     // Banner Defesa Civil Claro
     ctx.fillStyle = hc ? '#000000' : '#fff8e6';
-    ctx.fillRect(32, startY, w - 64, 78);
+    ctx.fillRect(offX, startY, contentW, 68);
     ctx.strokeStyle = hc ? '#ffff00' : '#d9a400';
     ctx.lineWidth = 2;
-    ctx.strokeRect(32, startY, w - 64, 78);
+    ctx.strokeRect(offX, startY, contentW, 68);
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#925400';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillText('⚠️ DEFESA CIVIL JAÚ • TEMPO ESTÁVEL', 52, startY + 32);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('⚠️ DEFESA CIVIL JAÚ • TEMPO ESTÁVEL', offX + 16, startY + 28);
     ctx.fillStyle = hc ? '#ffff00' : '#593900';
-    ctx.font = '18px sans-serif';
-    ctx.fillText('Campanha de vacinação ativa até 17h nos postos municipais.', 52, startY + 60);
+    ctx.font = '15px sans-serif';
+    ctx.fillText('Vacinação ativa até 17h nos postos municipais.', offX + 16, startY + 52);
 
     // Chamada Bem-vindo a Jaú
     ctx.textAlign = 'center';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 32px sans-serif';
-    ctx.fillText('COMO PODEMOS AJUDAR VOCÊ HOJE?', w / 2, startY + 128);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('COMO PODEMOS AJUDAR VOCÊ HOJE?', offX + contentW / 2, startY + 118);
 
     // Grade dos 4 Pilares Estratégicos — Design Tátil de Quiosque Físico
     const cards = [
@@ -1254,10 +1315,10 @@ class Totem3DViewer {
     cards.forEach((c, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const cx = 36 + col * 332;
-      const cy = startY + 155 + row * 265;
-      const cw = 316;
-      const ch = 245;
+      const cx = offX + col * 310;
+      const cy = startY + 142 + row * 252;
+      const cw = 296;
+      const ch = 236;
 
       // Card Background & Sombra Tátil Física
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
@@ -1270,82 +1331,94 @@ class Totem3DViewer {
 
       // Barra tátil lateral esquerda sólida (identidade de cada módulo)
       ctx.fillStyle = hc ? '#ffff00' : c.color;
-      ctx.fillRect(cx, cy, 9, ch);
+      ctx.fillRect(cx, cy, 8, ch);
 
       // Topo: Badge de Ícone + Tag de Categoria
       // Box do ícone
       ctx.fillStyle = hc ? '#000000' : c.accentBg;
-      ctx.fillRect(cx + 20, cy + 18, 54, 54);
+      ctx.fillRect(cx + 16, cy + 16, 50, 50);
       ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(cx + 20, cy + 18, 54, 54);
+      ctx.strokeRect(cx + 16, cy + 16, 50, 50);
       ctx.textAlign = 'center';
-      ctx.font = '34px sans-serif';
-      ctx.fillText(c.icon, cx + 47, cy + 56);
+      ctx.font = '30px sans-serif';
+      ctx.fillText(c.icon, cx + 41, cy + 52);
 
       // Tag de Categoria
       ctx.fillStyle = hc ? '#000000' : c.accentBg;
-      ctx.fillRect(cx + cw - 150, cy + 22, 134, 28);
+      ctx.fillRect(cx + cw - 146, cy + 18, 132, 26);
       ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
-      ctx.strokeRect(cx + cw - 150, cy + 22, 134, 28);
+      ctx.strokeRect(cx + cw - 146, cy + 18, 132, 26);
       ctx.fillStyle = hc ? '#ffff00' : c.tagColor;
-      ctx.font = '800 12px sans-serif';
+      ctx.font = '800 11px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(c.tag, cx + cw - 83, cy + 41);
+      ctx.fillText(c.tag, cx + cw - 80, cy + 36);
 
       // Título do Card
       ctx.textAlign = 'left';
       ctx.fillStyle = hc ? '#ffff00' : c.tagColor;
-      ctx.font = '800 20.5px sans-serif';
-      ctx.fillText(c.title, cx + 20, cy + 104);
+      ctx.font = '800 19px sans-serif';
+      ctx.fillText(c.title, cx + 16, cy + 98);
 
       // Subtítulo descritivo
       ctx.fillStyle = hc ? '#ffff00' : '#475569';
-      ctx.font = '600 15px sans-serif';
-      ctx.fillText(c.sub, cx + 20, cy + 132);
+      ctx.font = '600 14px sans-serif';
+      ctx.fillText(c.sub, cx + 16, cy + 124, cw - 32);
 
       // Linha tracejada divisória
       ctx.strokeStyle = hc ? '#ffff00' : 'rgba(0,0,0,0.1)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
-      ctx.moveTo(cx + 18, cy + 185);
-      ctx.lineTo(cx + cw - 18, cy + 185);
+      ctx.moveTo(cx + 16, cy + 175);
+      ctx.lineTo(cx + cw - 16, cy + 175);
       ctx.stroke();
       ctx.setLineDash([]);
 
       // Barra de Ação Inferior (Feedback tátil: Toque para acessar + Círculo com seta)
       ctx.fillStyle = hc ? '#ffff00' : c.color;
-      ctx.font = '800 13px sans-serif';
+      ctx.font = '800 12px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(c.action, cx + 20, cy + 215);
+      ctx.fillText(c.action, cx + 16, cy + 206);
 
       // Círculo com seta
       ctx.beginPath();
-      ctx.arc(cx + cw - 36, cy + 210, 15, 0, Math.PI * 2);
+      ctx.arc(cx + cw - 30, cy + 203, 14, 0, Math.PI * 2);
       ctx.fillStyle = hc ? '#ffff00' : c.color;
       ctx.fill();
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.font = '800 15px sans-serif';
+      ctx.font = '800 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('➔', cx + cw - 36, cy + 215);
+      ctx.fillText('➔', cx + cw - 30, cy + 208);
     });
 
+    // Faixa de Serviços Rápidos de Jaú
+    const qY = startY + 652;
+    ctx.fillStyle = hc ? '#000000' : '#ffffff';
+    ctx.fillRect(offX, qY, contentW, 42);
+    ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(offX, qY, contentW, 42);
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
+    ctx.font = 'bold 13.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🚑 SAMU 192   •   🛡️ Guarda 153   •   📞 Ouvidoria 156   •   💊 Farmácia 24h', offX + contentW / 2, qY + 26);
+
     // Faixa ESG Paperless com QR Code
-    const esgY = startY + 705;
+    const esgY = startY + 704;
     if (esgY < 1040) {
       ctx.fillStyle = hc ? '#000000' : '#f0fdf4';
-      ctx.fillRect(36, esgY, w - 72, 84);
+      ctx.fillRect(offX, esgY, contentW, 74);
       ctx.strokeStyle = hc ? '#ffff00' : '#168821';
       ctx.lineWidth = 2;
-      ctx.strokeRect(36, esgY, w - 72, 84);
+      ctx.strokeRect(offX, esgY, contentW, 74);
       ctx.fillStyle = hc ? '#ffff00' : '#168821';
-      ctx.font = 'bold 20px sans-serif';
+      ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('🌱 PROJETO CIDADE INTELIGENTE (100% PAPERLESS ESG)', 56, esgY + 36);
+      ctx.fillText('🌱 PROJETO JAÚ CONECTADA (100% PAPERLESS ESG)', offX + 16, esgY + 30);
       ctx.fillStyle = hc ? '#ffff00' : '#14532d';
-      ctx.font = '600 15.5px sans-serif';
-      ctx.fillText('Informações sem papel: envie rotas e serviços para seu celular via QR Code.', 56, esgY + 64);
+      ctx.font = '600 14px sans-serif';
+      ctx.fillText('Sem emissão de papel: envie rotas e serviços ao celular via QR Code.', offX + 16, esgY + 54);
     }
   }
 

@@ -143,10 +143,25 @@ class TotemApp {
 
     // Botão de Libras
     const btnVLibras = document.getElementById('btn-vlibras');
+    const vlibrasBox = document.getElementById('vlibras-kiosk-box');
+    
+    const handleVLibrasToggle = () => {
+      if (btnVLibras) btnVLibras.classList.toggle('active');
+      if (vlibrasBox) {
+        vlibrasBox.classList.toggle('active');
+        vlibrasBox.style.transform = 'scale(1.08)';
+        setTimeout(() => { if (vlibrasBox) vlibrasBox.style.transform = ''; }, 300);
+      }
+      this.initVLibras();
+    };
+
     if (btnVLibras) {
-      btnVLibras.addEventListener('click', () => {
-        btnVLibras.classList.toggle('active');
-        this.initVLibras();
+      btnVLibras.addEventListener('click', handleVLibrasToggle);
+    }
+    if (vlibrasBox) {
+      vlibrasBox.addEventListener('click', () => {
+        handleVLibrasToggle();
+        this.falar('VLibras: Intérprete virtual do Governo Federal ativo.');
       });
     }
 
