@@ -34,6 +34,78 @@ body {
   font-size: calc(16px * var(--font-scale));
 }
 
+/* BOTÕES FLUTUANTES SUPERIORES (TABLET / MONITOR) */
+.tablet-top-actions {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-float-dots {
+  background: var(--gov-blue-dark);
+  color: var(--gov-gold);
+  border: 1.5px solid var(--gov-gold);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-float-dots:hover {
+  background: var(--gov-blue);
+  color: #fff;
+  transform: scale(1.04);
+}
+
+.dots-icon {
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.dots-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-float-expand {
+  background: var(--gov-blue);
+  color: #ffffff;
+  border: 1.5px solid #38bdf8;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-float-expand:hover {
+  background: var(--gov-blue-dark);
+  border-color: var(--gov-gold);
+  color: var(--gov-gold);
+  transform: scale(1.04);
+}
+
+.expand-icon {
+  font-size: 15px;
+}
+
 /* PAINEL LATERAL DE CONTROLE DO SIMULADOR (DEMONSTRAÇÃO BANCA SENAC) */
 .simulator-panel {
   width: 320px;
@@ -46,6 +118,36 @@ body {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
   z-index: 50;
   flex-shrink: 0;
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ESTADO ENCOLHIDO / COLAPSADO (LIBERA A TELA INTEIRA PARA O TOTEM OU 3D) */
+.simulator-panel.collapsed {
+  margin-left: -320px;
+}
+
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.btn-collapse-arrow {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-collapse-arrow:hover {
+  background: #dc2626;
+  color: #fff;
 }
 
 .panel-header .badge-live {
@@ -57,7 +159,6 @@ body {
   border-radius: 9999px;
   text-transform: uppercase;
   display: inline-block;
-  margin-bottom: 8px;
 }
 
 .panel-header h3 {
@@ -1957,5 +2058,85 @@ body {
   background: #0284c7;
   border-color: #38bdf8;
   color: #fff;
+}
+
+/* ======================================================== */
+/* RESPONSIVIDADE E OTIMIZAÇÃO PARA TABLET EM PÉ (RETRATO)  */
+/* ======================================================== */
+
+/* Modo Fullscreen Kiosk (Tablet em pé) */
+.totem-frame.fullscreen-tablet,
+.totem-frame.fullscreen-mode {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+.totem-frame.fullscreen-tablet .totem-top-sensor,
+.totem-frame.fullscreen-tablet .totem-bottom-chassis,
+.totem-frame.fullscreen-mode .totem-top-sensor,
+.totem-frame.fullscreen-mode .totem-bottom-chassis {
+  display: none !important;
+}
+
+/* Ajuste para Tablets e Dispositivos Móveis */
+@media (max-width: 1024px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .simulator-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1200;
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
+  }
+
+  /* No tablet, o painel começa colapsado para ver 100% o Totem ou 3D */
+  .simulator-panel.collapsed {
+    transform: translateX(-100%);
+    margin-left: 0;
+  }
+
+  .totem-wrapper {
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  .totem-frame {
+    width: 100vw !important;
+    max-width: 650px;
+    height: 100vh !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .totem-3d-stage {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+}
+
+/* Orientação Retrato (Tablet em Pé) */
+@media (orientation: portrait) {
+  .totem-frame {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .totem-wrapper {
+    padding: 0 !important;
+  }
 }
 

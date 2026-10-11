@@ -302,8 +302,48 @@ class TotemApp {
     }
   }
 
-  // 5. PAINEL DE CONTROLE DO SIMULADOR (PARA A BANCA)
+  // 5. PAINEL DE CONTROLE DO SIMULADOR (PARA A BANCA & TABLET)
   setupSimulatorControls() {
+    const simulatorPanel = document.getElementById('simulator-controls');
+    const btnTogglePanel = document.getElementById('btn-toggle-panel');
+    const btnClosePanel = document.getElementById('btn-close-panel');
+    const btnFloatFullscreen = document.getElementById('btn-float-fullscreen');
+
+    // Auto-colapsar em tablets e telas verticais no carregamento inicial
+    if (window.innerWidth <= 1024 && simulatorPanel) {
+      simulatorPanel.classList.add('collapsed');
+    }
+
+    // BOTÃO DE 3 PONTINHOS: Recolhe ou Abre a Aba Lateral
+    const toggleSidebar = () => {
+      if (!simulatorPanel) return;
+      simulatorPanel.classList.toggle('collapsed');
+      if (this.viewer3D) {
+        setTimeout(() => this.viewer3D.handleResize(), 350);
+      }
+    };
+
+    if (btnTogglePanel) btnTogglePanel.addEventListener('click', toggleSidebar);
+    if (btnClosePanel) btnClosePanel.addEventListener('click', () => {
+      if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+      if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 350);
+    });
+
+    // BOTÃO EXPANDIR MONITOR (TELA CHEIA NATIVA NO TABLET)
+    if (btnFloatFullscreen) {
+      btnFloatFullscreen.addEventListener('click', () => {
+        const chassis = document.getElementById('totem-chassis');
+        // Alterna tela cheia do navegador
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+          if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+          if (chassis) chassis.classList.add('fullscreen-mode');
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
     // Toggle Moldura 2D vs Tela Cheia vs Visão 3D 360°
     const btnToggleFrame = document.getElementById('btn-toggle-frame');
     const btnFullscreen = document.getElementById('btn-fullscreen');
@@ -320,6 +360,10 @@ class TotemApp {
         chassis.classList.remove('fullscreen-mode');
         stage3D.classList.remove('hidden');
         if (btnToggle3D) btnToggle3D.classList.add('active');
+        // Na visão 3D, recolhe a aba lateral automaticamente no tablet para ver só o totem
+        if (window.innerWidth <= 1024 && simulatorPanel) {
+          simulatorPanel.classList.add('collapsed');
+        }
         if (this.viewer3D) {
           setTimeout(() => this.viewer3D.handleResize(), 50);
         }
@@ -332,6 +376,7 @@ class TotemApp {
         chassis.classList.remove('hidden');
         chassis.classList.add('fullscreen-mode');
         if (btnFullscreen) btnFullscreen.classList.add('active');
+        if (simulatorPanel) simulatorPanel.classList.add('collapsed');
       }
     };
 

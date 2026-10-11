@@ -17,10 +17,28 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans select-none">
 
+  <!-- BOTÕES FLUTUANTES DE CONTROLE (TABLET / EXPANDIR MONITOR) -->
+  <div class="tablet-top-actions">
+    <!-- Botão de 3 Pontinhos para Encolher/Expandir a Aba Lateral -->
+    <button id="btn-toggle-panel" class="btn-float-dots" title="Recolher / Mostrar Painel Lateral">
+      <span class="dots-icon">⋯</span>
+      <span class="dots-label">Painel</span>
+    </button>
+
+    <!-- Botão de Expandir Monitor / Tela Cheia -->
+    <button id="btn-float-fullscreen" class="btn-float-expand" title="Expandir para Tela Inteira no Tablet">
+      <span class="expand-icon">⛶</span>
+      <span class="expand-label">Expandir Monitor</span>
+    </button>
+  </div>
+
   <!-- PAINEL DE CONTROLE EXTERNO DO MOCKUP (Para a Banca / Apresentação) -->
   <aside id="simulator-controls" class="simulator-panel">
     <div class="panel-header">
-      <span class="badge-live">Ao Vivo</span>
+      <div class="panel-header-row">
+        <span class="badge-live">Ao Vivo</span>
+        <button id="btn-close-panel" class="btn-collapse-arrow" title="Recolher para a Lateral">◀ Recolher</button>
+      </div>
       <h3>Painel de Demonstração (Senac / Prefeitura)</h3>
       <p>Simulador de Ambiente e Sensores</p>
     </div>
