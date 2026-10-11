@@ -15,13 +15,13 @@ class Totem3DViewer {
     // Estado da câmera orbital 360° (coordenadas esféricas)
     this.camState = {
       theta: 0.48,        // Ângulo horizontal (radianos) - 360° livre
-      phi: 1.32,          // Ângulo vertical (radianos)
-      radius: 3.45,       // Distância do zoom
-      targetY: 1.12,      // Altura do foco
+      phi: 1.34,          // Ângulo vertical (radianos)
+      radius: 2.75,       // Distância do zoom - aproximado ao máximo sem cortar nem distorcer
+      targetY: 1.10,      // Altura do foco no centro do totem
       targetTheta: 0.48,
-      targetPhi: 1.32,
-      targetRadius: 3.45,
-      targetLookY: 1.12
+      targetPhi: 1.34,
+      targetRadius: 2.75,
+      targetLookY: 1.10
     };
 
     this.isDragging = false;
@@ -689,7 +689,7 @@ class Totem3DViewer {
         metalness: 0.4
       })
     );
-    lowerPanelMesh.position.set(0, 0.42, 0.167);
+    lowerPanelMesh.position.set(0, 0.42, 0.180);
     this.totemGroup.add(lowerPanelMesh);
 
     // BOTÃO FÍSICO SOS EMERGÊNCIA 3D (Em alto-relevo iluminado na frente)
@@ -698,7 +698,7 @@ class Totem3DViewer {
       new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.7, roughness: 0.3 })
     );
     sosBase.rotation.x = Math.PI / 2;
-    sosBase.position.set(0.18, 0.48, 0.172);
+    sosBase.position.set(0.18, 0.48, 0.184);
     this.totemGroup.add(sosBase);
 
     const sosBtn = new THREE.Mesh(
@@ -711,7 +711,7 @@ class Totem3DViewer {
       })
     );
     sosBtn.rotation.x = Math.PI / 2;
-    sosBtn.position.set(0.18, 0.48, 0.178);
+    sosBtn.position.set(0.18, 0.48, 0.190);
     this.totemGroup.add(sosBtn);
 
     // -----------------------------------------------------------------------
@@ -759,15 +759,15 @@ class Totem3DViewer {
     rctx.fillText('TOTEM INTELIGENTE', 256, 448);
     rctx.fillStyle = '#10b981';
     rctx.font = 'bold 17px sans-serif';
-    rctx.fillText('☀️ ENERGIA SOLAR FOTOVOLTAICA', 256, 495);
+    rctx.fillText('☀️ ENERGIA HÍBRIDA (SOLAR 35Wp + 220V)', 256, 495);
 
     // Especificações Técnicas na Plaqueta Traseira
     const specs = [
       '• Estrutura: Aço Galvanizado e ACM',
       '• Pintura: Eletrostática Anticorrosiva',
       '• Proteção: Vidro 8mm + Grau IP65',
-      '• Conectividade: 4G/5G, Wi-Fi e Ethernet',
-      '• Bateria Interna: Autonomia Backup 24h',
+      '• Painel Solar Topo: 35Wp (64x21cm Embutido)',
+      '• Bateria Interna: Backup LiFePO4 24h (SOS/5G)',
       '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)',
       '• Peso Aproximado: 120 kg'
     ];
@@ -806,7 +806,7 @@ class Totem3DViewer {
       })
     );
     rearDoorMesh.rotation.y = Math.PI;
-    rearDoorMesh.position.set(0, 1.10, -0.167);
+    rearDoorMesh.position.set(0, 1.10, -0.180);
     this.totemGroup.add(rearDoorMesh);
 
     // 2 Fechaduras tubulares antivandalismo em 3D na porta traseira
@@ -816,7 +816,7 @@ class Totem3DViewer {
         boltMat
       );
       lockCylinder.rotation.x = Math.PI / 2;
-      lockCylinder.position.set(-0.23, ly, -0.17);
+      lockCylinder.position.set(-0.23, ly, -0.182);
       this.totemGroup.add(lockCylinder);
     });
 
@@ -1376,56 +1376,56 @@ class Totem3DViewer {
       {
         id: 'solar',
         num: '1',
-        title: 'Placa Solar Fotovoltaica + 5G',
-        desc: 'Captação de energia limpa no topo com bateria interna de backup (autonomia de até 24h) + antena 4G/5G/Wi-Fi de alto ganho.',
-        pos: new THREE.Vector3(0.0, 2.22, 0.05),
-        cam: { theta: 0.35, phi: 0.92, radius: 2.35, targetY: 1.85 }
+        title: 'Placa Solar 35Wp Embutida (Invisível de Frente)',
+        desc: 'Painel monocristalino de 64×21 cm (35 Wp) embutido na parte plana traseira do topo (atrás da quina frontal arredondada). Alimenta LEDs, sensores PIR, modem 5G e mantém a bateria LiFePO4 de backup 24h (SOS), operando em sistema híbrido com a rede elétrica da praça para a tela 43".',
+        pos: new THREE.Vector3(0.0, 2.21, -0.04),
+        cam: { theta: 0.18, phi: 0.42, radius: 1.95, targetY: 1.95 }
       },
       {
         id: 'sensors',
         num: '2',
-        title: 'Câmera HD + Sensor PIR',
-        desc: 'Câmera frontal de segurança para monitoramento do entorno e sensor de presença PIR que acorda o totem automaticamente.',
-        pos: new THREE.Vector3(0.0, 2.02, 0.20),
-        cam: { theta: 0.08, phi: 1.38, radius: 1.85, targetY: 1.88 }
+        title: 'Quina Arredondada + Câmera HD & PIR',
+        desc: 'Borda superior frontal com curvatura ergonômica suave (11 cm de raio no topo) logo acima da câmera frontal de segurança e do sensor PIR de presença.',
+        pos: new THREE.Vector3(0.0, 1.99, 0.19),
+        cam: { theta: 0.65, phi: 1.25, radius: 1.85, targetY: 1.88 }
       },
       {
         id: 'screen',
         num: '3',
         title: 'Tela Touchscreen 43" Full HD (IP65)',
         desc: 'Monitor multi-touch de alto brilho (1500 nits) protegido por vidro temperado antivandalismo de 8mm e interface acessível (Libras, Voz e Modo Cadeirante).',
-        pos: new THREE.Vector3(0.28, 1.28, 0.20),
-        cam: { theta: 0.0, phi: 1.45, radius: 2.15, targetY: 1.22 }
+        pos: new THREE.Vector3(0.28, 1.25, 0.19),
+        cam: { theta: 0.0, phi: 1.48, radius: 2.20, targetY: 1.18 }
       },
       {
         id: 'usb_sos',
         num: '4',
         title: 'Som 10W + Carregadores USB + SOS',
         desc: 'Alto-falantes direcionais de 10W para leitura em voz alta, 2 portas USB para recarga gratuita de celulares e botão físico SOS ligado à Guarda Municipal.',
-        pos: new THREE.Vector3(0.22, 0.48, 0.20),
+        pos: new THREE.Vector3(0.22, 0.48, 0.19),
         cam: { theta: 0.15, phi: 1.48, radius: 1.85, targetY: 0.52 }
       },
       {
         id: 'structure',
         num: '5',
-        title: 'Estrutura Aço Galvanizado & ACM + LED',
-        desc: 'Chassi com pintura eletrostática anticorrosiva (120 kg), proteção IP65 contra chuva e poeira, e fita de iluminação LED de baixo consumo nas laterais.',
-        pos: new THREE.Vector3(-0.38, 1.15, 0.05),
-        cam: { theta: -1.35, phi: 1.40, radius: 2.65, targetY: 1.10 }
+        title: 'Bloco "Quadradão" Aço & ACM + LED',
+        desc: 'Formato retangular puro visto de frente (0,70m × 2,20m) e perfil lateral de 0,35m com quina superior frontal arredondada, pintura eletrostática IP65 e fita LED lateral.',
+        pos: new THREE.Vector3(-0.36, 1.15, 0.05),
+        cam: { theta: -1.52, phi: 1.38, radius: 2.85, targetY: 1.12 }
       },
       {
         id: 'rear',
         num: '6',
         title: 'Porta Traseira & Exaustão Térmica',
-        desc: 'Acesso técnico traseiro com fechadura dupla antivandalismo, venezianas de ventilação natural e plaqueta técnica de identificação.',
-        pos: new THREE.Vector3(0.0, 1.25, -0.20),
-        cam: { theta: Math.PI, phi: 1.40, radius: 2.55, targetY: 1.15 }
+        desc: 'Costas retas com porta técnica de manutenção, fechadura dupla antivandalismo, venezianas de ventilação natural e plaqueta técnica IP65.',
+        pos: new THREE.Vector3(0.0, 1.25, -0.19),
+        cam: { theta: Math.PI, phi: 1.40, radius: 2.65, targetY: 1.15 }
       },
       {
         id: 'base',
         num: '7',
         title: 'Base Chumbada & Piso Tátil NBR 9050',
-        desc: 'Base metálica chumbada em fundação de concreto na calçada de pedra portuguesa, cercada por piso tátil direcional e de alerta.',
+        desc: 'Base metálica retangular chumbada em fundação de concreto na calçada de pedra portuguesa, cercada por piso tátil direcional e de alerta.',
         pos: new THREE.Vector3(-0.28, 0.08, 0.42),
         cam: { theta: -0.45, phi: 1.18, radius: 2.45, targetY: 0.25 }
       }
@@ -1528,7 +1528,7 @@ class Totem3DViewer {
 
       if (this.isDragging) {
         this.camState.targetTheta -= dx * 0.0085;
-        this.camState.targetPhi = Math.max(0.25, Math.min(1.62, this.camState.targetPhi - dy * 0.0065));
+        this.camState.targetPhi = Math.max(0.18, Math.min(1.62, this.camState.targetPhi - dy * 0.0065));
       } else if (this.isPanning) {
         this.camState.targetLookY = Math.max(0.2, Math.min(2.0, this.camState.targetLookY + dy * 0.004));
       }
@@ -1544,7 +1544,7 @@ class Totem3DViewer {
     // Zoom suave no scroll do mouse
     domElement.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.camState.targetRadius = Math.max(1.45, Math.min(6.0, this.camState.targetRadius + e.deltaY * 0.0022));
+      this.camState.targetRadius = Math.max(1.35, Math.min(6.0, this.camState.targetRadius + e.deltaY * 0.0022));
     }, { passive: false });
 
     // Suporte Touch (Celular / Tablet / Tela Touch)
@@ -1567,14 +1567,14 @@ class Totem3DViewer {
         const dy = e.touches[0].clientY - this.prevMouse.y;
         this.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         this.camState.targetTheta -= dx * 0.009;
-        this.camState.targetPhi = Math.max(0.25, Math.min(1.62, this.camState.targetPhi - dy * 0.007));
+        this.camState.targetPhi = Math.max(0.18, Math.min(1.62, this.camState.targetPhi - dy * 0.007));
       } else if (e.touches.length === 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.hypot(dx, dy);
         const delta = this.pinchStartDist - dist;
         this.pinchStartDist = dist;
-        this.camState.targetRadius = Math.max(1.45, Math.min(6.0, this.camState.targetRadius + delta * 0.008));
+        this.camState.targetRadius = Math.max(1.35, Math.min(6.0, this.camState.targetRadius + delta * 0.008));
       }
     }, { passive: true });
 
@@ -1587,13 +1587,13 @@ class Totem3DViewer {
   // BOTÕES DA INTERFACE DO ESTÚDIO 3D (CÂMERAS, GIRO 360°, TEMA, DIA/NOITE)
   // =========================================================================
   setupUIControls() {
-    // 1. Ângulos Rápidos de Câmera
+    // 1. Ângulos Rápidos de Câmera (Enquadramento máximo sem cortar nem distorcer)
     const presets = {
-      'front': { theta: 0.0, phi: 1.40, radius: 3.25, targetY: 1.12 },
-      'perspective': { theta: 0.52, phi: 1.30, radius: 3.45, targetY: 1.12 },
-      'side': { theta: 1.57, phi: 1.38, radius: 3.15, targetY: 1.12 },
-      'back': { theta: Math.PI, phi: 1.38, radius: 3.25, targetY: 1.12 },
-      'solar': { theta: 0.25, phi: 0.65, radius: 2.35, targetY: 1.85 }
+      'front': { theta: 0.0, phi: 1.52, radius: 2.65, targetY: 1.10 },
+      'perspective': { theta: 0.52, phi: 1.32, radius: 2.75, targetY: 1.10 },
+      'side': { theta: 1.57, phi: 1.48, radius: 2.60, targetY: 1.10 },
+      'back': { theta: Math.PI, phi: 1.45, radius: 2.65, targetY: 1.10 },
+      'solar': { theta: 0.0, phi: 0.28, radius: 1.60, targetY: 1.95 }
     };
 
     document.querySelectorAll('[data-cam-preset]').forEach(btn => {
@@ -1735,17 +1735,24 @@ class Totem3DViewer {
     const aspect = width / height;
     this.camera.aspect = aspect;
 
-    // Correção anti-distorção para tablets e telas em pé (portrait):
-    // Em telas mais estreitas ou quadradas (aspect < 1.1), ajusta o FOV para o Totem de 2,20m caber inteiro sem deformar nem cortar
-    if (aspect < 0.75) {
-      this.camera.fov = 50;
-      this.camState.targetRadius = 4.2;
-    } else if (aspect < 1.0) {
+    // Correção anti-distorção para tablets e telas em pé (portrait) com ZOOM MÁXIMO:
+    // O Totem tem 2,20m de altura. Ajustamos FOV e raio orbital para preencher a tela inteira verticalmente sem cortar o topo nem a base
+    if (aspect < 0.65) {
+      // Telas muito compridas em pé (celulares)
       this.camera.fov = 46;
-      this.camState.targetRadius = 3.8;
+      this.camState.targetRadius = 3.20;
+    } else if (aspect < 0.85) {
+      // Tablets verticais (iPads Portrait, tablets Android 3:4 ou 9:16)
+      this.camera.fov = 42;
+      this.camState.targetRadius = 2.85;
+    } else if (aspect < 1.15) {
+      // Tablets quase quadrados ou rotação intermediária
+      this.camera.fov = 39;
+      this.camState.targetRadius = 2.70;
     } else {
-      this.camera.fov = 40;
-      this.camState.targetRadius = 3.45;
+      // Desktop / Telas widescreen
+      this.camera.fov = 36;
+      this.camState.targetRadius = 2.65;
     }
 
     this.camera.updateProjectionMatrix();

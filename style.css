@@ -394,15 +394,15 @@ body {
   overflow-y: auto;
 }
 
-/* CARCAÇA / CHASSI DO TOTEM VERTICAL */
+/* CARCAÇA / CHASSI DO TOTEM VERTICAL (MAXIMIZADO NA TELA) */
 .totem-frame {
-  width: 540px;
+  width: min(600px, 98vw);
   min-height: 960px;
-  height: 95vh;
-  max-height: 1050px;
+  height: 97vh;
+  max-height: 1200px;
   background: #1e293b;
-  border-radius: 28px;
-  border: 12px solid #334155;
+  border-radius: 20px;
+  border: 6px solid #334155;
   box-shadow: 
     0 0 0 2px #475569,
     0 25px 60px -15px rgba(0, 0, 0, 0.8),
@@ -1307,9 +1307,9 @@ body {
   display: none;
 }
 
-/* LATERAIS FOSCAS (EFEITO FROSTED BLUR GOV) */
+/* LATERAIS FOSCAS (EFEITO FROSTED BLUR GOV - BORDAS DISCRETAS E FINAS) */
 .frosted-side {
-  width: 24px;
+  width: 8px;
   height: 100%;
   backdrop-filter: blur(25px);
   background: linear-gradient(90deg, rgba(12, 50, 111, 0.8), rgba(248, 249, 250, 0.2));
@@ -2188,16 +2188,16 @@ body {
 
 /* O totem mantém sua proporção áurea vertical de quiosque (9:16) sem esticar */
 .totem-frame {
-  width: min(520px, 92vw);
-  height: min(94vh, 980px);
-  max-width: 540px;
+  width: min(600px, 98vw);
+  height: min(97vh, 1200px);
+  max-width: 620px;
   margin: 0 auto;
 }
 
 /* Modo Fullscreen Kiosk (Tela Cheia Real no Tablet) */
 .totem-frame.fullscreen-tablet,
 .totem-frame.fullscreen-mode {
-  width: min(560px, 100vw) !important;
+  width: min(600px, 100vw) !important;
   height: 100vh !important;
   max-height: none !important;
   border-radius: 0 !important;
@@ -2235,7 +2235,7 @@ body {
   }
 
   .totem-wrapper {
-    padding: 10px 0 !important;
+    padding: 6px 0 !important;
     width: 100vw !important;
     height: 100vh !important;
     display: flex;
@@ -2244,14 +2244,14 @@ body {
     background: radial-gradient(circle at center, #111c33 0%, #060b17 100%);
   }
 
-  /* Garante que o Totem tenha proporção vertical ergonômica sem esticar horizontalmente */
+  /* Ocupa o máximo da tela do tablet na vertical sem distorcer as proporções */
   .totem-frame {
-    width: min(520px, 96vw) !important;
-    height: min(98vh, 1000px) !important;
-    max-width: 520px !important;
+    width: min(580px, 98vw) !important;
+    height: 98vh !important;
+    max-width: 600px !important;
     margin: 0 auto !important;
-    border-width: 8px !important;
-    border-radius: 20px !important;
+    border-width: 6px !important;
+    border-radius: 16px !important;
   }
 
   .totem-3d-stage {
@@ -2287,10 +2287,10 @@ body {
 /* Tablet em Pé (Orientação Portrait) */
 @media (orientation: portrait) and (max-width: 1024px) {
   .totem-frame {
-    /* Em tablets verticais, enquadra com altura total e largura proporcional de quiosque */
-    height: 98vh !important;
-    width: min(520px, 96vw) !important;
-    border-radius: 18px !important;
+    /* Em tablets verticais, ocupa praticamente 99% da altura da tela */
+    height: 98.5vh !important;
+    width: min(580px, 98vw) !important;
+    border-radius: 14px !important;
   }
 
   .totem-screen {
