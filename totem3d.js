@@ -29,14 +29,14 @@ class Totem3DViewer {
     this.prevMouse = { x: 0, y: 0 };
     this.pinchStartDist = 0;
 
-    // Configurações interativas da cena
+    // Configurações interativas da cena (iniciam desativadas por padrão no F5)
     this.autoRotate = false;
     this.autoRotateSpeed = 0.005;
     this.isNightMode = false;
-    this.showDimensions = true;
-    this.showHotspots = true;
-    this.designTheme = 'dossie'; // 'dossie' (Grafite & Ouro/Bronze Solar) | 'nexus' (Grafite & Azul Ciano)
-    this.screenState = 'home';   // 'home' | 'bus' | 'shoes' | 'tourism' | 'services' | 'idle' | 'sleep'
+    this.showDimensions = false; // Cotas métricas iniciam ocultas
+    this.showHotspots = false;   // Pontos 1 a 6 iniciam ocultos
+    this.designTheme = 'dossie';
+    this.screenState = 'home';
     this.isWheelchair = false;
     this.isHighContrast = false;
 
@@ -1473,6 +1473,7 @@ class Totem3DViewer {
     dSprite.position.set(0.76, 0.16, 0.0);
     this.dimensionGroup.add(dSprite);
 
+    this.dimensionGroup.visible = this.showDimensions;
     this.scene.add(this.dimensionGroup);
   }
 
