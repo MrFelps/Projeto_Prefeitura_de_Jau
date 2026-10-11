@@ -76,10 +76,10 @@ class Totem3DViewer {
     const width = this.container.clientWidth || 800;
     const height = this.container.clientHeight || 600;
 
-    // 1. Cena
+    // 1. Cena (Fundo Claro de Estúdio Arquitetônico)
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0b1325);
-    this.scene.fog = new THREE.FogExp2(0x0b1325, 0.06);
+    this.scene.background = new THREE.Color(0xeef2f6);
+    this.scene.fog = new THREE.FogExp2(0xeef2f6, 0.045);
 
     // 2. Câmera
     this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
@@ -123,17 +123,17 @@ class Totem3DViewer {
   // ILUMINAÇÃO (MODO DIA E NOITE)
   // =========================================================================
   setupLights() {
-    const ambient = new THREE.AmbientLight(0xdbeafe, 0.75);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.95);
     this.scene.add(ambient);
     this.dynamicLights.ambient = ambient;
 
-    const hemi = new THREE.HemisphereLight(0x93c5fd, 0x1e293b, 0.65);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 0.85);
     hemi.position.set(0, 10, 0);
     this.scene.add(hemi);
     this.dynamicLights.hemi = hemi;
 
     // Luz Solar Principal
-    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.45);
     dirLight.position.set(4.5, 7.5, 5.0);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
@@ -145,13 +145,13 @@ class Totem3DViewer {
     this.dynamicLights.sun = dirLight;
 
     // Luz de preenchimento traseira (para destacar a porta de manutenção no giro 360°)
-    const backLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
+    const backLight = new THREE.DirectionalLight(0xe2e8f0, 0.8);
     backLight.position.set(-4.0, 4.0, -5.0);
     this.scene.add(backLight);
     this.dynamicLights.back = backLight;
 
     // Brilho emitido pela tela frontal e fitas LED laterais
-    const screenGlow = new THREE.PointLight(0x38bdf8, 0.65, 3.2);
+    const screenGlow = new THREE.PointLight(0x38bdf8, 0.45, 3.2);
     screenGlow.position.set(0, 1.15, 0.65);
     this.scene.add(screenGlow);
     this.dynamicLights.screenGlow = screenGlow;
@@ -273,8 +273,8 @@ class Totem3DViewer {
       }
     }
 
-    // Grade sutil ao redor no piso do estúdio
-    const grid = new THREE.GridHelper(10, 20, 0x1e3a8a, 0x0f172a);
+    // Grade sutil clara ao redor no piso do estúdio
+    const grid = new THREE.GridHelper(10, 20, 0x94a3b8, 0xcbd5e1);
     grid.position.y = -0.085;
     envGroup.add(grid);
 
@@ -287,16 +287,16 @@ class Totem3DViewer {
   createTotemModel() {
     this.totemGroup = new THREE.Group();
 
-    // Materiais principais do chassi: METAL CRU / AÇO ESCOVADO INDUSTRIAL (SEM PINTURA)
+    // Materiais principais do chassi: METAL CLARO / ALUMÍNIO & AÇO ESCOVADO CLARO
     const rawMetalTextureCanvas = document.createElement('canvas');
     rawMetalTextureCanvas.width = 512;
     rawMetalTextureCanvas.height = 512;
     const mctx = rawMetalTextureCanvas.getContext('2d');
-    // Base de metal cru cinza-prateado
-    mctx.fillStyle = '#b0b7c0';
+    // Base em cinza-prata bem claro
+    mctx.fillStyle = '#e5eaf0';
     mctx.fillRect(0, 0, 512, 512);
-    // Riscos finos sutis de aço escovado industrial
-    mctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    // Riscos finos sutis de escovado claro
+    mctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
     mctx.lineWidth = 1;
     for (let i = 0; i < 400; i++) {
       const y = Math.random() * 512;
@@ -305,8 +305,8 @@ class Totem3DViewer {
       mctx.lineTo(512, y + (Math.random() - 0.5) * 4);
       mctx.stroke();
     }
-    mctx.strokeStyle = 'rgba(71, 85, 105, 0.12)';
-    for (let i = 0; i < 350; i++) {
+    mctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+    for (let i = 0; i < 300; i++) {
       const y = Math.random() * 512;
       mctx.beginPath();
       mctx.moveTo(0, y);
@@ -318,33 +318,36 @@ class Totem3DViewer {
     brushedMetalTex.wrapT = THREE.RepeatWrapping;
     brushedMetalTex.repeat.set(2, 4);
 
+    // Nota: Em Three.js sem HDR externo, metalness baixo (0.18) garante que o cinza fique bem CLARO e iluminado!
     const bodyMat = new THREE.MeshStandardMaterial({
       map: brushedMetalTex,
-      color: 0xd8dde3,          // Prata de metal cru sem pintura
-      metalness: 0.92,          // Alta refletividade de metal cru
-      roughness: 0.30,          // Aspereza de metal industrial escovado
+      color: 0xf1f5f9,          // Cinza-prata bem claro
+      metalness: 0.18,          // Mantém brilho metálico sem escurecer o difuso
+      roughness: 0.32,
+      emissive: 0x334155,
+      emissiveIntensity: 0.10
     });
     this.dynamicMaterials.body = bodyMat;
 
     const darkPanelMat = new THREE.MeshStandardMaterial({
-      color: 0x334155,
-      metalness: 0.85,
-      roughness: 0.28
+      color: 0x94a3b8,
+      metalness: 0.20,
+      roughness: 0.35
     });
 
-    // Material de união / chanfro sutil de metal escovado escuro (sem cor amarela)
+    // Material de união / chanfro sutil em cinza claro
     const rawSeamMat = new THREE.MeshStandardMaterial({
-      color: 0x94a3b8,
-      metalness: 0.90,
-      roughness: 0.25
+      color: 0xcbd5e1,
+      metalness: 0.20,
+      roughness: 0.30
     });
     this.dynamicMaterials.accentTrim = rawSeamMat;
 
-    // Fita de LED desativada (neutra em metal cru)
+    // Friso lateral em cinza claro
     const ledStripMat = new THREE.MeshStandardMaterial({
-      color: 0x94a3b8,
-      metalness: 0.9,
-      roughness: 0.3
+      color: 0xe2e8f0,
+      metalness: 0.20,
+      roughness: 0.30
     });
     this.dynamicMaterials.ledStrip = ledStripMat;
 
@@ -352,9 +355,9 @@ class Totem3DViewer {
     // 1. BASE METÁLICA CHUMBADA + PEDESTAL DE FIXAÇÃO (0,00m a 0,16m)
     // -----------------------------------------------------------------------
     const concreteBaseMat = new THREE.MeshStandardMaterial({
-      color: 0x64748b,
-      roughness: 0.7,
-      metalness: 0.2
+      color: 0xcbd5e1,
+      roughness: 0.65,
+      metalness: 0.10
     });
     const basePedestal = new THREE.Mesh(
       new THREE.BoxGeometry(0.84, 0.10, 0.48),
@@ -365,11 +368,11 @@ class Totem3DViewer {
     basePedestal.receiveShadow = true;
     this.totemGroup.add(basePedestal);
 
-    // Flange metálica em chapa de aço cru
+    // Flange metálica em chapa de aço claro
     const flangeMat = new THREE.MeshStandardMaterial({
-      color: 0x64748b,
-      metalness: 0.92,
-      roughness: 0.28
+      color: 0xdbe2ea,
+      metalness: 0.22,
+      roughness: 0.32
     });
     const flange = new THREE.Mesh(
       new THREE.BoxGeometry(0.76, 0.04, 0.40),
@@ -381,7 +384,7 @@ class Totem3DViewer {
 
     // 6 Chumbadores / Parafusos sextavados de fixação estrutural
     const boltGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 6);
-    const boltMat = new THREE.MeshStandardMaterial({ color: 0xcfd4dc, metalness: 0.95, roughness: 0.18 });
+    const boltMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.30, roughness: 0.22 });
     [
       [-0.34, 0.145, 0.16], [0, 0.145, 0.16], [0.34, 0.145, 0.16],
       [-0.34, 0.145, -0.16], [0, 0.145, -0.16], [0.34, 0.145, -0.16]
@@ -604,14 +607,14 @@ class Totem3DViewer {
     lowerConsoleCanvas.height = 420;
     const lctx = lowerConsoleCanvas.getContext('2d');
 
-    // Fundo metálico escuro
-    lctx.fillStyle = '#0f172a';
+    // Fundo metálico claro (aço/alumínio escovado claro)
+    lctx.fillStyle = '#e2e8f0';
     lctx.fillRect(0, 0, 512, 420);
 
-    // Faixa de ícones de conectividade (QR, Wi-Fi, Solar, Acessibilidade, SOS)
-    lctx.fillStyle = '#1e293b';
+    // Faixa de ícones de conectividade (QR, Wi-Fi, Solar, Acessibilidade)
+    lctx.fillStyle = '#f8fafc';
     lctx.fillRect(24, 18, 464, 74);
-    lctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    lctx.strokeStyle = '#94a3b8';
     lctx.lineWidth = 2;
     lctx.strokeRect(24, 18, 464, 74);
 
@@ -626,64 +629,90 @@ class Totem3DViewer {
       lctx.font = '24px sans-serif';
       lctx.textAlign = 'center';
       lctx.fillText(b.icon, bx + 36, 52);
-      lctx.fillStyle = '#93c5fd';
+      lctx.fillStyle = '#0c326f';
       lctx.font = 'bold 12px sans-serif';
       lctx.fillText(b.label, bx + 36, 76);
     });
 
-    // Seção de Carregadores USB e Som Direcional
-    lctx.fillStyle = '#111827';
-    lctx.fillRect(24, 110, 290, 115);
-    lctx.strokeStyle = '#334155';
-    lctx.strokeRect(24, 110, 290, 115);
+    // Seção de Carregadores USB e Som Direcional (Caixa Esquerda Clara)
+    lctx.save();
+    lctx.fillStyle = '#f1f5f9';
+    lctx.fillRect(24, 110, 286, 118);
+    lctx.strokeStyle = '#94a3b8';
+    lctx.lineWidth = 2;
+    lctx.strokeRect(24, 110, 286, 118);
+    lctx.beginPath();
+    lctx.rect(26, 112, 282, 114);
+    lctx.clip();
 
-    lctx.fillStyle = '#38bdf8';
-    lctx.font = 'bold 13px sans-serif';
+    lctx.fillStyle = '#0c326f';
+    lctx.font = 'bold 12px sans-serif';
     lctx.textAlign = 'left';
-    lctx.fillText('⚡ CARREGADORES USB & ÁUDIO 10W', 40, 134);
+    lctx.fillText('⚡ CARREGADORES USB & ÁUDIO 10W', 36, 133, 264);
 
     // Desenho da grelha de som direcional
-    lctx.fillStyle = '#334155';
+    lctx.fillStyle = '#64748b';
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 10; c++) {
         lctx.beginPath();
-        lctx.arc(50 + c * 14, 156 + r * 14, 3.5, 0, Math.PI * 2);
+        lctx.arc(46 + c * 14, 156 + r * 14, 3.5, 0, Math.PI * 2);
         lctx.fill();
       }
     }
 
     // Desenho das 2 portas USB iluminadas
-    [225, 270].forEach(ux => {
-      lctx.fillStyle = '#0284c7';
-      lctx.fillRect(ux, 152, 28, 44);
-      lctx.fillStyle = '#0f172a';
-      lctx.fillRect(ux + 6, 160, 16, 28);
-      lctx.fillStyle = '#38bdf8';
+    [218, 262].forEach(ux => {
+      lctx.fillStyle = '#1351b4';
+      lctx.fillRect(ux, 150, 28, 44);
+      lctx.fillStyle = '#ffffff';
+      lctx.fillRect(ux + 6, 158, 16, 28);
+      lctx.fillStyle = '#0c326f';
       lctx.font = 'bold 10px sans-serif';
       lctx.textAlign = 'center';
-      lctx.fillText('USB', ux + 14, 212);
+      lctx.fillText('USB', ux + 14, 210);
     });
+    lctx.restore();
 
-    // Placa Metálica Institucional da Prefeitura de Jaú em aço escovado
+    // Caixa Direita: Moldura do Botão Físico de Acionamento de Socorro (SOS)
+    lctx.save();
+    lctx.fillStyle = '#fef2f2';
+    lctx.fillRect(322, 110, 166, 118);
+    lctx.strokeStyle = '#dc2626';
+    lctx.lineWidth = 2;
+    lctx.strokeRect(322, 110, 166, 118);
+    lctx.beginPath();
+    lctx.rect(324, 112, 162, 114);
+    lctx.clip();
+
+    lctx.fillStyle = '#b91c1c';
+    lctx.font = 'bold 11px sans-serif';
+    lctx.textAlign = 'center';
+    lctx.fillText('🚨 BOTÃO DE SOCORRO', 405, 130, 150);
+    lctx.fillStyle = '#7f1d1d';
+    lctx.font = 'bold 10px sans-serif';
+    lctx.fillText('SAMU 192 • GCM 153', 405, 218, 150);
+    lctx.restore();
+
+    // Placa Metálica Institucional da Prefeitura de Jaú em aço escovado claro
     const plateGrad = lctx.createLinearGradient(24, 248, 488, 395);
-    plateGrad.addColorStop(0, '#1e293b');
-    plateGrad.addColorStop(1, '#0f172a');
+    plateGrad.addColorStop(0, '#ffffff');
+    plateGrad.addColorStop(1, '#f1f5f9');
     lctx.fillStyle = plateGrad;
     lctx.fillRect(24, 248, 464, 145);
     lctx.strokeStyle = '#94a3b8';
     lctx.lineWidth = 2;
     lctx.strokeRect(24, 248, 464, 145);
 
-    lctx.fillStyle = '#f8fafc';
+    lctx.fillStyle = '#0c326f';
     lctx.font = 'bold 21px sans-serif';
     lctx.textAlign = 'center';
-    lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294);
-    lctx.fillStyle = '#cbd5e1';
+    lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294, 436);
+    lctx.fillStyle = '#168821';
     lctx.font = 'bold 15px sans-serif';
-    lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326);
-    lctx.fillStyle = '#94a3b8';
+    lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326, 436);
+    lctx.fillStyle = '#475569';
     lctx.font = '13px sans-serif';
-    lctx.fillText('Projeto Integrador Senac Jaú • Totemize Smart City', 256, 356);
+    lctx.fillText('Projeto Integrador Senac Jaú • Totemize Smart City', 256, 356, 436);
 
     const lowerTex = new THREE.CanvasTexture(lowerConsoleCanvas);
     const lowerPanelMesh = new THREE.Mesh(
@@ -691,7 +720,7 @@ class Totem3DViewer {
       new THREE.MeshStandardMaterial({
         map: lowerTex,
         roughness: 0.35,
-        metalness: 0.4
+        metalness: 0.12
       })
     );
     lowerPanelMesh.position.set(0, 0.42, 0.180);
@@ -700,7 +729,7 @@ class Totem3DViewer {
     // BOTÃO FÍSICO SOS EMERGÊNCIA 3D (Em alto-relevo iluminado na frente)
     const sosBase = new THREE.Mesh(
       new THREE.CylinderGeometry(0.052, 0.056, 0.018, 24),
-      new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.7, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.25, roughness: 0.3 })
     );
     sosBase.rotation.x = Math.PI / 2;
     sosBase.position.set(0.18, 0.48, 0.184);
@@ -720,7 +749,7 @@ class Totem3DViewer {
     this.totemGroup.add(sosBtn);
 
     // -----------------------------------------------------------------------
-    // 7. FACE TRASEIRA COMPLETA (PARA VISUALIZAÇÃO 360°!)
+    // 7. FACE TRASEIRA COMPLETA EM METAL CLARO (PARA VISUALIZAÇÃO 360°!)
     // Porta de Manutenção Antivandalismo, Fechaduras, Aletas de Exaustão e Plaqueta IP65
     // -----------------------------------------------------------------------
     const rearCanvas = document.createElement('canvas');
@@ -728,77 +757,80 @@ class Totem3DViewer {
     rearCanvas.height = 1400;
     const rctx = rearCanvas.getContext('2d');
 
-    rctx.fillStyle = '#161b22';
+    rctx.fillStyle = '#e2e8f0';
     rctx.fillRect(0, 0, 512, 1400);
 
     // Contorno da porta técnica traseira
-    rctx.strokeStyle = '#090d16';
-    rctx.lineWidth = 6;
+    rctx.strokeStyle = '#94a3b8';
+    rctx.lineWidth = 5;
     rctx.strokeRect(36, 40, 440, 1320);
-    rctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+    rctx.strokeStyle = '#cbd5e1';
     rctx.lineWidth = 2;
-    rctx.strokeRect(40, 44, 432, 1312);
+    rctx.strokeRect(42, 46, 428, 1308);
 
     // Venezianas / Grelhas de ventilação superior (dissipação térmica)
-    rctx.fillStyle = '#090d16';
     for (let i = 0; i < 9; i++) {
-      rctx.fillRect(86, 85 + i * 22, 340, 11);
-      rctx.fillStyle = '#334155';
-      rctx.fillRect(86, 83 + i * 22, 340, 2);
-      rctx.fillStyle = '#090d16';
+      rctx.fillStyle = '#64748b';
+      rctx.fillRect(86, 85 + i * 22, 340, 10);
+      rctx.fillStyle = '#f8fafc';
+      rctx.fillRect(86, 82 + i * 22, 340, 3);
     }
 
-    // Painel Institucional Traseiro
-    rctx.fillStyle = '#0f172a';
+    // Painel Institucional Traseiro Claro
+    rctx.fillStyle = '#ffffff';
     rctx.fillRect(68, 340, 376, 420);
-    rctx.strokeStyle = '#0284c7';
+    rctx.strokeStyle = '#94a3b8';
     rctx.lineWidth = 3;
     rctx.strokeRect(68, 340, 376, 420);
 
-    rctx.fillStyle = '#38bdf8';
+    rctx.fillStyle = '#0c326f';
     rctx.font = 'bold 22px sans-serif';
     rctx.textAlign = 'center';
     rctx.fillText('PREFEITURA DE JAÚ', 256, 405);
-    rctx.fillStyle = '#f8fafc';
+    rctx.fillStyle = '#1e293b';
     rctx.font = 'bold 30px sans-serif';
     rctx.fillText('TOTEM INTELIGENTE', 256, 448);
-    rctx.fillStyle = '#10b981';
+    rctx.fillStyle = '#168821';
     rctx.font = 'bold 17px sans-serif';
     rctx.fillText('☀️ ENERGIA HÍBRIDA (SOLAR 35Wp + 220V)', 256, 495);
 
     // Especificações Técnicas na Plaqueta Traseira
     const specs = [
-      '• Estrutura: Aço Galvanizado e ACM',
-      '• Pintura: Eletrostática Anticorrosiva',
-      '• Proteção: Vidro 8mm + Grau IP65',
+      '• Estrutura: Chapa de Metal Escovado Claro',
+      '• Proteção: Vidro Temperado 8mm + Grau IP65',
+      '• Exaustão: Venezianas com Cooler Termostático',
       '• Painel Solar Topo: 35Wp (64x21cm Embutido)',
-      '• Bateria Interna: Backup LiFePO4 24h (SOS/5G)',
+      '• Bateria na Base: Backup LiFePO4 24h (Zona Fria)',
       '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)',
       '• Peso Aproximado: 120 kg'
     ];
-    rctx.fillStyle = '#cbd5e1';
-    rctx.font = '15px sans-serif';
+    rctx.fillStyle = '#334155';
+    rctx.font = 'bold 14.5px sans-serif';
     rctx.textAlign = 'left';
     specs.forEach((line, idx) => {
-      rctx.fillText(line, 92, 548 + idx * 28);
+      rctx.fillText(line, 88, 548 + idx * 28, 340);
     });
 
     // Aviso de Acesso Técnico Restrito
-    rctx.fillStyle = '#eab308';
+    rctx.fillStyle = '#f1f5f9';
     rctx.fillRect(106, 810, 300, 64);
-    rctx.fillStyle = '#000000';
-    rctx.font = 'bold 16px sans-serif';
+    rctx.strokeStyle = '#64748b';
+    rctx.lineWidth = 2;
+    rctx.strokeRect(106, 810, 300, 64);
+    rctx.fillStyle = '#0f172a';
+    rctx.font = 'bold 15px sans-serif';
     rctx.textAlign = 'center';
     rctx.fillText('⚡ ACESSO TÉCNICO RESTRITO', 256, 838);
-    rctx.font = 'bold 12px sans-serif';
+    rctx.fillStyle = '#475569';
+    rctx.font = 'bold 11.5px sans-serif';
     rctx.fillText('SISTEMA ELÉTRICO SOLAR + REDE 220V', 256, 858);
 
     // Venezianas de ventilação inferior
     for (let i = 0; i < 8; i++) {
-      rctx.fillStyle = '#090d16';
-      rctx.fillRect(86, 1080 + i * 22, 340, 11);
-      rctx.fillStyle = '#334155';
-      rctx.fillRect(86, 1078 + i * 22, 340, 2);
+      rctx.fillStyle = '#64748b';
+      rctx.fillRect(86, 1080 + i * 22, 340, 10);
+      rctx.fillStyle = '#f8fafc';
+      rctx.fillRect(86, 1077 + i * 22, 340, 3);
     }
 
     const rearTex = new THREE.CanvasTexture(rearCanvas);
@@ -806,8 +838,8 @@ class Totem3DViewer {
       new THREE.PlaneGeometry(0.62, 1.82),
       new THREE.MeshStandardMaterial({
         map: rearTex,
-        roughness: 0.4,
-        metalness: 0.6
+        roughness: 0.35,
+        metalness: 0.15
       })
     );
     rearDoorMesh.rotation.y = Math.PI;
@@ -829,7 +861,7 @@ class Totem3DViewer {
   }
 
   // =========================================================================
-  // RENDERIZAÇÃO DINÂMICA DO CABEÇALHO SUPERIOR E TELA TOUCH 43"
+  // RENDERIZAÇÃO DINÂMICA DO CABEÇALHO SUPERIOR E TELA TOUCH 43" (FUNDO CLARO)
   // =========================================================================
   updateHeaderTexture() {
     const ctx = this.headerCtx;
@@ -837,26 +869,21 @@ class Totem3DViewer {
     const h = this.headerCanvas.height;
 
     const grad = ctx.createLinearGradient(0, 0, 0, h);
-    if (this.designTheme === 'nexus') {
-      grad.addColorStop(0, '#042f4e');
-      grad.addColorStop(1, '#081426');
-    } else {
-      grad.addColorStop(0, '#111827');
-      grad.addColorStop(1, '#090d16');
-    }
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(1, '#e2e8f0');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Moldura metálica escovada limpa (sem amarelo)
+    // Moldura metálica escovada limpa
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 4;
     ctx.strokeRect(8, 8, w - 16, h - 16);
 
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#f8fafc';
+    ctx.fillStyle = '#0c326f';
     ctx.font = '800 64px sans-serif';
     ctx.fillText('JAÚ', w / 2, 105);
-    ctx.fillStyle = '#cbd5e1';
+    ctx.fillStyle = '#1351b4';
     ctx.font = 'bold 24px sans-serif';
     ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
 
@@ -938,7 +965,7 @@ class Totem3DViewer {
       return;
     }
 
-    // 3. Interface Interativa Principal (Suporta Alto Contraste e Modo Cadeirante)
+    // 3. Interface Interativa Principal em Fundo Claro (Padrão Gov.br / Suporta Alto Contraste e Modo Cadeirante)
     const hc = this.isHighContrast;
     const wcOffset = this.isWheelchair ? 210 : 0;
 
@@ -947,52 +974,52 @@ class Totem3DViewer {
       ctx.fillRect(0, 0, w, h);
     } else {
       const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-      bgGrad.addColorStop(0, '#0b1930');
-      bgGrad.addColorStop(1, '#030712');
+      bgGrad.addColorStop(0, '#f8fafc');
+      bgGrad.addColorStop(1, '#eef2f6');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
     }
 
     // Se Modo Cadeirante estiver ativo, exibe faixa informativa no topo
     if (this.isWheelchair) {
-      ctx.fillStyle = hc ? '#000' : '#0f172a';
+      ctx.fillStyle = hc ? '#000' : '#ffffff';
       ctx.fillRect(0, 0, w, wcOffset);
-      ctx.strokeStyle = '#fbbf24';
+      ctx.strokeStyle = hc ? '#ffff00' : '#1351b4';
       ctx.lineWidth = 3;
       ctx.strokeRect(16, 16, w - 32, wcOffset - 32);
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.textAlign = 'center';
       ctx.font = 'bold 28px sans-serif';
       ctx.fillText('♿ MODO ALCANCE ACESSÍVEL ATIVO', w / 2, 95);
-      ctx.fillStyle = '#cbd5e1';
+      ctx.fillStyle = hc ? '#ffff00' : '#475569';
       ctx.font = '22px sans-serif';
       ctx.fillText('Interface rebaixada para cadeirantes (NBR 9050)', w / 2, 140);
     }
 
-    // Header da Tela Touch
-    ctx.fillStyle = hc ? '#000000' : 'rgba(15, 23, 42, 0.95)';
+    // Header da Tela Touch (Fundo Claro Institucional)
+    ctx.fillStyle = hc ? '#000000' : '#ffffff';
     ctx.fillRect(0, wcOffset, w, 175);
-    ctx.strokeStyle = hc ? '#ffff00' : 'rgba(56, 189, 248, 0.3)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = hc ? '#ffff00' : '#168821';
+    ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(0, wcOffset + 175);
     ctx.lineTo(w, wcOffset + 175);
     ctx.stroke();
 
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 30px sans-serif';
     ctx.fillText('🏛️ PREFEITURA DE JAÚ', 32, wcOffset + 58);
-    ctx.fillStyle = hc ? '#ffff00' : '#38bdf8';
+    ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
     ctx.font = 'bold 20px sans-serif';
     ctx.fillText('Estância Turística • Totemize Smart City', 32, wcOffset + 90);
 
     // Relógio e Clima no canto direito
     ctx.textAlign = 'right';
-    ctx.fillStyle = hc ? '#ffff00' : '#38bdf8';
+    ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
     ctx.font = '800 36px sans-serif';
     ctx.fillText(timeStr, w - 32, wcOffset + 58);
-    ctx.fillStyle = hc ? '#ffff00' : '#f8fafc';
+    ctx.fillStyle = hc ? '#ffff00' : '#334155';
     ctx.font = 'bold 22px sans-serif';
     ctx.fillText('☀️ 28°C Jaú/SP', w - 32, wcOffset + 92);
 
@@ -1001,12 +1028,12 @@ class Totem3DViewer {
     accBtns.forEach((lbl, idx) => {
       const bx = 30 + idx * 134;
       const by = wcOffset + 112;
-      ctx.fillStyle = hc ? '#000000' : '#1e293b';
+      ctx.fillStyle = hc ? '#000000' : '#f1f5f9';
       ctx.fillRect(bx, by, 124, 46);
-      ctx.strokeStyle = hc ? '#ffff00' : '#475569';
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 2;
       ctx.strokeRect(bx, by, 124, 46);
-      ctx.fillStyle = hc ? '#ffff00' : '#e2e8f0';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(lbl, bx + 62, by + 30);
@@ -1027,81 +1054,92 @@ class Totem3DViewer {
       this.drawHomeScreen(ctx, w, bodyY, hc);
     }
 
-    // Rodapé Fixo com DOOH e Botão de Emergência
+    // Rodapé Fixo Claro com DOOH e Botão de Emergência
     const footY = h - 130;
-    ctx.fillStyle = hc ? '#000000' : '#0f172a';
+    ctx.fillStyle = hc ? '#000000' : '#ffffff';
     ctx.fillRect(0, footY, w, 130);
-    ctx.strokeStyle = hc ? '#ffff00' : '#334155';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = hc ? '#ffff00' : '#0c326f';
+    ctx.lineWidth = 3;
     ctx.strokeRect(0, footY, w, 130);
 
     // Botão Início
-    ctx.fillStyle = hc ? '#000000' : '#1e293b';
+    ctx.fillStyle = hc ? '#000000' : '#1351b4';
     ctx.fillRect(24, footY + 22, 110, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#38bdf8';
+    ctx.strokeStyle = hc ? '#ffff00' : '#0c326f';
     ctx.strokeRect(24, footY + 22, 110, 86);
     ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('🏠 INÍCIO', 79, footY + 72);
 
-    // Carrossel DOOH
-    ctx.fillStyle = hc ? '#000000' : '#1e293b';
-    ctx.fillRect(150, footY + 22, 340, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#334155';
-    ctx.strokeRect(150, footY + 22, 340, 86);
+    // Carrossel DOOH (Contido estritamente dentro do seu retângulo claro)
+    ctx.save();
+    ctx.fillStyle = hc ? '#000000' : '#f8fafc';
+    ctx.fillRect(148, footY + 22, 344, 86);
+    ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(148, footY + 22, 344, 86);
+    ctx.beginPath();
+    ctx.rect(152, footY + 24, 336, 82);
+    ctx.clip();
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#38bdf8';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.fillText('ANÚNCIO PARCEIRO • DOOH ESG', 168, footY + 50);
-    ctx.fillStyle = hc ? '#ffff00' : '#e2e8f0';
-    ctx.font = '18px sans-serif';
-    ctx.fillText('👠 Feira do Calçado de Jaú!', 168, footY + 84);
+    ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('ANÚNCIO PARCEIRO • DOOH ESG', 164, footY + 50, 314);
+    ctx.fillStyle = hc ? '#ffff00' : '#1e293b';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('👠 Feira do Calçado de Jaú!', 164, footY + 82, 314);
+    ctx.restore();
 
-    // Botão Contatos de Socorro
-    ctx.fillStyle = hc ? '#000000' : '#991b1b';
+    // Botão Contatos de Acionamento de Socorro (Contido estritamente nas bordas)
+    ctx.save();
+    ctx.fillStyle = hc ? '#000000' : '#ffffff';
     ctx.fillRect(506, footY + 22, 190, 86);
-    ctx.strokeStyle = hc ? '#ffff00' : '#ef4444';
+    ctx.strokeStyle = hc ? '#ffff00' : '#d32f2f';
     ctx.lineWidth = 3;
     ctx.strokeRect(506, footY + 22, 190, 86);
-    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
-    ctx.font = 'bold 19px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('☎️ SOCORRO', 601, footY + 58);
+    ctx.beginPath();
+    ctx.rect(510, footY + 25, 182, 80);
+    ctx.clip();
+    ctx.fillStyle = hc ? '#ffff00' : '#b71c1c';
     ctx.font = 'bold 15px sans-serif';
-    ctx.fillText('192 • 193 • 153', 601, footY + 84);
+    ctx.textAlign = 'center';
+    ctx.fillText('☎️ CONTATOS DE', 601, footY + 54, 172);
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('SOCORRO • 192/153', 601, footY + 82, 172);
+    ctx.restore();
 
     if (this.screenTexture) this.screenTexture.needsUpdate = true;
   }
 
   drawHomeScreen(ctx, w, startY, hc) {
-    // Banner Defesa Civil
-    ctx.fillStyle = hc ? '#000000' : 'rgba(239, 68, 68, 0.22)';
+    // Banner Defesa Civil Claro
+    ctx.fillStyle = hc ? '#000000' : '#fff8e6';
     ctx.fillRect(32, startY, w - 64, 78);
-    ctx.strokeStyle = hc ? '#ffff00' : '#ef4444';
+    ctx.strokeStyle = hc ? '#ffff00' : '#d9a400';
     ctx.lineWidth = 2;
     ctx.strokeRect(32, startY, w - 64, 78);
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#fca5a5';
+    ctx.fillStyle = hc ? '#ffff00' : '#925400';
     ctx.font = 'bold 18px sans-serif';
     ctx.fillText('⚠️ DEFESA CIVIL JAÚ • TEMPO ESTÁVEL', 52, startY + 32);
-    ctx.fillStyle = hc ? '#ffff00' : '#fecaca';
+    ctx.fillStyle = hc ? '#ffff00' : '#593900';
     ctx.font = '18px sans-serif';
     ctx.fillText('Campanha de vacinação ativa até 17h nos postos municipais.', 52, startY + 60);
 
     // Chamada Bem-vindo a Jaú
     ctx.textAlign = 'center';
-    ctx.fillStyle = hc ? '#ffff00' : '#f8fafc';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 34px sans-serif';
     ctx.fillText('BEM-VINDO A JAÚ • COMO AJUDAR HOJE?', w / 2, startY + 132);
 
-    // Grade de 6 Cards Coloridos (Layout Dossiê + Mockup)
+    // Grade de 6 Cards em Fundo Claro (Padrão Gov.br)
     const cards = [
-      { icon: '🚌', title: 'ÔNIBUS & ROTAS', sub: 'Itinerários GPS em tempo real', color: '#0284c7' },
-      { icon: '👠', title: 'CIRCUITO CALÇADO', sub: 'Lojas de fábrica e rotas', color: '#db2777' },
-      { icon: '🏛️', title: 'TURISMO & LAZER', sub: 'Parques, Matriz e Teatro', color: '#059669' },
-      { icon: '📋', title: 'SERVIÇOS PÚBLICOS', sub: 'Ouvidoria, Saúde e 156', color: '#d97706' },
-      { icon: '🗺️', title: 'MAPA INTERATIVO', sub: 'Rotas via QR Code sem papel', color: '#4f46e5' },
+      { icon: '🚌', title: 'ÔNIBUS & ROTAS', sub: 'Itinerários GPS em tempo real', color: '#1351b4' },
+      { icon: '👠', title: 'CIRCUITO CALÇADO', sub: 'Lojas de fábrica e rotas', color: '#d97706' },
+      { icon: '🏛️', title: 'TURISMO & LAZER', sub: 'Parques, Matriz e Teatro', color: '#168821' },
+      { icon: '📋', title: 'SERVIÇOS PÚBLICOS', sub: 'Ouvidoria, Saúde e 156', color: '#0c326f' },
+      { icon: '🗺️', title: 'MAPA INTERATIVO', sub: 'Rotas via QR Code sem papel', color: '#2563eb' },
       { icon: '🚨', title: 'SEGURANÇA & SOS', sub: 'Guarda 153, SAMU e Apoio', color: '#dc2626' }
     ];
 
@@ -1113,36 +1151,40 @@ class Totem3DViewer {
       const cw = 320;
       const ch = 175;
 
-      ctx.fillStyle = hc ? '#000000' : c.color;
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(cx, cy, cw, ch);
-      ctx.strokeStyle = hc ? '#ffff00' : 'rgba(255,255,255,0.35)';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
+      ctx.lineWidth = 2;
       ctx.strokeRect(cx, cy, cw, ch);
+
+      // Filete superior colorido padrão Gov.br
+      ctx.fillStyle = hc ? '#ffff00' : c.color;
+      ctx.fillRect(cx, cy, cw, 8);
 
       ctx.textAlign = 'left';
       ctx.font = '46px sans-serif';
-      ctx.fillText(c.icon, cx + 22, cy + 64);
+      ctx.fillText(c.icon, cx + 22, cy + 68);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = '800 23px sans-serif';
-      ctx.fillText(c.title, cx + 22, cy + 114);
+      ctx.fillText(c.title, cx + 22, cy + 116);
 
-      ctx.fillStyle = hc ? '#ffff00' : 'rgba(255,255,255,0.9)';
+      ctx.fillStyle = hc ? '#ffff00' : '#475569';
       ctx.font = '18px sans-serif';
-      ctx.fillText(c.sub, cx + 22, cy + 146);
+      ctx.fillText(c.sub, cx + 22, cy + 148);
     });
 
     // Faixa ESG Paperless com QR Code
     const esgY = startY + 760;
     if (esgY < 1050) {
-      ctx.fillStyle = hc ? '#000000' : 'rgba(16, 185, 129, 0.2)';
+      ctx.fillStyle = hc ? '#000000' : '#f0fdf4';
       ctx.fillRect(32, esgY, w - 64, 92);
-      ctx.strokeStyle = hc ? '#ffff00' : '#10b981';
+      ctx.strokeStyle = hc ? '#ffff00' : '#168821';
       ctx.strokeRect(32, esgY, w - 64, 92);
-      ctx.fillStyle = hc ? '#ffff00' : '#6ee7b7';
+      ctx.fillStyle = hc ? '#ffff00' : '#168821';
       ctx.font = 'bold 22px sans-serif';
       ctx.fillText('🌱 CIDADE INTELIGENTE ESG (100% PAPERLESS)', 54, esgY + 40);
-      ctx.fillStyle = hc ? '#ffff00' : '#d1fae5';
+      ctx.fillStyle = hc ? '#ffff00' : '#14532d';
       ctx.font = '19px sans-serif';
       ctx.fillText('Escaneie o QR Code na tela para levar rotas e horários no celular.', 54, esgY + 72);
     }
@@ -1150,26 +1192,26 @@ class Totem3DViewer {
 
   drawBusScreen(ctx, w, startY, hc) {
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#38bdf8';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 32px sans-serif';
     ctx.fillText('🚌 TRANSPORTE COLETIVO DE JAÚ (GTFS-RT)', 32, startY + 40);
 
     const lines = [
-      { badge: 'LINHA 01', name: 'Circular Centro ⇄ Pouso Alegre', eta: '4 min', color: '#10b981' },
-      { badge: 'LINHA 04', name: 'Jd. Pedro Ometto ⇄ Terminal', eta: '12 min', color: '#10b981' },
-      { badge: 'LINHA 07', name: 'Vila Nova ⇄ Território do Calçado', eta: '21 min', color: '#f59e0b' },
-      { badge: 'LINHA 11', name: 'Distrito Industrial ⇄ Centro', eta: '7 min', color: '#10b981' }
+      { badge: 'LINHA 01', name: 'Circular Centro ⇄ Pouso Alegre', eta: '4 min', color: '#168821' },
+      { badge: 'LINHA 04', name: 'Jd. Pedro Ometto ⇄ Terminal', eta: '12 min', color: '#168821' },
+      { badge: 'LINHA 07', name: 'Vila Nova ⇄ Território do Calçado', eta: '21 min', color: '#d97706' },
+      { badge: 'LINHA 11', name: 'Distrito Industrial ⇄ Centro', eta: '7 min', color: '#168821' }
     ];
 
     lines.forEach((l, i) => {
       const ly = startY + 80 + i * 155;
-      ctx.fillStyle = hc ? '#000000' : '#1e293b';
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(32, ly, w - 64, 135);
-      ctx.strokeStyle = hc ? '#ffff00' : '#0284c7';
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 2;
       ctx.strokeRect(32, ly, w - 64, 135);
 
-      ctx.fillStyle = hc ? '#000000' : '#0284c7';
+      ctx.fillStyle = hc ? '#000000' : '#0c326f';
       ctx.fillRect(52, ly + 25, 130, 85);
       ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
       ctx.font = '800 22px sans-serif';
@@ -1177,7 +1219,7 @@ class Totem3DViewer {
       ctx.fillText(l.badge, 117, ly + 75);
 
       ctx.textAlign = 'left';
-      ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = 'bold 24px sans-serif';
       ctx.fillText(l.name, 205, ly + 55);
 
@@ -1189,7 +1231,7 @@ class Totem3DViewer {
 
   drawShoesScreen(ctx, w, startY, hc) {
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#f472b6';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 32px sans-serif';
     ctx.fillText('👠 CIRCUITO DO CALÇADO FEMININO', 32, startY + 40);
 
@@ -1201,21 +1243,21 @@ class Totem3DViewer {
 
     stores.forEach((s, i) => {
       const sy = startY + 85 + i * 200;
-      ctx.fillStyle = hc ? '#000000' : '#500724';
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(32, sy, w - 64, 175);
-      ctx.strokeStyle = hc ? '#ffff00' : '#ec4899';
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 3;
       ctx.strokeRect(32, sy, w - 64, 175);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = '800 26px sans-serif';
       ctx.fillText(`🛍️ ${s.title}`, 56, sy + 58);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#fbcfe8';
+      ctx.fillStyle = hc ? '#ffff00' : '#475569';
       ctx.font = '21px sans-serif';
       ctx.fillText(`📍 ${s.addr}`, 56, sy + 102);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#db2777';
+      ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
       ctx.fillRect(56, sy + 120, 280, 40);
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.font = 'bold 19px sans-serif';
@@ -1225,7 +1267,7 @@ class Totem3DViewer {
 
   drawTourismScreen(ctx, w, startY, hc) {
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#34d399';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 32px sans-serif';
     ctx.fillText('🏛️ TURISMO, CULTURA E LAZER EM JAÚ', 32, startY + 40);
 
@@ -1237,21 +1279,21 @@ class Totem3DViewer {
 
     spots.forEach((sp, i) => {
       const sy = startY + 85 + i * 200;
-      ctx.fillStyle = hc ? '#000000' : '#064e3b';
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(32, sy, w - 64, 175);
-      ctx.strokeStyle = hc ? '#ffff00' : '#10b981';
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 3;
       ctx.strokeRect(32, sy, w - 64, 175);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = '800 26px sans-serif';
       ctx.fillText(`${sp.icon} ${sp.title}`, 56, sy + 60);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#a7f3d0';
+      ctx.fillStyle = hc ? '#ffff00' : '#475569';
       ctx.font = '21px sans-serif';
       ctx.fillText(sp.desc, 56, sy + 106);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#34d399';
+      ctx.fillStyle = hc ? '#ffff00' : '#168821';
       ctx.font = 'bold 19px sans-serif';
       ctx.fillText('📲 Escaneie o QR Code para abrir no Google Maps', 56, sy + 148);
     });
@@ -1259,7 +1301,7 @@ class Totem3DViewer {
 
   drawServicesScreen(ctx, w, startY, hc) {
     ctx.textAlign = 'left';
-    ctx.fillStyle = hc ? '#ffff00' : '#fbbf24';
+    ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 32px sans-serif';
     ctx.fillText('📋 SERVIÇOS PÚBLICOS & EMERGÊNCIA', 32, startY + 40);
 
@@ -1278,18 +1320,18 @@ class Totem3DViewer {
       const px = 32 + col * 336;
       const py = startY + 80 + row * 145;
 
-      ctx.fillStyle = hc ? '#000000' : '#1e293b';
+      ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(px, py, 320, 125);
-      ctx.strokeStyle = hc ? '#ffff00' : '#ef4444';
+      ctx.strokeStyle = hc ? '#ffff00' : '#dc2626';
       ctx.lineWidth = 3;
       ctx.strokeRect(px, py, 320, 125);
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = hc ? '#ffff00' : '#f87171';
+      ctx.fillStyle = hc ? '#ffff00' : '#dc2626';
       ctx.font = '800 42px sans-serif';
       ctx.fillText(p.num, px + 160, py + 62);
 
-      ctx.fillStyle = hc ? '#ffff00' : '#f8fafc';
+      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
       ctx.font = 'bold 20px sans-serif';
       ctx.fillText(p.label, px + 160, py + 102);
     });
@@ -1644,19 +1686,53 @@ class Totem3DViewer {
       });
     }
 
-    // 5. Alternar Acabamento (Dossiê Ouro/Grafite vs Nexus Azul/Grafite)
-    const btnTheme = document.getElementById('btn-3d-theme');
-    if (btnTheme) {
-      btnTheme.addEventListener('click', () => {
-        this.designTheme = this.designTheme === 'dossie' ? 'nexus' : 'dossie';
-        this.applyDesignTheme();
-        btnTheme.textContent = this.designTheme === 'dossie'
-          ? '🎨 Acabamento: Dossiê Solar (Ouro)'
-          : '🎨 Acabamento: Jaú Nexus (Azul)';
+    // 5. Giro Interativo por Ângulo (↺ -45° e ↻ +45°)
+    const btnSpinLeft = document.getElementById('btn-spin-left');
+    const btnSpinRight = document.getElementById('btn-spin-right');
+    if (btnSpinLeft) {
+      btnSpinLeft.addEventListener('click', () => {
+        this.autoRotate = false;
+        const btnAuto = document.getElementById('btn-3d-autorotate');
+        if (btnAuto) btnAuto.classList.remove('active');
+        this.camState.targetTheta -= Math.PI / 4; // -45 graus
+      });
+    }
+    if (btnSpinRight) {
+      btnSpinRight.addEventListener('click', () => {
+        this.autoRotate = false;
+        const btnAuto = document.getElementById('btn-3d-autorotate');
+        if (btnAuto) btnAuto.classList.remove('active');
+        this.camState.targetTheta += Math.PI / 4; // +45 graus
       });
     }
 
-    // 6. Alternar Iluminação Dia / Noite
+    // 6. Seletor de Cor da Carcaça de Ferro/Metal
+    const btnOpenColorPicker = document.getElementById('btn-open-color-picker');
+    const btnCloseColorPicker = document.getElementById('btn-close-color-picker');
+    const colorPickerModal = document.getElementById('totem-color-picker-modal');
+
+    if (btnOpenColorPicker && colorPickerModal) {
+      btnOpenColorPicker.addEventListener('click', () => {
+        colorPickerModal.classList.toggle('hidden');
+      });
+    }
+
+    if (btnCloseColorPicker && colorPickerModal) {
+      btnCloseColorPicker.addEventListener('click', () => {
+        colorPickerModal.classList.add('hidden');
+      });
+    }
+
+    document.querySelectorAll('[data-metal-color]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const colorKey = btn.getAttribute('data-metal-color');
+        this.setMetalColor(colorKey);
+        document.querySelectorAll('[data-metal-color]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // 7. Alternar Iluminação Dia / Noite
     const btnNight = document.getElementById('btn-3d-daynight');
     if (btnNight) {
       btnNight.addEventListener('click', () => {
@@ -1667,7 +1743,7 @@ class Totem3DViewer {
       });
     }
 
-    // 7. Fechar card de especificações do hotspot
+    // 8. Fechar card de especificações do hotspot
     const btnCloseInfo = document.getElementById('btn-close-3d-info');
     if (btnCloseInfo) {
       btnCloseInfo.addEventListener('click', () => {
@@ -1678,35 +1754,83 @@ class Totem3DViewer {
     }
   }
 
-  applyDesignTheme() {
-    if (this.designTheme === 'nexus') {
-      this.dynamicMaterials.accentTrim.color.setHex(0x0284c7);
-      this.dynamicMaterials.ledStrip.color.setHex(0x38bdf8);
-      this.dynamicMaterials.ledStrip.emissive.setHex(0x0ea5e9);
-    } else {
-      this.dynamicMaterials.accentTrim.color.setHex(0xd97706);
-      this.dynamicMaterials.ledStrip.color.setHex(0xfbbf24);
-      this.dynamicMaterials.ledStrip.emissive.setHex(0xf59e0b);
+  // Método para mudar a cor da carcaça do totem (parte do ferro)
+  setMetalColor(colorKey) {
+    if (!this.dynamicMaterials.body) return;
+
+    const colorPresets = {
+      'raw': {
+        color: 0xd8dde3,
+        metalness: 0.92,
+        roughness: 0.30,
+        mapEnabled: true
+      },
+      'black': {
+        color: 0x181e28,
+        metalness: 0.70,
+        roughness: 0.38,
+        mapEnabled: false
+      },
+      'govblue': {
+        color: 0x1351b4,
+        metalness: 0.65,
+        roughness: 0.32,
+        mapEnabled: false
+      },
+      'white': {
+        color: 0xf1f5f9,
+        metalness: 0.50,
+        roughness: 0.28,
+        mapEnabled: false
+      },
+      'gold': {
+        color: 0xd4af37,
+        metalness: 0.88,
+        roughness: 0.25,
+        mapEnabled: false
+      },
+      'corten': {
+        color: 0x8b3a1a,
+        metalness: 0.60,
+        roughness: 0.68,
+        mapEnabled: false
+      }
+    };
+
+    const cfg = colorPresets[colorKey] || colorPresets['raw'];
+    this.dynamicMaterials.body.color.setHex(cfg.color);
+    this.dynamicMaterials.body.metalness = cfg.metalness;
+    this.dynamicMaterials.body.roughness = cfg.roughness;
+
+    // Sincroniza também a moldura do Totem 2D caso o usuário abra o menu
+    const chassis2D = document.getElementById('totem-chassis');
+    if (chassis2D) {
+      const chassisColors = {
+        'raw': 'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #64748b 100%)',
+        'black': '#0f172a',
+        'govblue': '#0c326f',
+        'white': '#f8fafc',
+        'gold': 'linear-gradient(135deg, #b45309 0%, #f59e0b 50%, #d97706 100%)',
+        'corten': '#7c2d12'
+      };
+      chassis2D.style.background = chassisColors[colorKey] || chassisColors['raw'];
     }
-    this.updateHeaderTexture();
   }
 
   applyDayNightMode() {
     if (this.isNightMode) {
-      this.scene.background.setHex(0x030712);
-      this.scene.fog.color.setHex(0x030712);
-      this.dynamicLights.ambient.intensity = 0.28;
-      this.dynamicLights.sun.intensity = 0.35;
-      this.dynamicLights.screenGlow.intensity = 1.35;
-      this.dynamicMaterials.ledStrip.emissiveIntensity = 1.8;
-      this.dynamicMaterials.screenDisplay.emissiveIntensity = 1.05;
+      this.scene.background.setHex(0x0f172a);
+      this.scene.fog.color.setHex(0x0f172a);
+      this.dynamicLights.ambient.intensity = 0.45;
+      this.dynamicLights.sun.intensity = 0.45;
+      this.dynamicLights.screenGlow.intensity = 1.15;
+      this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.95;
     } else {
-      this.scene.background.setHex(0x0b1325);
-      this.scene.fog.color.setHex(0x0b1325);
-      this.dynamicLights.ambient.intensity = 0.75;
-      this.dynamicLights.sun.intensity = 1.35;
-      this.dynamicLights.screenGlow.intensity = 0.65;
-      this.dynamicMaterials.ledStrip.emissiveIntensity = 0.9;
+      this.scene.background.setHex(0xeef2f6);
+      this.scene.fog.color.setHex(0xeef2f6);
+      this.dynamicLights.ambient.intensity = 0.95;
+      this.dynamicLights.sun.intensity = 1.45;
+      this.dynamicLights.screenGlow.intensity = 0.45;
       this.dynamicMaterials.screenDisplay.emissiveIntensity = 0.78;
     }
   }

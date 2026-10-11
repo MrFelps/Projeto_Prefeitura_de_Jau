@@ -26,7 +26,7 @@
 
 body {
   font-family: 'rawline', 'Rawline', 'Open Sans', system-ui, -apple-system, sans-serif;
-  background-color: #0d1527;
+  background-color: #eef2f6;
   color: var(--gov-text-dark);
   min-height: 100vh;
   display: flex;
@@ -291,19 +291,30 @@ body {
 }
 
 /* OVERLAY / MODAL: INTERFACE 2D DO TOTEM (SOBREPÕE O 3D SEM DEFORMAÇÃO) */
+/* OCULTA QUALQUER BARRA DE ROLAGEM VERTICAL/HORIZONTAL (ESTILO APP/CELULAR) */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .totem-menu-overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(3, 7, 18, 0.82);
+  background: rgba(241, 245, 249, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  overflow-y: auto;
-  padding: 12px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px 6px;
   animation: fadeInModal 0.25s ease-out;
 }
 
@@ -317,26 +328,23 @@ body {
 }
 
 .totem-menu-overlay-header {
-  width: 100%;
-  max-width: 580px;
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: 2100;
+  width: auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  gap: 8px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
 }
 
 .overlay-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #94a3b8;
+  display: none;
 }
 
 .overlay-badge {
@@ -379,9 +387,11 @@ body {
 .totem-menu-overlay .totem-wrapper {
   padding: 0;
   background: transparent;
-  flex: none;
-  width: auto;
+  flex: 1;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .totem-wrapper {
@@ -389,24 +399,25 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  background: radial-gradient(circle at center, #1e293b 0%, #0a0f1d 100%);
-  overflow-y: auto;
+  padding: 4px 8px;
+  background: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 100%);
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
 }
 
-/* CARCAÇA / CHASSI DO TOTEM VERTICAL: METAL CRU / AÇO ESCOVADO (SEM PINTURA) */
+/* CARCAÇA / CHASSI DO TOTEM VERTICAL: BORDAS LATERAIS FINAS ESTILO CELULAR & TELA EXPANDIDA */
 .totem-frame {
-  width: min(600px, 98vw);
-  min-height: 960px;
-  height: 97vh;
-  max-height: 1200px;
-  background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #64748b 100%);
-  border-radius: 20px;
-  border: 6px solid #475569;
+  width: min(880px, 98vw);
+  min-height: 0;
+  height: 98.5vh;
+  max-height: 98.5vh;
+  background: #e2e8f0;
+  border-radius: 16px;
+  border: 3px solid #cbd5e1;
   box-shadow: 
-    0 0 0 2px #94a3b8,
-    0 25px 60px -15px rgba(0, 0, 0, 0.8),
-    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    0 0 0 1px #94a3b8,
+    0 16px 40px -10px rgba(15, 23, 42, 0.22);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -414,58 +425,60 @@ body {
   transition: all 0.3s ease;
 }
 
-/* TOPO DO CHASSI COM SENSOR E CÂMERA */
+/* TOPO DO CHASSI COM SENSOR E CÂMERA (FINO E CLARO) */
 .totem-top-sensor {
-  height: 38px;
-  background: #0f172a;
+  height: 22px;
+  flex-shrink: 0;
+  background: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-bottom: 2px solid #1e293b;
+  border-bottom: 1px solid #cbd5e1;
 }
 
 .camera-lens {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background: #0284c7;
   border-radius: 50%;
-  box-shadow: 0 0 8px #0284c7;
+  box-shadow: 0 0 6px #0284c7;
 }
 
 .pir-sensor {
-  width: 14px;
-  height: 14px;
-  background: #475569;
+  width: 12px;
+  height: 10px;
+  background: #94a3b8;
   border-radius: 3px;
-  margin-left: 12px;
-  opacity: 0.6;
+  margin-left: 10px;
+  opacity: 0.8;
 }
 
 .chassis-brand {
   position: absolute;
-  right: 16px;
-  font-size: 9px;
+  right: 12px;
+  font-size: 8.5px;
   font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #64748b;
+  letter-spacing: 1.2px;
+  color: #475569;
 }
 
-/* BASE INFERIOR DO CHASSI */
+/* BASE INFERIOR DO CHASSI (FINA E CLARA) */
 .totem-bottom-chassis {
-  height: 32px;
-  background: #0f172a;
+  height: 20px;
+  flex-shrink: 0;
+  background: #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  border-top: 2px solid #1e293b;
+  padding: 0 14px;
+  border-top: 1px solid #cbd5e1;
 }
 
 .chassis-vent {
-  width: 60px;
-  height: 4px;
-  background: #334155;
+  width: 50px;
+  height: 3px;
+  background: #94a3b8;
   border-radius: 2px;
 }
 
@@ -494,6 +507,7 @@ body {
 /* A TELA DO TOTEM (ÁREA ÚTIL DIGITAL - PADRÃO GOV.BR) */
 .totem-screen {
   flex: 1;
+  min-height: 0;
   background: var(--gov-white-ice);
   color: var(--gov-text-dark);
   display: flex;
@@ -502,15 +516,16 @@ body {
   overflow: hidden;
 }
 
-/* CABEÇALHO OFICIAL GOV.BR */
+/* CABEÇALHO OFICIAL GOV.BR (COMPACTO COM LATERAIS MENORES) */
 .totem-header {
-  padding: 10px 18px 12px;
+  padding: 6px 12px 8px;
+  flex-shrink: 0;
   background: var(--gov-white-pure);
   border-bottom: 3px solid var(--gov-green); /* Filete Verde Gov */
-  box-shadow: 0 2px 10px rgba(0, 51, 102, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 51, 102, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   z-index: 10;
 }
 
@@ -1926,7 +1941,7 @@ body {
   width: 100%;
   height: 100vh;
   max-height: none;
-  background: #070d19;
+  background: #eef2f6;
   border: none;
   border-radius: 0;
   display: flex;
@@ -2021,27 +2036,192 @@ body {
 }
 
 .totem-3d-angle-box {
-  background: rgba(2, 132, 199, 0.12);
+  background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  padding: 4px 12px;
+  border-radius: 12px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.angle-header {
   text-align: center;
-  min-width: 84px;
+  min-width: 60px;
 }
 
 .totem-3d-angle-box .angle-lbl {
   display: block;
-  font-size: 9px;
+  font-size: 8.5px;
   text-transform: uppercase;
   color: #7dd3fc;
   font-weight: 700;
 }
 
 .totem-3d-angle-box strong {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: #38bdf8;
   font-variant-numeric: tabular-nums;
+}
+
+.angle-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-spin {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-spin:hover {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.btn-spin:active {
+  transform: scale(0.95);
+}
+
+/* PAINEL SELETOR DE CORES DA CARCAÇA DE METAL */
+.totem-color-picker-panel {
+  position: absolute;
+  bottom: 60px;
+  left: 20px;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid #38bdf8;
+  border-radius: 16px;
+  padding: 16px;
+  z-index: 35;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.totem-color-picker-panel.hidden {
+  display: none;
+}
+
+.color-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.btn-close-picker {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.color-picker-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.color-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.color-opt {
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.color-opt:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.color-opt.active {
+  border-color: #38bdf8;
+  background: rgba(2, 132, 199, 0.2);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.color-swatch {
+  width: 100%;
+  height: 14px;
+  border-radius: 4px;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.swatch-raw {
+  background: linear-gradient(90deg, #94a3b8, #e2e8f0, #64748b);
+}
+
+.swatch-black {
+  background: #0f172a;
+}
+
+.swatch-blue {
+  background: #1351b4;
+}
+
+.swatch-white {
+  background: #f8fafc;
+}
+
+.swatch-gold {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.swatch-corten {
+  background: linear-gradient(90deg, #7c2d12, #b45309);
+}
+
+.color-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.color-opt small {
+  font-size: 9px;
+  color: #94a3b8;
+  line-height: 1.1;
+}
+
+.btn-color-trigger {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 /* VIEWPORT WEBGL CENTRAL */
@@ -2286,7 +2466,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at center, #111c33 0%, #060b17 100%);
+    background: radial-gradient(circle at center, #ffffff 0%, #dbe4f0 100%);
   }
 
   /* Ocupa o máximo da tela do tablet na vertical sem distorcer as proporções */

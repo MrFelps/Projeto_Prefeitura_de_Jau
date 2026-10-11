@@ -704,9 +704,16 @@
           <button class="btn-3d-screen" data-3d-screen="services">📋 Serviços</button>
         </div>
 
-        <div class="totem-3d-angle-box">
-          <span class="angle-lbl">Ângulo 360°</span>
-          <strong id="totem-3d-angle-deg">28°</strong>
+        <!-- Caixa de Ângulo e Giro 360° Interativo -->
+        <div class="totem-3d-angle-box" title="Controle de Ângulo e Giro 360°">
+          <div class="angle-header">
+            <span class="angle-lbl">Ângulo 360°</span>
+            <strong id="totem-3d-angle-deg">28°</strong>
+          </div>
+          <div class="angle-controls">
+            <button id="btn-spin-left" class="btn-spin" title="Girar 45° para a esquerda">↺ -45°</button>
+            <button id="btn-spin-right" class="btn-spin" title="Girar 45° para a direita">↻ +45°</button>
+          </div>
         </div>
       </div>
 
@@ -714,6 +721,47 @@
       <div class="totem-3d-viewport">
         <div id="totem-3d-canvas-mount" class="totem-3d-canvas-mount"></div>
         <div id="totem-3d-hotspots" class="totem-3d-hotspots-layer"></div>
+
+        <!-- Seletor Flutuante de Cores da Carcaça de Ferro/Metal -->
+        <div id="totem-color-picker-modal" class="totem-color-picker-panel hidden">
+          <div class="color-picker-header">
+            <span>🎨 Cor da Carcaça (Ferro/Metal)</span>
+            <button id="btn-close-color-picker" class="btn-close-picker">✕</button>
+          </div>
+          <p class="color-picker-desc">Escolha o acabamento do metal para simular o protótipo:</p>
+          <div class="color-options-grid">
+            <button class="color-opt active" data-metal-color="raw">
+              <span class="color-swatch swatch-raw"></span>
+              <span class="color-title">Metal Cru Industrial</span>
+              <small>Aço escovado sem pintura</small>
+            </button>
+            <button class="color-opt" data-metal-color="black">
+              <span class="color-swatch swatch-black"></span>
+              <span class="color-title">Preto Fosco (Grafite)</span>
+              <small>Pintura Eletrostática</small>
+            </button>
+            <button class="color-opt" data-metal-color="govblue">
+              <span class="color-swatch swatch-blue"></span>
+              <span class="color-title">Azul Oficial Gov.br</span>
+              <small>Padrão Institucional</small>
+            </button>
+            <button class="color-opt" data-metal-color="white">
+              <span class="color-swatch swatch-white"></span>
+              <span class="color-title">Branco Gelo Urbano</span>
+              <small>Acabamento Hospitalar/Limpo</small>
+            </button>
+            <button class="color-opt" data-metal-color="gold">
+              <span class="color-swatch swatch-gold"></span>
+              <span class="color-title">Bronze / Ouro Solar</span>
+              <small>Edição Especial Dossiê</small>
+            </button>
+            <button class="color-opt" data-metal-color="corten">
+              <span class="color-swatch swatch-corten"></span>
+              <span class="color-title">Aço Corten / Ferrugem</span>
+              <small>Design Arquitetônico Praça</small>
+            </button>
+          </div>
+        </div>
 
         <!-- Card Flutuante de Especificação Técnica (quando clica num ponto 1-7) -->
         <div id="totem-3d-info-card" class="totem-3d-info-card hidden">
@@ -737,9 +785,9 @@
 
         <div class="dock-group">
           <button id="btn-3d-autorotate" class="btn-dock">🔄 Giro 360° Auto</button>
+          <button id="btn-open-color-picker" class="btn-dock btn-color-trigger">🎨 Cor da Carcaça</button>
           <button id="btn-3d-dimensions" class="btn-dock active">📏 Cotas (2,20m)</button>
           <button id="btn-3d-hotspots" class="btn-dock active">📍 Pontos (1-7)</button>
-          <button id="btn-3d-theme" class="btn-dock">🎨 Acabamento: Dossiê Solar (Ouro)</button>
           <button id="btn-3d-daynight" class="btn-dock">☀️ Ambiente: Dia (Praça)</button>
         </div>
       </div>
