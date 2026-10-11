@@ -30,6 +30,12 @@
       <span class="expand-icon">⛶</span>
       <span class="expand-label">Expandir Monitor</span>
     </button>
+
+    <!-- Botão de Abrir o Menu do Totem por cima do 3D -->
+    <button id="btn-open-menu-modal" class="btn-float-menu" title="Ver o Menu Interativo do Totem">
+      <span class="menu-icon">📱</span>
+      <span class="menu-label">Ver Menu do Totem</span>
+    </button>
   </div>
 
   <!-- PAINEL DE CONTROLE EXTERNO DO MOCKUP (Para a Banca / Apresentação) -->
@@ -80,9 +86,23 @@
     </div>
   </aside>
 
-  <!-- ESTRUTURA DO TOTEM FÍSICO -->
-  <main class="totem-wrapper">
-    <div id="totem-chassis" class="totem-frame">
+  <!-- OVERLAY / MODAL: TELA 2D DO MENU DO TOTEM (ABRE POR CIMA DO 3D SEM DISTORCER) -->
+  <div id="totem-menu-overlay" class="totem-menu-overlay hidden">
+    <!-- Barra superior de fechamento do menu -->
+    <div class="totem-menu-overlay-header">
+      <div class="overlay-brand">
+        <span class="overlay-badge">MODO QUIOSQUE TOUCH</span>
+        <span>Interface 2D Oficial • Proporção 9:16</span>
+      </div>
+      <button id="btn-close-menu-overlay" class="btn-close-overlay" title="Fechar menu e voltar à visão 3D 360°">
+        <span class="close-icon">✕</span>
+        <span>Voltar ao Totem 3D</span>
+      </button>
+    </div>
+
+    <!-- ESTRUTURA DO TOTEM FÍSICO 2D -->
+    <main class="totem-wrapper">
+      <div id="totem-chassis" class="totem-frame">
       <!-- Câmera superior e sensor do chassi físico -->
       <div class="totem-top-sensor">
         <div class="camera-lens"></div>
@@ -657,11 +677,13 @@
         <div class="chassis-label">SISTEMA INTELIGENTE DE UTILIDADE PÚBLICA</div>
       </div>
     </div>
+  </main>
+  </div><!-- Fim do totem-menu-overlay -->
 
-    <!-- =================================================================== -->
-    <!-- ESTÚDIO 3D INTERATIVO 360° (WEBGL / THREE.JS)                       -->
-    <!-- =================================================================== -->
-    <div id="totem-3d-stage" class="totem-3d-stage">
+  <!-- =================================================================== -->
+  <!-- ESTÚDIO 3D INTERATIVO 360° (WEBGL / THREE.JS)                       -->
+  <!-- =================================================================== -->
+  <div id="totem-3d-stage" class="totem-3d-stage">
       <!-- Barra Superior do Visualizador 3D -->
       <div class="totem-3d-topbar">
         <div class="totem-3d-brand">

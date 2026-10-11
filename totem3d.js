@@ -362,58 +362,83 @@ class Totem3DViewer {
     });
 
     // -----------------------------------------------------------------------
-    // 2. CORPO ESTRUTURAL PRINCIPAL (Altura até 2,08m | Largura 0,70m | Prof 0,35m)
+    // 2. CORPO ESTRUTURAL "QUADRADÃO" COM QUINA SUPERIOR FRONTAL ARREDONDADA
+    //    - Vista de Frente: Retângulo puro (0,70m L x 2,20m A)
+    //    - Vista de Lado: Retângulo de 0,35m P com canto superior frontal arredondado
+    //    - Vista de Cima: Faixa frontal arredondada (0,11m) + Área plana traseira (0,24m)
     // -----------------------------------------------------------------------
-    const mainCabinet = new THREE.Mesh(
-      new THREE.BoxGeometry(0.68, 1.92, 0.33),
-      bodyMat
-    );
-    mainCabinet.position.set(0, 1.10, 0);
+    const sideProfile = new THREE.Shape();
+    const zBack = -0.175;   // Costa reta
+    const zFront = 0.175;   // Frente reta
+    const yBottom = 0.12;   // Acima da base chumbada
+    const yTop = 2.20;      // Topo plano (altura máxima 2,20m)
+    const curveDropY = 0.16; // Quanto a curva desce na quina frontal (até y = 2.04m)
+    const curveDepthZ = 0.11; // Largura da faixa arredondada vista de cima ("parte riscadinha")
+    const zCurveStart = zFront - curveDepthZ; // z = +0.065m (divisa entre área solar plana e quina arredondada)
+
+    // Traçado 2D da Vista de Lado (X_shape = Z_world, Y_shape = Y_world)
+    sideProfile.moveTo(zBack, yBottom);
+    sideProfile.lineTo(zFront, yBottom);
+    sideProfile.lineTo(zFront, yTop - curveDropY);
+    // Quina superior frontal suavemente arredondada (canto superior direito na vista lateral)
+    sideProfile.quadraticCurveTo(zFront, yTop, zCurveStart, yTop);
+    // Parte plana superior onde fica o painel solar ("parte sem risco" na vista de cima)
+    sideProfile.lineTo(zBack, yTop);
+    sideProfile.lineTo(zBack, yBottom);
+
+    const extrudeSettings = {
+      depth: 0.692,
+      bevelEnabled: true,
+      bevelSegments: 4,
+      steps: 1,
+      bevelSize: 0.004,
+      bevelThickness: 0.004,
+      curveSegments: 32
+    };
+
+    const mainCabinetGeo = new THREE.ExtrudeGeometry(sideProfile, extrudeSettings);
+    const mainCabinet = new THREE.Mesh(mainCabinetGeo, bodyMat);
+    // Rotaciona para que o perfil 2D fique no plano Y-Z (lado) e a extrusão no eixo X (0,70m de largura)
+    mainCabinet.rotation.y = -Math.PI / 2;
+    mainCabinet.position.set(0.346, 0, 0);
     mainCabinet.castShadow = true;
     mainCabinet.receiveShadow = true;
     this.totemGroup.add(mainCabinet);
 
-    // Colunas laterais arredondadas (acabamento ergonômico antivandalismo)
-    const pillarGeo = new THREE.CylinderGeometry(0.165, 0.165, 1.92, 24);
-    [-0.34, 0.34].forEach(px => {
-      const pillar = new THREE.Mesh(pillarGeo, bodyMat);
-      pillar.position.set(px, 1.10, 0);
-      pillar.scale.set(0.18, 1, 1);
-      pillar.castShadow = true;
-      this.totemGroup.add(pillar);
+    // Frisos sutis na quina arredondada superior frontal (marca a "parte riscadinha" vista de cima)
+    const curveSeamMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      metalness: 0.8,
+      roughness: 0.3
     });
+    const dividerBar = new THREE.Mesh(
+      new THREE.BoxGeometry(0.696, 0.006, 0.012),
+       accentTrimMat
+    );
+    dividerBar.position.set(0, 2.202, zCurveStart);
+    this.totemGroup.add(dividerBar);
 
-    // FRISOS ARQUITETÔNICOS LATERAIS (Idênticos à Vista Lateral do Dossiê Técnico!)
+    // FRISOS ARQUITETÔNICOS LATERAIS RENTES AO "QUADRADÃO" (Sem cilindros salientes)
     [-1, 1].forEach(side => {
-      const xPos = side * 0.362;
+      const xPos = side * 0.351;
 
-      // Faixa metálica chanfrada Dourado/Bronze (ou Azul no tema Nexus)
-      const sideFinGeo = new THREE.BoxGeometry(0.018, 1.76, 0.085);
+      // Faixa metálica vertical Dourado/Bronze (ou Azul no tema Nexus)
+      const sideFinGeo = new THREE.BoxGeometry(0.006, 1.84, 0.055);
       const sideFin = new THREE.Mesh(sideFinGeo, accentTrimMat);
-      sideFin.position.set(xPos, 1.08, 0.03);
+      sideFin.position.set(xPos, 1.06, 0.02);
       this.totemGroup.add(sideFin);
 
       // Fita de LED vertical embutida na lateral
-      const ledGeo = new THREE.BoxGeometry(0.022, 1.68, 0.014);
+      const ledGeo = new THREE.BoxGeometry(0.008, 1.78, 0.012);
       const ledMesh = new THREE.Mesh(ledGeo, ledStripMat);
-      ledMesh.position.set(xPos, 1.08, 0.085);
+      ledMesh.position.set(xPos, 1.06, 0.062);
       this.totemGroup.add(ledMesh);
     });
 
     // -----------------------------------------------------------------------
-    // 3. TOPO INCLINADO COM PLACA SOLAR FOTOVOLTAICA + ANTENA 5G (Altura até 2,20m)
+    // 3. TOPO PLANO COM PLACA SOLAR EMBUTIDA (INVISÍVEL PARA QUEM OLHA DE FRENTE!)
+    //    Localizada exatamente na área plana traseira do topo (z = -0.165 a +0.055)
     // -----------------------------------------------------------------------
-    const solarHoodGroup = new THREE.Group();
-    solarHoodGroup.position.set(0, 2.09, 0);
-
-    // Carenagem inclinada do topo
-    const hoodGeo = new THREE.BoxGeometry(0.70, 0.14, 0.36);
-    const hoodMesh = new THREE.Mesh(hoodGeo, bodyMat);
-    hoodMesh.rotation.x = 0.24; // Inclinação solar ideal
-    hoodMesh.castShadow = true;
-    solarHoodGroup.add(hoodMesh);
-
-    // Textura da Placa Solar Fotovoltaica (células monocristalinas + barramentos)
     const solarCanvas = document.createElement('canvas');
     solarCanvas.width = 512;
     solarCanvas.height = 256;
@@ -421,7 +446,7 @@ class Totem3DViewer {
     sctx.fillStyle = '#0a192f';
     sctx.fillRect(0, 0, 512, 256);
 
-    // Células solares
+    // Células solares monocristalinas de alta eficiência (22%)
     const cols = 8;
     const rows = 4;
     const cw = 512 / cols;
@@ -435,7 +460,7 @@ class Totem3DViewer {
         sctx.fillStyle = grad;
         sctx.fillRect(c * cw + 3, r * ch + 3, cw - 6, ch - 6);
 
-        // Trilhas condutoras prateadas
+        // Trilhas condutoras prateadas (busbars)
         sctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
         sctx.lineWidth = 1;
         sctx.beginPath();
@@ -446,53 +471,45 @@ class Totem3DViewer {
         sctx.stroke();
       }
     }
-    // Moldura de alumínio do painel solar
-    sctx.strokeStyle = '#94a3b8';
+    // Moldura de alumínio anodizado escuro
+    sctx.strokeStyle = '#64748b';
     sctx.lineWidth = 8;
     sctx.strokeRect(0, 0, 512, 256);
 
     const solarTex = new THREE.CanvasTexture(solarCanvas);
     const solarPanelMat = new THREE.MeshStandardMaterial({
       map: solarTex,
-      metalness: 0.6,
-      roughness: 0.15
+      metalness: 0.65,
+      roughness: 0.14
     });
 
+    // Placa Solar de 64cm x 21cm (35Wp) embutida de forma plana no topo (y = 2.203m)
+    // Como fica atrás da quina arredondada e rente ao topo, quem olha de frente NÃO vê!
     const solarPanelMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.66, 0.02, 0.33),
+      new THREE.BoxGeometry(0.64, 0.008, 0.21),
       solarPanelMat
     );
-    solarPanelMesh.position.set(0, 0.072, 0);
-    solarPanelMesh.rotation.x = 0.24;
-    solarHoodGroup.add(solarPanelMesh);
+    solarPanelMesh.position.set(0, 2.203, -0.055);
+    this.totemGroup.add(solarPanelMesh);
 
-    // Antena 4G/5G/Wi-Fi Industrial no topo traseiro
+    // Antena 5G/Wi-Fi low-profile embutida no canto traseiro do topo
     const antennaBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.022, 0.028, 0.04, 16),
+      new THREE.BoxGeometry(0.06, 0.014, 0.03),
       darkPanelMat
     );
-    antennaBase.position.set(0.24, 0.09, -0.11);
-    solarHoodGroup.add(antennaBase);
+    antennaBase.position.set(0.26, 2.206, -0.145);
+    this.totemGroup.add(antennaBase);
 
-    const antennaRod = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.008, 0.012, 0.08, 12),
-      darkPanelMat
-    );
-    antennaRod.position.set(0.24, 0.14, -0.11);
-    solarHoodGroup.add(antennaRod);
-
-    // LED verde de sinal 5G ativo no topo
     const signalDot = new THREE.Mesh(
-      new THREE.SphereGeometry(0.009, 12, 12),
+      new THREE.SphereGeometry(0.006, 12, 12),
       new THREE.MeshBasicMaterial({ color: 0x10b981 })
     );
-    signalDot.position.set(0.24, 0.185, -0.11);
-    solarHoodGroup.add(signalDot);
-
-    this.totemGroup.add(solarHoodGroup);
+    signalDot.position.set(0.26, 2.215, -0.145);
+    this.totemGroup.add(signalDot);
 
     // -----------------------------------------------------------------------
     // 4. FACE FRONTAL: CABEÇALHO LUMINOSO + CÂMERA + SENSOR PIR
+    //    Posicionados abaixo do início da quina arredondada (y <= 2.02m)
     // -----------------------------------------------------------------------
     this.headerTexture = new THREE.CanvasTexture(this.headerCanvas);
     const headerSignMat = new THREE.MeshStandardMaterial({
@@ -505,42 +522,42 @@ class Totem3DViewer {
     this.dynamicMaterials.headerSign = headerSignMat;
 
     const headerPanel = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.58, 0.24),
+      new THREE.PlaneGeometry(0.58, 0.22),
       headerSignMat
     );
-    headerPanel.position.set(0, 1.88, 0.168);
+    headerPanel.position.set(0, 1.84, 0.180);
     this.totemGroup.add(headerPanel);
 
     // Barra de Sensores Superior (Câmera de Segurança + Sensor PIR)
     const sensorBar = new THREE.Mesh(
-      new THREE.BoxGeometry(0.58, 0.045, 0.015),
+      new THREE.BoxGeometry(0.58, 0.042, 0.012),
       darkPanelMat
     );
-    sensorBar.position.set(0, 2.025, 0.165);
+    sensorBar.position.set(0, 1.985, 0.178);
     this.totemGroup.add(sensorBar);
 
     // Lente da Câmera de Monitoramento
     const camRing = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.014, 0.014, 0.02, 20),
+      new THREE.CylinderGeometry(0.013, 0.013, 0.018, 20),
       new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1 })
     );
     camRing.rotation.x = Math.PI / 2;
-    camRing.position.set(0, 2.025, 0.17);
+    camRing.position.set(0, 1.985, 0.182);
     this.totemGroup.add(camRing);
 
     const camLens = new THREE.Mesh(
-      new THREE.SphereGeometry(0.009, 16, 16),
+      new THREE.SphereGeometry(0.008, 16, 16),
       new THREE.MeshBasicMaterial({ color: 0x0284c7 })
     );
-    camLens.position.set(0, 2.025, 0.178);
+    camLens.position.set(0, 1.985, 0.189);
     this.totemGroup.add(camLens);
 
     // Sensor PIR de Presença ao lado da câmera
     const pirSensor = new THREE.Mesh(
-      new THREE.BoxGeometry(0.026, 0.018, 0.018),
+      new THREE.BoxGeometry(0.024, 0.016, 0.015),
       new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 })
     );
-    pirSensor.position.set(0.055, 2.025, 0.17);
+    pirSensor.position.set(0.055, 1.985, 0.182);
     this.totemGroup.add(pirSensor);
 
     // -----------------------------------------------------------------------
@@ -548,10 +565,10 @@ class Totem3DViewer {
     // -----------------------------------------------------------------------
     // Moldura protetora da tela (Bezel IP65)
     const screenBezel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.60, 1.04, 0.018),
+      new THREE.BoxGeometry(0.60, 1.02, 0.014),
       darkPanelMat
     );
-    screenBezel.position.set(0, 1.21, 0.164);
+    screenBezel.position.set(0, 1.19, 0.176);
     this.totemGroup.add(screenBezel);
 
     // Display LCD ativo com Textura Canvas 2D Ao Vivo
@@ -568,10 +585,10 @@ class Totem3DViewer {
     this.dynamicMaterials.screenDisplay = screenDisplayMat;
 
     const screenMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.55, 0.98),
+      new THREE.PlaneGeometry(0.55, 0.96),
       screenDisplayMat
     );
-    screenMesh.position.set(0, 1.21, 0.174);
+    screenMesh.position.set(0, 1.19, 0.184);
     this.totemGroup.add(screenMesh);
 
     // -----------------------------------------------------------------------
