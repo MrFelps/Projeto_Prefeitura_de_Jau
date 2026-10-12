@@ -13,31 +13,138 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261012_v4">
+  <style>
+    /* Garantir zero aba lateral e 100% da tela ocupada pelo fundo 3D */
+    html, body {
+      display: block !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+    #totem-3d-stage {
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+    }
+    /* 3 Botões no canto superior esquerdo (um embaixo do outro, direto sobre o fundo 3D, sem aba lateral) */
+    .top-left-orbs {
+      position: fixed !important;
+      top: 14px !important;
+      left: 14px !important;
+      z-index: 3000 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      background: transparent !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      pointer-events: none;
+    }
+    .orb-btn {
+      pointer-events: auto !important;
+      position: relative !important;
+      width: 98px !important;
+      min-height: 100px !important;
+      padding: 5px 4px 6px !important;
+      border-radius: 4px !important;
+      background: rgba(241, 245, 249, 0.94) !important;
+      border: 1.5px solid #475569 !important;
+      color: #000000 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18) !important;
+      transition: all 0.18s ease !important;
+      text-align: center !important;
+    }
+    .orb-btn:hover {
+      background: #ffffff !important;
+      border-color: #0284c7 !important;
+      transform: translateY(-1px) scale(1.03) !important;
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.28) !important;
+    }
+    .orb-btn.active {
+      background: #e0f2fe !important;
+      border: 2px solid #0284c7 !important;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.28), 0 6px 16px rgba(15, 23, 42, 0.22) !important;
+    }
+    .orb-badge {
+      position: static !important;
+      width: auto !important;
+      height: auto !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #000000 !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      line-height: 1.1 !important;
+      display: block !important;
+    }
+    .orb-svg {
+      width: 52px !important;
+      height: 52px !important;
+      color: #000000 !important;
+      stroke: #000000 !important;
+      stroke-width: 2.3 !important;
+      margin: 2px 0 !important;
+      flex-shrink: 0 !important;
+    }
+    .orb-tooltip {
+      position: static !important;
+      opacity: 1 !important;
+      transform: none !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: #000000 !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 1.15 !important;
+      white-space: nowrap !important;
+      pointer-events: none !important;
+    }
+    /* Botão do canto inferior direito (Características do 360°) */
+    .bottom-right-orb-wrap {
+      position: fixed !important;
+      bottom: 20px !important;
+      right: 20px !important;
+      z-index: 2900 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+    }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans select-none">
 
   <!-- =================================================================== -->
-  <!-- CANTO SUPERIOR ESQUERDO: 3 BOLINHAS UMA EMBAIXO DA OUTRA            -->
-  <!-- 1ª: Visão da Tela do Totem (2D)                                     -->
-  <!-- 2ª: Totem do Lado Interno a Raio-X (3D Interno)                     -->
-  <!-- 3ª: Texto com a Parte Técnica (Dossiê Completo)                     -->
+  <!-- CANTO SUPERIOR ESQUERDO: 3 BOTÕES UM EMBAIXO DO OUTRO NO FUNDO 3D   -->
+  <!-- 1º: Tela do Totem (2D)                                              -->
+  <!-- 2º: Raio-X Interno (3D Lado Interno)                                -->
+  <!-- 3º: Parte Técnica (Texto e Especificações)                          -->
   <!-- =================================================================== -->
-  <nav class="top-left-orbs" aria-label="Menu Principal em 3 Bolinhas">
-    <!-- 1ª Bolinha: Visão da Tela do Totem -->
-    <button id="btn-orb-screen" class="orb-btn" title="1. Visão da Tela do Totem (Interface Touch 2D)">
+  <nav class="top-left-orbs" aria-label="Menu Principal">
+    <!-- 1º Botão: Visão da Tela do Totem -->
+    <button type="button" id="btn-orb-screen" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('screen')" title="1. Visão da Tela do Totem (Interface Touch 2D)">
       <span class="orb-badge">1</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        <circle cx="12" cy="18" r="1" fill="currentColor"></circle>
       </svg>
       <span class="orb-tooltip">Tela do Totem</span>
     </button>
 
-    <!-- 2ª Bolinha: Totem do Lado Interno a Raio-X -->
-    <button id="btn-orb-xray" class="orb-btn" title="2. Totem do Lado Interno a Raio-X (Hardware & Fiação)">
+    <!-- 2º Botão: Totem do Lado Interno a Raio-X -->
+    <button type="button" id="btn-orb-xray" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('xray')" title="2. Totem do Lado Interno a Raio-X (Hardware & Fiação)">
       <span class="orb-badge">2</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="4" width="16" height="16" rx="2"></rect>
         <rect x="9" y="9" width="6" height="6"></rect>
         <line x1="9" y1="1" x2="9" y2="4"></line>
@@ -52,10 +159,10 @@
       <span class="orb-tooltip">Raio-X Interno</span>
     </button>
 
-    <!-- 3ª Bolinha: Texto com a Parte Técnica -->
-    <button id="btn-orb-tech" class="orb-btn" title="3. Parte Técnica (Texto, Especificações, Fiação e Montagem)">
+    <!-- 3º Botão: Texto com a Parte Técnica -->
+    <button type="button" id="btn-orb-tech" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('tech')" title="3. Parte Técnica (Texto, Especificações, Fiação e Montagem)">
       <span class="orb-badge">3</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -1295,7 +1402,7 @@
         </div>
 
         <!-- Botão Redondo Principal no Canto Inferior Direito -->
-        <button id="btn-orb-360" class="orb-360-btn" title="Características e Opções para o 360° do Totem">
+        <button type="button" id="btn-orb-360" class="orb-360-btn" onclick="window.triggerBottomRight360 && window.triggerBottomRight360(event)" title="Características e Opções para o 360° do Totem">
           <svg class="orb-360-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <ellipse cx="12" cy="12" rx="10" ry="4"></ellipse>
@@ -1767,7 +1874,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js"></script>
-  <script src="app.js"></script>
+  <script src="totem3d.js?v=20261012_v4"></script>
+  <script src="app.js?v=20261012_v4"></script>
 </body>
 </html>

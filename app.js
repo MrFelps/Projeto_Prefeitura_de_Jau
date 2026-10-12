@@ -30,6 +30,7 @@ class TotemApp {
   }
 
   init() {
+    this.setup3DViewer();
     this.setupClock();
     this.setupNavigation();
     this.setupAccessibility();
@@ -39,7 +40,6 @@ class TotemApp {
     this.setupEnergyTimer();
     this.setupDOOHCarousel();
     this.setupFilters();
-    this.setup3DViewer();
   }
 
   setup3DViewer() {
@@ -339,40 +339,69 @@ class TotemApp {
     }
   }
 
-  // 5. CONTROLE DAS 3 BOLINHAS (SUPERIOR ESQUERDO) E 1 BOLINHA 360° (INFERIOR DIREITO)
+  // 5. CONTROLE DOS 3 BOTÕES (SUPERIOR ESQUERDO) E 1 BOTÃO 360° (INFERIOR DIREITO)
   setupSimulatorControls() {
     const menuOverlay = document.getElementById('totem-menu-overlay');
     const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
     const modalSchematics = document.getElementById('modal-hardware-schematics');
 
-    // As 3 Bolinhas no Canto Superior Esquerdo
-    const btnOrbScreen = document.getElementById('btn-orb-screen'); // 1ª: Visão da Tela do Totem
-    const btnOrbXray = document.getElementById('btn-orb-xray');     // 2ª: Totem do Lado Interno a Raio-X
-    const btnOrbTech = document.getElementById('btn-orb-tech');     // 3ª: Texto com a Parte Técnica
+    // Os 3 Botões no Canto Superior Esquerdo
+    const btnOrbScreen = document.getElementById('btn-orb-screen'); // 1º: Visão da Tela do Totem
+    const btnOrbXray = document.getElementById('btn-orb-xray');     // 2º: Totem do Lado Interno a Raio-X
+    const btnOrbTech = document.getElementById('btn-orb-tech');     // 3º: Texto com a Parte Técnica
 
-    // A 1 Bolinha no Canto Inferior Direito (Características para o 360 do Totem)
+    // O Botão no Canto Inferior Direito (Características para o 360 do Totem)
     const btnOrb360 = document.getElementById('btn-orb-360');
     const popover360 = document.getElementById('orb-360-popover');
     const btnClosePopover360 = document.getElementById('btn-close-360-popover');
 
-    // 1ª Bolinha: Visão da Tela do Totem (Interface 2D Touch)
-    if (btnOrbScreen) {
-      btnOrbScreen.addEventListener('click', () => {
+    window.triggerTopLeftButton = (action) => {
+      if (action === 'screen') {
         const isCurrentlyHidden = menuOverlay ? menuOverlay.classList.contains('hidden') : true;
         if (isCurrentlyHidden) {
           if (menuOverlay) menuOverlay.classList.remove('hidden');
           if (modalSchematics) modalSchematics.classList.add('hidden');
-          btnOrbScreen.classList.add('active');
+          if (btnOrbScreen) btnOrbScreen.classList.add('active');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
           this.resetInactivityTimer();
           this.falar('Abrindo visão da tela interativa do totem.');
         } else {
           if (menuOverlay) menuOverlay.classList.add('hidden');
-          btnOrbScreen.classList.remove('active');
+          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 80);
         }
-      });
-    }
+      } else if (action === 'xray') {
+        // Fecha overlays para exibir o Totem 3D no centro com Raio-X Interno
+        if (menuOverlay) menuOverlay.classList.add('hidden');
+        if (modalSchematics) modalSchematics.classList.add('hidden');
+        if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+        if (btnOrbTech) btnOrbTech.classList.remove('active');
+
+        if (!this.viewer3D && window.Totem3DViewer) {
+          this.setup3DViewer();
+        }
+        if (this.viewer3D) {
+          const nextState = !this.viewer3D.isHardwareMode;
+          this.viewer3D.hardwareViewMode = 'xray';
+          this.viewer3D.setHardwareMode(nextState);
+          if (btnOrbXray) btnOrbXray.classList.toggle('active', nextState);
+          this.falar(nextState ? 'Visão do totem do lado interno a raio-x ativada.' : 'Visão externa do totem restaurada.');
+        }
+      } else if (action === 'tech') {
+        if (!modalSchematics) return;
+        const isHidden = modalSchematics.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+          modalSchematics.classList.remove('hidden');
+          if (btnOrbTech) btnOrbTech.classList.add('active');
+          this.falar('Abrindo documento com a parte técnica e arquitetura do totem.');
+        } else {
+          modalSchematics.classList.add('hidden');
+          if (btnOrbTech) btnOrbTech.classList.remove('active');
+        }
+      }
+    };
 
     if (btnCloseMenuOverlay) {
       btnCloseMenuOverlay.addEventListener('click', () => {
@@ -382,52 +411,16 @@ class TotemApp {
       });
     }
 
-    // 2ª Bolinha: Totem do Lado Interno a Raio-X (Alterna Raio-X no Totem 3D central)
-    if (btnOrbXray) {
-      btnOrbXray.addEventListener('click', () => {
-        // Fecha overlays para mostrar o Totem 3D no centro
-        if (menuOverlay) menuOverlay.classList.add('hidden');
-        if (modalSchematics) modalSchematics.classList.add('hidden');
-        if (btnOrbScreen) btnOrbScreen.classList.remove('active');
-        if (btnOrbTech) btnOrbTech.classList.remove('active');
+    // Botão do Canto Inferior Direito: Abre/Fecha menu de Características do 360°
+    window.triggerBottomRight360 = (e) => {
+      if (e) e.stopPropagation();
+      if (!popover360 || !btnOrb360) return;
+      const isHidden = popover360.classList.contains('hidden');
+      popover360.classList.toggle('hidden', !isHidden);
+      btnOrb360.classList.toggle('active', isHidden);
+    };
 
-        if (this.viewer3D) {
-          const nextState = !this.viewer3D.isHardwareMode;
-          this.viewer3D.hardwareViewMode = 'xray';
-          this.viewer3D.setHardwareMode(nextState);
-          btnOrbXray.classList.toggle('active', nextState);
-          this.falar(nextState ? 'Visão do totem do lado interno a raio-x ativada.' : 'Visão externa do totem restaurada.');
-        }
-      });
-    }
-
-    // 3ª Bolinha: Texto com a Parte Técnica (Abre o Dossiê Técnico na aba de Texto Técnico)
-    if (btnOrbTech) {
-      btnOrbTech.addEventListener('click', () => {
-        if (!modalSchematics) return;
-        const isHidden = modalSchematics.classList.contains('hidden');
-        if (isHidden) {
-          if (menuOverlay) menuOverlay.classList.add('hidden');
-          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
-          modalSchematics.classList.remove('hidden');
-          btnOrbTech.classList.add('active');
-          this.falar('Abrindo documento com a parte técnica e arquitetura do totem.');
-        } else {
-          modalSchematics.classList.add('hidden');
-          btnOrbTech.classList.remove('active');
-        }
-      });
-    }
-
-    // Bolinha do Canto Inferior Direito: Abre/Fecha menu de Características do 360°
-    if (btnOrb360 && popover360) {
-      btnOrb360.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isHidden = popover360.classList.contains('hidden');
-        popover360.classList.toggle('hidden', !isHidden);
-        btnOrb360.classList.toggle('active', isHidden);
-      });
-
+    if (popover360 && btnOrb360) {
       if (btnClosePopover360) {
         btnClosePopover360.addEventListener('click', (e) => {
           e.stopPropagation();
