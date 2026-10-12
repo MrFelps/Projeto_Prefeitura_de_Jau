@@ -4310,15 +4310,15 @@ body:not(.panel-collapsed) .tablet-top-actions {
 /* - 1 BOLINHA NO CANTO INFERIOR DIREITO (CARACTERÍSTICAS DO 360°)           */
 /* ========================================================================= */
 
-/* Canto Superior Esquerdo: 3 Botões Empilhados Verticalmente Direto no Fundo 3D */
+/* Canto Superior Esquerdo: 3 Bolinhas Redondas e Azuis (padrão idêntico ao botão 360°) */
 .top-left-orbs {
   position: fixed;
-  top: 14px;
-  left: 14px;
+  top: 20px;
+  left: 20px;
   z-index: 3000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   background: transparent;
   pointer-events: none;
 }
@@ -4326,74 +4326,80 @@ body:not(.panel-collapsed) .tablet-top-actions {
 .orb-btn {
   pointer-events: auto;
   position: relative;
-  width: 98px;
-  min-height: 100px;
-  padding: 5px 4px 6px;
-  border-radius: 4px;
-  background: rgba(241, 245, 249, 0.94);
-  border: 1.5px solid #475569;
-  color: #000000;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 2.5px solid #38bdf8;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 3px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
-  transition: all 0.18s ease;
-  text-align: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45), 0 0 18px rgba(56, 189, 248, 0.3);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.orb-btn:hover {
-  background: #ffffff;
-  border-color: #0284c7;
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.28);
-}
-
+.orb-btn:hover,
 .orb-btn.active {
-  background: #e0f2fe;
-  border: 2px solid #0284c7;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.28), 0 6px 16px rgba(15, 23, 42, 0.22);
-}
-
-.orb-badge {
-  position: static;
-  width: auto;
-  height: auto;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: #000000;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.1;
-  display: block;
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #0284c7 0%, #1351b4 100%);
+  border-color: #ffffff;
+  box-shadow: 0 14px 34px rgba(2, 132, 199, 0.6);
 }
 
 .orb-svg {
-  width: 52px;
-  height: 52px;
-  color: #000000;
-  stroke: #000000;
-  stroke-width: 2.3;
-  margin: 2px 0;
-  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: #38bdf8;
+  stroke: #38bdf8;
+  transition: color 0.18s ease, stroke 0.18s ease;
+}
+
+.orb-btn:hover .orb-svg,
+.orb-btn.active .orb-svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+.orb-tag {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #e2e8f0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.orb-btn:hover .orb-tag,
+.orb-btn.active .orb-tag {
+  color: #ffffff;
 }
 
 .orb-tooltip {
-  position: static;
-  opacity: 1;
-  transform: none;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  color: #000000;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.15;
+  position: absolute;
+  left: 78px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
   white-space: nowrap;
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
   pointer-events: none;
+  transition: all 0.18s ease;
+}
+
+.orb-btn:hover .orb-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }
 
 /* Canto Inferior Direito: 1 Bolinha para as Características do 360° */

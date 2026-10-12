@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261012_v4">
+  <link rel="stylesheet" href="style.css?v=20261012_v5">
   <style>
     /* Garantir zero aba lateral e 100% da tela ocupada pelo fundo 3D */
     html, body {
@@ -29,15 +29,15 @@
       height: 100vh !important;
       margin: 0 !important;
     }
-    /* 3 Botões no canto superior esquerdo (um embaixo do outro, direto sobre o fundo 3D, sem aba lateral) */
+    /* 3 Bolinhas Redondas e Azuis no Canto Superior Esquerdo (idênticas ao padrão do botão 360°) */
     .top-left-orbs {
       position: fixed !important;
-      top: 14px !important;
-      left: 14px !important;
+      top: 20px !important;
+      left: 20px !important;
       z-index: 3000 !important;
       display: flex !important;
       flex-direction: column !important;
-      gap: 10px !important;
+      gap: 14px !important;
       background: transparent !important;
       padding: 0 !important;
       margin: 0 !important;
@@ -46,71 +46,81 @@
     .orb-btn {
       pointer-events: auto !important;
       position: relative !important;
-      width: 98px !important;
-      min-height: 100px !important;
-      padding: 5px 4px 6px !important;
-      border-radius: 4px !important;
-      background: rgba(241, 245, 249, 0.94) !important;
-      border: 1.5px solid #475569 !important;
-      color: #000000 !important;
+      width: 66px !important;
+      height: 66px !important;
+      min-height: 66px !important;
+      padding: 0 !important;
+      border-radius: 50% !important;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+      border: 2.5px solid #38bdf8 !important;
+      color: #ffffff !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      justify-content: space-between !important;
+      justify-content: center !important;
+      gap: 3px !important;
       cursor: pointer !important;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18) !important;
-      transition: all 0.18s ease !important;
-      text-align: center !important;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45), 0 0 18px rgba(56, 189, 248, 0.3) !important;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
-    .orb-btn:hover {
-      background: #ffffff !important;
-      border-color: #0284c7 !important;
-      transform: translateY(-1px) scale(1.03) !important;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.28) !important;
-    }
+    .orb-btn:hover,
     .orb-btn.active {
-      background: #e0f2fe !important;
-      border: 2px solid #0284c7 !important;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.28), 0 6px 16px rgba(15, 23, 42, 0.22) !important;
-    }
-    .orb-badge {
-      position: static !important;
-      width: auto !important;
-      height: auto !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      color: #000000 !important;
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      line-height: 1.1 !important;
-      display: block !important;
+      transform: scale(1.08) !important;
+      background: linear-gradient(135deg, #0284c7 0%, #1351b4 100%) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 14px 34px rgba(2, 132, 199, 0.6) !important;
     }
     .orb-svg {
-      width: 52px !important;
-      height: 52px !important;
-      color: #000000 !important;
-      stroke: #000000 !important;
-      stroke-width: 2.3 !important;
-      margin: 2px 0 !important;
+      width: 24px !important;
+      height: 24px !important;
+      color: #38bdf8 !important;
+      stroke: #38bdf8 !important;
+      stroke-width: 2 !important;
+      margin: 0 !important;
       flex-shrink: 0 !important;
+      transition: color 0.18s ease, stroke 0.18s ease !important;
     }
-    .orb-tooltip {
-      position: static !important;
-      opacity: 1 !important;
-      transform: none !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      color: #000000 !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
-      line-height: 1.15 !important;
-      white-space: nowrap !important;
+    .orb-btn:hover .orb-svg,
+    .orb-btn.active .orb-svg {
+      color: #ffffff !important;
+      stroke: #ffffff !important;
+    }
+    .orb-tag {
+      font-size: 9.5px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.4px !important;
+      color: #e2e8f0 !important;
+      line-height: 1 !important;
+      text-transform: uppercase !important;
       pointer-events: none !important;
     }
-    /* Botão do canto inferior direito (Características do 360°) */
+    .orb-btn:hover .orb-tag,
+    .orb-btn.active .orb-tag {
+      color: #ffffff !important;
+    }
+    .orb-tooltip {
+      position: absolute !important;
+      left: 78px !important;
+      top: 50% !important;
+      transform: translateY(-50%) translateX(-8px) !important;
+      white-space: nowrap !important;
+      background: rgba(15, 23, 42, 0.95) !important;
+      color: #ffffff !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      padding: 6px 12px !important;
+      border-radius: 9999px !important;
+      border: 1.5px solid #38bdf8 !important;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: all 0.18s ease !important;
+    }
+    .orb-btn:hover .orb-tooltip {
+      opacity: 1 !important;
+      transform: translateY(-50%) translateX(0) !important;
+    }
+    /* Botão Redondo do canto inferior direito (Características do 360°) */
     .bottom-right-orb-wrap {
       position: fixed !important;
       bottom: 20px !important;
@@ -125,26 +135,25 @@
 <body class="bg-slate-900 text-slate-100 font-sans select-none">
 
   <!-- =================================================================== -->
-  <!-- CANTO SUPERIOR ESQUERDO: 3 BOTÕES UM EMBAIXO DO OUTRO NO FUNDO 3D   -->
-  <!-- 1º: Tela do Totem (2D)                                              -->
-  <!-- 2º: Raio-X Interno (3D Lado Interno)                                -->
-  <!-- 3º: Parte Técnica (Texto e Especificações)                          -->
+  <!-- CANTO SUPERIOR ESQUERDO: 3 BOLINHAS REDONDAS E AZUIS EMPILHADAS     -->
+  <!-- 1ª: Visão da Tela do Totem (2D)                                     -->
+  <!-- 2ª: Totem do Lado Interno a Raio-X (3D Interno)                     -->
+  <!-- 3ª: Texto com a Parte Técnica (Dossiê Completo)                     -->
   <!-- =================================================================== -->
   <nav class="top-left-orbs" aria-label="Menu Principal">
-    <!-- 1º Botão: Visão da Tela do Totem -->
+    <!-- 1ª Bolinha Redonda Azul: Visão da Tela do Totem -->
     <button type="button" id="btn-orb-screen" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('screen')" title="1. Visão da Tela do Totem (Interface Touch 2D)">
-      <span class="orb-badge">1</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-        <circle cx="12" cy="18" r="1" fill="currentColor"></circle>
+        <line x1="12" y1="18" x2="12.01" y2="18"></line>
       </svg>
+      <span class="orb-tag">TELA</span>
       <span class="orb-tooltip">Tela do Totem</span>
     </button>
 
-    <!-- 2º Botão: Totem do Lado Interno a Raio-X -->
+    <!-- 2ª Bolinha Redonda Azul: Totem do Lado Interno a Raio-X -->
     <button type="button" id="btn-orb-xray" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('xray')" title="2. Totem do Lado Interno a Raio-X (Hardware & Fiação)">
-      <span class="orb-badge">2</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="4" y="4" width="16" height="16" rx="2"></rect>
         <rect x="9" y="9" width="6" height="6"></rect>
         <line x1="9" y1="1" x2="9" y2="4"></line>
@@ -156,19 +165,20 @@
         <line x1="1" y1="9" x2="4" y2="9"></line>
         <line x1="1" y1="14" x2="4" y2="14"></line>
       </svg>
+      <span class="orb-tag">RAIO-X</span>
       <span class="orb-tooltip">Raio-X Interno</span>
     </button>
 
-    <!-- 3º Botão: Texto com a Parte Técnica -->
+    <!-- 3ª Bolinha Redonda Azul: Texto com a Parte Técnica -->
     <button type="button" id="btn-orb-tech" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('tech')" title="3. Parte Técnica (Texto, Especificações, Fiação e Montagem)">
-      <span class="orb-badge">3</span>
-      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
         <line x1="16" y1="17" x2="8" y2="17"></line>
         <line x1="10" y1="9" x2="8" y2="9"></line>
       </svg>
+      <span class="orb-tag">TÉCNICO</span>
       <span class="orb-tooltip">Parte Técnica</span>
     </button>
   </nav>
