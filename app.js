@@ -339,143 +339,118 @@ class TotemApp {
     }
   }
 
-  // 5. PAINEL DE CONTROLE DO SIMULADOR (PARA A BANCA & TABLET)
+  // 5. CONTROLE DAS 3 BOLINHAS (SUPERIOR ESQUERDO) E 1 BOLINHA 360° (INFERIOR DIREITO)
   setupSimulatorControls() {
-    const simulatorPanel = document.getElementById('simulator-controls');
-    const btnTogglePanel = document.getElementById('btn-toggle-panel');
-    const btnClosePanel = document.getElementById('btn-close-panel');
-    const btnFloatFullscreen = document.getElementById('btn-float-fullscreen');
+    const menuOverlay = document.getElementById('totem-menu-overlay');
+    const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
+    const modalSchematics = document.getElementById('modal-hardware-schematics');
 
-    // Auto-colapsar em tablets e telas verticais no carregamento inicial
-    // Sincroniza estado de classe no body para ajustes finos de layout
-    const syncPanelBodyClass = () => {
-      const isCollapsed = simulatorPanel ? simulatorPanel.classList.contains('collapsed') : true;
-      document.body.classList.toggle('panel-collapsed', isCollapsed);
-    };
+    // As 3 Bolinhas no Canto Superior Esquerdo
+    const btnOrbScreen = document.getElementById('btn-orb-screen'); // 1ª: Visão da Tela do Totem
+    const btnOrbXray = document.getElementById('btn-orb-xray');     // 2ª: Totem do Lado Interno a Raio-X
+    const btnOrbTech = document.getElementById('btn-orb-tech');     // 3ª: Texto com a Parte Técnica
 
-    if (window.innerWidth <= 1024 && simulatorPanel) {
-      simulatorPanel.classList.add('collapsed');
-    }
-    syncPanelBodyClass();
+    // A 1 Bolinha no Canto Inferior Direito (Características para o 360 do Totem)
+    const btnOrb360 = document.getElementById('btn-orb-360');
+    const popover360 = document.getElementById('orb-360-popover');
+    const btnClosePopover360 = document.getElementById('btn-close-360-popover');
 
-    // BOTÃO DE 3 PONTINHOS: Recolhe ou Abre a Aba Lateral
-    const toggleSidebar = () => {
-      if (!simulatorPanel) return;
-      simulatorPanel.classList.toggle('collapsed');
-      syncPanelBodyClass();
-      if (this.viewer3D) {
-        setTimeout(() => this.viewer3D.handleResize(), 350);
-      }
-    };
-
-    if (btnTogglePanel) btnTogglePanel.addEventListener('click', toggleSidebar);
-    if (btnClosePanel) btnClosePanel.addEventListener('click', () => {
-      if (simulatorPanel) simulatorPanel.classList.add('collapsed');
-      syncPanelBodyClass();
-      if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 350);
-    });
-
-    // BOTÃO EXPANDIR MONITOR (TELA CHEIA NATIVA NO TABLET)
-    if (btnFloatFullscreen) {
-      btnFloatFullscreen.addEventListener('click', () => {
-        // Alterna tela cheia do navegador
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-          if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+    // 1ª Bolinha: Visão da Tela do Totem (Interface 2D Touch)
+    if (btnOrbScreen) {
+      btnOrbScreen.addEventListener('click', () => {
+        const isCurrentlyHidden = menuOverlay ? menuOverlay.classList.contains('hidden') : true;
+        if (isCurrentlyHidden) {
+          if (menuOverlay) menuOverlay.classList.remove('hidden');
+          if (modalSchematics) modalSchematics.classList.add('hidden');
+          btnOrbScreen.classList.add('active');
+          if (btnOrbTech) btnOrbTech.classList.remove('active');
+          this.resetInactivityTimer();
+          this.falar('Abrindo visão da tela interativa do totem.');
         } else {
-          document.exitFullscreen().catch(() => {});
-        }
-        if (this.viewer3D) {
-          setTimeout(() => this.viewer3D.handleResize(), 200);
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+          btnOrbScreen.classList.remove('active');
+          if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 80);
         }
       });
     }
-
-    // GERENCIAMENTO DAS 3 ABAS PRINCIPAIS DO PROJETO:
-    // Aba 1: 📱 Menu 2D Touch
-    // Aba 2: 🧊 Totem 3D Externo (360°)
-    // Aba 3: 🔌 Hardware & Máquina Aberta 3D (Novo!)
-    const menuOverlay = document.getElementById('totem-menu-overlay');
-    const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
-    const stage3D = document.getElementById('totem-3d-stage');
-
-    const tabButtons = {
-      'menu': [document.getElementById('btn-tab-menu'), document.getElementById('btn-toggle-frame')],
-      '3d-external': [document.getElementById('btn-tab-3d-external'), document.getElementById('btn-toggle-3d')],
-      '3d-hardware': [document.getElementById('btn-tab-3d-hardware'), document.getElementById('btn-toggle-hardware')]
-    };
-
-    const activateTab = (tabId) => {
-      // Remove classe active de todos os botões de abas
-      Object.values(tabButtons).flat().forEach(btn => btn && btn.classList.remove('active'));
-
-      // Ativa botões da aba selecionada
-      if (tabButtons[tabId]) {
-        tabButtons[tabId].forEach(btn => btn && btn.classList.add('active'));
-      }
-
-      if (tabId === 'menu') {
-        if (menuOverlay) menuOverlay.classList.remove('hidden');
-        this.resetInactivityTimer();
-        this.falar('Abrindo menu interativo do totem.');
-      } else if (tabId === '3d-external') {
-        if (menuOverlay) menuOverlay.classList.add('hidden');
-        if (stage3D) stage3D.classList.remove('hidden');
-        if (this.viewer3D) {
-          this.viewer3D.setHardwareMode(false);
-          setTimeout(() => this.viewer3D.handleResize(), 100);
-        }
-        if (window.innerWidth <= 1024 && simulatorPanel) {
-          simulatorPanel.classList.add('collapsed');
-          syncPanelBodyClass();
-        }
-      } else if (tabId === '3d-hardware') {
-        if (menuOverlay) menuOverlay.classList.add('hidden');
-        if (stage3D) stage3D.classList.remove('hidden');
-        if (this.viewer3D) {
-          this.viewer3D.setHardwareMode(true);
-          setTimeout(() => this.viewer3D.handleResize(), 100);
-        }
-        if (window.innerWidth <= 1024 && simulatorPanel) {
-          simulatorPanel.classList.add('collapsed');
-          syncPanelBodyClass();
-        }
-        this.falar('Visualizando arquitetura e hardware interno da máquina.');
-      }
-    };
-
-    // Listeners das 3 Abas na Barra Superior
-    const btnTabMenu = document.getElementById('btn-tab-menu');
-    const btnTab3dExt = document.getElementById('btn-tab-3d-external');
-    const btnTab3dHw = document.getElementById('btn-tab-3d-hardware');
-    if (btnTabMenu) btnTabMenu.addEventListener('click', () => activateTab('menu'));
-    if (btnTab3dExt) btnTab3dExt.addEventListener('click', () => activateTab('3d-external'));
-    if (btnTab3dHw) btnTab3dHw.addEventListener('click', () => activateTab('3d-hardware'));
-
-    // Listeners das Abas no Painel Lateral do Simulador
-    const btnToggleFrame = document.getElementById('btn-toggle-frame');
-    const btnToggle3D = document.getElementById('btn-toggle-3d');
-    const btnToggleHw = document.getElementById('btn-toggle-hardware');
-    const btnFullscreen = document.getElementById('btn-fullscreen');
-
-    if (btnToggleFrame) btnToggleFrame.addEventListener('click', () => activateTab('menu'));
-    if (btnToggle3D) btnToggle3D.addEventListener('click', () => activateTab('3d-external'));
-    if (btnToggleHw) btnToggleHw.addEventListener('click', () => activateTab('3d-hardware'));
 
     if (btnCloseMenuOverlay) {
       btnCloseMenuOverlay.addEventListener('click', () => {
-        activateTab('3d-external');
+        if (menuOverlay) menuOverlay.classList.add('hidden');
+        if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+        if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 80);
       });
     }
 
-    if (btnFullscreen) {
-      btnFullscreen.addEventListener('click', () => {
-        activateTab('menu');
-        if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+    // 2ª Bolinha: Totem do Lado Interno a Raio-X (Alterna Raio-X no Totem 3D central)
+    if (btnOrbXray) {
+      btnOrbXray.addEventListener('click', () => {
+        // Fecha overlays para mostrar o Totem 3D no centro
+        if (menuOverlay) menuOverlay.classList.add('hidden');
+        if (modalSchematics) modalSchematics.classList.add('hidden');
+        if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+        if (btnOrbTech) btnOrbTech.classList.remove('active');
+
+        if (this.viewer3D) {
+          const nextState = !this.viewer3D.isHardwareMode;
+          this.viewer3D.hardwareViewMode = 'xray';
+          this.viewer3D.setHardwareMode(nextState);
+          btnOrbXray.classList.toggle('active', nextState);
+          this.falar(nextState ? 'Visão do totem do lado interno a raio-x ativada.' : 'Visão externa do totem restaurada.');
+        }
       });
     }
 
-    // Seletor rápido de telas dentro do Estúdio 3D
+    // 3ª Bolinha: Texto com a Parte Técnica (Abre o Dossiê Técnico na aba de Texto Técnico)
+    if (btnOrbTech) {
+      btnOrbTech.addEventListener('click', () => {
+        if (!modalSchematics) return;
+        const isHidden = modalSchematics.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+          modalSchematics.classList.remove('hidden');
+          btnOrbTech.classList.add('active');
+          this.falar('Abrindo documento com a parte técnica e arquitetura do totem.');
+        } else {
+          modalSchematics.classList.add('hidden');
+          btnOrbTech.classList.remove('active');
+        }
+      });
+    }
+
+    // Bolinha do Canto Inferior Direito: Abre/Fecha menu de Características do 360°
+    if (btnOrb360 && popover360) {
+      btnOrb360.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = popover360.classList.contains('hidden');
+        popover360.classList.toggle('hidden', !isHidden);
+        btnOrb360.classList.toggle('active', isHidden);
+      });
+
+      if (btnClosePopover360) {
+        btnClosePopover360.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popover360.classList.add('hidden');
+          btnOrb360.classList.remove('active');
+        });
+      }
+
+      popover360.addEventListener('click', (e) => e.stopPropagation());
+
+      // Fechar popover do 360° ao clicar fora
+      document.addEventListener('click', (e) => {
+        if (!popover360.classList.contains('hidden') &&
+            !e.target.closest('#orb-360-popover') &&
+            !e.target.closest('#btn-orb-360') &&
+            !e.target.closest('#totem-color-picker-modal')) {
+          popover360.classList.add('hidden');
+          btnOrb360.classList.remove('active');
+        }
+      });
+    }
+
+    // Seletor rápido de telas dentro do menu 360°
     document.querySelectorAll('[data-3d-screen]').forEach(btn => {
       btn.addEventListener('click', () => {
         const sc = btn.getAttribute('data-3d-screen');
@@ -491,15 +466,6 @@ class TotemApp {
         }
       });
     });
-
-    // Botões de Simulação de Energia
-    const btnSimIdle = document.getElementById('btn-sim-idle');
-    const btnSimSleep = document.getElementById('btn-sim-sleep');
-    const btnSimPir = document.getElementById('btn-sim-pir');
-
-    if (btnSimIdle) btnSimIdle.addEventListener('click', () => this.enterIdleMode());
-    if (btnSimSleep) btnSimSleep.addEventListener('click', () => this.enterSleepMode());
-    if (btnSimPir) btnSimPir.addEventListener('click', () => this.resetInactivityTimer());
 
     // Clicar nos overlays acorda a tela
     const idleOverlay = document.getElementById('screen-idle-overlay');

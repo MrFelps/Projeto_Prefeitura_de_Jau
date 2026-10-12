@@ -15,13 +15,13 @@ class Totem3DViewer {
     // Estado da câmera orbital 360° (coordenadas esféricas)
     this.camState = {
       theta: 0.48,        // Ângulo horizontal (radianos) - 360° livre
-      phi: 1.34,          // Ângulo vertical (radianos)
-      radius: 2.75,       // Distância do zoom - aproximado ao máximo sem cortar nem distorcer
-      targetY: 1.10,      // Altura do foco no centro do totem
+      phi: 1.38,          // Ângulo vertical (radianos)
+      radius: 3.50,       // Distância calibrada para exibir 100% do totem (da base ao topo solar)
+      targetY: 1.06,      // Altura do foco no centro exato do totem
       targetTheta: 0.48,
-      targetPhi: 1.34,
-      targetRadius: 2.75,
-      targetLookY: 1.10
+      targetPhi: 1.38,
+      targetRadius: 3.50,
+      targetLookY: 1.06
     };
 
     this.isDragging = false;
@@ -41,9 +41,9 @@ class Totem3DViewer {
     this.isHighContrast = false;
     this.showVLibrasBox = false; // VLibras inicia oculto por padrão (só aparece quando solicitado)
 
-    // ABA 3: Configurações do Modo Hardware & Máquina Aberta
+    // Configurações do Modo Hardware & Raio-X Interno (2ª Bolinha)
     this.isHardwareMode = false;
-    this.hardwareViewMode = 'door'; // 'door', 'xray', 'exploded'
+    this.hardwareViewMode = 'xray'; // 'xray', 'door', 'exploded'
     this.glowPowerWiring = false;
     this.glowDataWiring = false;
     this.currentDoorAngle = 0;
@@ -105,8 +105,8 @@ class Totem3DViewer {
     this.container = document.getElementById(this.containerId);
     if (!this.container || typeof THREE === 'undefined') return;
 
-    const width = this.container.clientWidth || 800;
-    const height = this.container.clientHeight || 600;
+    const width = this.container.clientWidth || window.innerWidth || 800;
+    const height = this.container.clientHeight || window.innerHeight || 600;
 
     // 1. Cena (Fundo Neutro Natural de Estúdio Arquitetônico)
     this.scene = new THREE.Scene();
@@ -114,7 +114,7 @@ class Totem3DViewer {
     this.scene.fog = new THREE.FogExp2(0xdbe2ea, 0.035);
 
     // 2. Câmera
-    this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
 
     // 3. Renderizador WebGL com sombras suaves e exposição natural (sem estouro de branco)
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -148,6 +148,7 @@ class Totem3DViewer {
     window.addEventListener('resize', () => this.handleResize());
 
     this.initialized = true;
+    this.handleResize();
     this.animate();
   }
 
@@ -596,14 +597,16 @@ class Totem3DViewer {
     this.rearDoorHingeGroup.position.set(-0.31, 1.10, -0.178);
 
     this.rearTexture = new THREE.CanvasTexture(this.rearCanvas);
+    const rearDoorMat = new THREE.MeshStandardMaterial({
+      map: this.rearTexture,
+      roughness: 0.40,
+      metalness: 0.28,
+      side: THREE.DoubleSide
+    });
+    this.dynamicMaterials.rearDoor = rearDoorMat;
     const rearDoorMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(0.62, 1.82),
-      new THREE.MeshStandardMaterial({
-        map: this.rearTexture,
-        roughness: 0.40,
-        metalness: 0.28,
-        side: THREE.DoubleSide
-      })
+      rearDoorMat
     );
     rearDoorMesh.rotation.y = Math.PI;
     rearDoorMesh.position.set(0.31, 0, 0); // Centro da folha de porta deslocado do pivô
@@ -2532,13 +2535,13 @@ class Totem3DViewer {
   // BOTÕES DA INTERFACE DO ESTÚDIO 3D (CÂMERAS, GIRO 360°, TEMA, DIA/NOITE)
   // =========================================================================
   setupUIControls() {
-    // 1. Ângulos Rápidos de Câmera (Enquadramento máximo sem cortar nem distorcer)
+    // 1. Ângulos Rápidos de Câmera (Enquadramento 100% visível da base ao topo sem cortar)
     const presets = {
-      'front': { theta: 0.0, phi: 1.52, radius: 2.65, targetY: 1.10 },
-      'perspective': { theta: 0.52, phi: 1.32, radius: 2.75, targetY: 1.10 },
-      'side': { theta: 1.57, phi: 1.48, radius: 2.60, targetY: 1.10 },
-      'back': { theta: Math.PI, phi: 1.45, radius: 2.65, targetY: 1.10 },
-      'solar': { theta: 0.0, phi: 0.28, radius: 1.60, targetY: 1.95 }
+      'front': { theta: 0.0, phi: 1.50, radius: 3.40, targetY: 1.06 },
+      'perspective': { theta: 0.48, phi: 1.38, radius: 3.50, targetY: 1.06 },
+      'side': { theta: 1.57, phi: 1.46, radius: 3.35, targetY: 1.06 },
+      'back': { theta: Math.PI, phi: 1.44, radius: 3.40, targetY: 1.06 },
+      'solar': { theta: 0.0, phi: 0.28, radius: 1.85, targetY: 1.95 }
     };
 
     document.querySelectorAll('[data-cam-preset]').forEach(btn => {
@@ -2623,7 +2626,7 @@ class Totem3DViewer {
         this.isNightMode = !this.isNightMode;
         this.applyDayNightMode();
         btnNight.classList.toggle('active', this.isNightMode);
-        btnNight.textContent = this.isNightMode ? '🌙 Ambiente: Noite (LEDs)' : '☀️ Ambiente: Dia (Praça)';
+        btnNight.textContent = this.isNightMode ? '🌙 Noite (LEDs)' : '☀️ Dia / Noite';
       });
     }
 
@@ -2637,32 +2640,56 @@ class Totem3DViewer {
       });
     }
 
-    // 9. Controles Específicos da Aba 3 (Hardware & Máquina Aberta)
+    // 9. Controles Específicos de Raio-X / Lado Interno
     this.setupHardwareControls();
   }
 
   // =========================================================================
-  // CONTROLES E MODOS DA ABA 3 (HARDWARE & MÁQUINA ABERTA)
+  // CONTROLES E MODOS DO LADO INTERNO / RAIO-X (2ª BOLINHA & MENU 360°)
   // =========================================================================
   setupHardwareControls() {
-    // 1. Modos de Visão Interna (Porta Aberta 100°, Raio-X Translúcido, Vista Explodida)
+    // 1. Modos de Visão Interna (Raio-X Translúcido, Porta Aberta 100°, Vista Explodida)
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
       btn.addEventListener('click', () => {
         const mode = btn.getAttribute('data-hw-view');
-        this.setHardwareView(mode);
+        if (this.isHardwareMode && this.hardwareViewMode === mode) {
+          // Se clicar novamente no modo já ativo, volta ao totem externo normal
+          this.setHardwareMode(false);
+          const orbXray = document.getElementById('btn-orb-xray');
+          if (orbXray) orbXray.classList.remove('active');
+        } else {
+          this.hardwareViewMode = mode;
+          this.setHardwareMode(true);
+          const orbXray = document.getElementById('btn-orb-xray');
+          if (orbXray) orbXray.classList.add('active');
+        }
       });
     });
 
     // 2. Destacar Chicote Elétrico (AC 220V e DC 12V)
     const btnGlowPower = document.getElementById('btn-hw-glow-power');
     if (btnGlowPower) {
-      btnGlowPower.addEventListener('click', () => this.toggleGlowPower());
+      btnGlowPower.addEventListener('click', () => {
+        if (!this.isHardwareMode) {
+          this.setHardwareMode(true);
+          const orbXray = document.getElementById('btn-orb-xray');
+          if (orbXray) orbXray.classList.add('active');
+        }
+        this.toggleGlowPower();
+      });
     }
 
-    // 3. Destacar Cabos de Dados (HDMI, USB Touch, Ethernet Cat6)
+    // 3. Destacar Cabos de Dados (HDMI, USB Touch, Telemetria RS485)
     const btnGlowData = document.getElementById('btn-hw-glow-data');
     if (btnGlowData) {
-      btnGlowData.addEventListener('click', () => this.toggleGlowData());
+      btnGlowData.addEventListener('click', () => {
+        if (!this.isHardwareMode) {
+          this.setHardwareMode(true);
+          const orbXray = document.getElementById('btn-orb-xray');
+          if (orbXray) orbXray.classList.add('active');
+        }
+        this.toggleGlowData();
+      });
     }
 
     // 4. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 9)
@@ -2678,16 +2705,19 @@ class Totem3DViewer {
       });
     }
 
-    // 5. Abrir Modal de Diagrama de Fiação Completo
+    // 5. Abrir/Fechar Modal da Parte Técnica (3ª Bolinha)
     const modalSchematics = document.getElementById('modal-hardware-schematics');
+    const orbTech = document.getElementById('btn-orb-tech');
     const openSchematics = () => {
       if (modalSchematics) {
         modalSchematics.classList.remove('hidden');
+        if (orbTech) orbTech.classList.add('active');
       }
     };
     const closeSchematics = () => {
       if (modalSchematics) {
         modalSchematics.classList.add('hidden');
+        if (orbTech) orbTech.classList.remove('active');
       }
     };
 
@@ -2707,7 +2737,7 @@ class Totem3DViewer {
       });
     }
 
-    // Abas internas do Modal de Hardware (Fiação, Diagrama, BOM, Montagem)
+    // Abas internas do Modal de Parte Técnica (Texto Técnico, Fiação, Diagrama, BOM, Montagem)
     document.querySelectorAll('[data-hw-tab]').forEach(tabBtn => {
       tabBtn.addEventListener('click', () => {
         const targetTab = tabBtn.getAttribute('data-hw-tab');
@@ -2724,50 +2754,41 @@ class Totem3DViewer {
   setHardwareMode(active) {
     this.isHardwareMode = active;
 
-    const extTopbar = document.getElementById('totem-external-topbar');
-    const hwTopbar = document.getElementById('totem-hardware-topbar');
-    const extDock = document.getElementById('totem-external-dock');
-    const hwDock = document.getElementById('totem-hardware-dock');
-
     if (active) {
-      if (extTopbar) extTopbar.classList.add('hidden');
-      if (hwTopbar) hwTopbar.classList.remove('hidden');
-      if (extDock) extDock.classList.add('hidden');
-      if (hwDock) hwDock.classList.remove('hidden');
-
       if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
       this.showHotspots = true;
       const btnHwHotspots = document.getElementById('btn-hw-hotspots');
       if (btnHwHotspots) btnHwHotspots.classList.add('active');
 
-      // Aplica o modo de visão atual do hardware (padrão: 'door' - porta aberta 100°)
-      this.setHardwareView(this.hardwareViewMode || 'door');
+      // Aplica o modo de visão interna (padrão: 'xray' - Totem do lado interno a raio-x)
+      this.setHardwareView(this.hardwareViewMode || 'xray');
     } else {
-      if (extTopbar) extTopbar.classList.remove('hidden');
-      if (hwTopbar) hwTopbar.classList.add('hidden');
-      if (extDock) extDock.classList.remove('hidden');
-      if (hwDock) hwDock.classList.add('hidden');
-
-      // Fecha a porta suavemente e remove transparência
+      // Fecha a porta suavemente e restaura a opacidade original da carcaça
       this.targetDoorAngle = 0;
       this.targetExplodeOffset = 0;
-      if (this.dynamicMaterials.body) {
-        this.dynamicMaterials.body.transparent = false;
-        this.dynamicMaterials.body.opacity = 1.0;
-        this.dynamicMaterials.body.needsUpdate = true;
-      }
-      if (this.dynamicMaterials.headerSign) {
-        this.dynamicMaterials.headerSign.transparent = false;
-        this.dynamicMaterials.headerSign.opacity = 1.0;
-        this.dynamicMaterials.headerSign.needsUpdate = true;
-      }
+      ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
+        const mat = this.dynamicMaterials[matKey];
+        if (mat) {
+          mat.transparent = false;
+          mat.opacity = 1.0;
+          mat.depthWrite = true;
+          mat.needsUpdate = true;
+        }
+      });
       if (this.internalHardwareGroup) this.internalHardwareGroup.visible = false;
+      this.showHotspots = false;
+      const btnHwHotspots = document.getElementById('btn-hw-hotspots');
+      if (btnHwHotspots) btnHwHotspots.classList.remove('active');
+      const card = document.getElementById('totem-3d-info-card');
+      if (card) card.classList.add('hidden');
 
-      // Restaura câmera para visão 3/4 externa
-      this.camState.targetTheta = 0.52;
-      this.camState.targetPhi = 1.32;
-      this.camState.targetRadius = 2.75;
-      this.camState.targetLookY = 1.10;
+      document.querySelectorAll('[data-hw-view]').forEach(btn => btn.classList.remove('active'));
+
+      // Restaura câmera para visão 3/4 externa centralizada
+      this.camState.targetTheta = 0.48;
+      this.camState.targetPhi = 1.38;
+      this.camState.targetRadius = 3.50;
+      this.camState.targetLookY = 1.06;
     }
 
     this.renderHotspotPins();
@@ -2778,16 +2799,15 @@ class Totem3DViewer {
     this.autoRotate = false;
 
     // Reseta transparências prévias
-    if (this.dynamicMaterials.body) {
-      this.dynamicMaterials.body.transparent = false;
-      this.dynamicMaterials.body.opacity = 1.0;
-      this.dynamicMaterials.body.needsUpdate = true;
-    }
-    if (this.dynamicMaterials.headerSign) {
-      this.dynamicMaterials.headerSign.transparent = false;
-      this.dynamicMaterials.headerSign.opacity = 1.0;
-      this.dynamicMaterials.headerSign.needsUpdate = true;
-    }
+    ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
+      const mat = this.dynamicMaterials[matKey];
+      if (mat) {
+        mat.transparent = false;
+        mat.opacity = 1.0;
+        mat.depthWrite = true;
+        mat.needsUpdate = true;
+      }
+    });
     this.targetExplodeOffset = 0;
 
     if (mode === 'door') {
@@ -2795,33 +2815,32 @@ class Totem3DViewer {
       this.targetDoorAngle = -Math.PI * 0.55;
       this.camState.targetTheta = Math.PI + 0.30;
       this.camState.targetPhi = 1.38;
-      this.camState.targetRadius = 2.35;
-      this.camState.targetLookY = 1.15;
+      this.camState.targetRadius = 3.25;
+      this.camState.targetLookY = 1.08;
     } else if (mode === 'xray') {
-      // Carcaça translúcida / Raio-X
+      // Carcaça translúcida / Raio-X (Visão interna 360° de todos os componentes e fios)
       this.targetDoorAngle = 0;
-      if (this.dynamicMaterials.body) {
-        this.dynamicMaterials.body.transparent = true;
-        this.dynamicMaterials.body.opacity = 0.22;
-        this.dynamicMaterials.body.needsUpdate = true;
-      }
-      if (this.dynamicMaterials.headerSign) {
-        this.dynamicMaterials.headerSign.transparent = true;
-        this.dynamicMaterials.headerSign.opacity = 0.25;
-        this.dynamicMaterials.headerSign.needsUpdate = true;
-      }
-      this.camState.targetTheta = 0.75;
-      this.camState.targetPhi = 1.30;
-      this.camState.targetRadius = 2.60;
-      this.camState.targetLookY = 1.10;
+      ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
+        const mat = this.dynamicMaterials[matKey];
+        if (mat) {
+          mat.transparent = true;
+          mat.opacity = 0.18;
+          mat.depthWrite = false;
+          mat.needsUpdate = true;
+        }
+      });
+      this.camState.targetTheta = 0.72;
+      this.camState.targetPhi = 1.35;
+      this.camState.targetRadius = 3.35;
+      this.camState.targetLookY = 1.06;
     } else if (mode === 'exploded') {
       // Vista explodida em camadas
       this.targetDoorAngle = -Math.PI * 0.40;
       this.targetExplodeOffset = 0.32;
       this.camState.targetTheta = 0.95;
-      this.camState.targetPhi = 1.25;
-      this.camState.targetRadius = 3.10;
-      this.camState.targetLookY = 1.10;
+      this.camState.targetPhi = 1.28;
+      this.camState.targetRadius = 3.65;
+      this.camState.targetLookY = 1.06;
     }
 
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
@@ -3218,24 +3237,24 @@ class Totem3DViewer {
     // para que a base inferior e o topo solar fiquem perfeitamente visíveis sem ser cortados
     if (aspect < 0.65) {
       // Telas compridas em pé (celulares)
-      this.camera.fov = 48;
-      this.camState.targetRadius = 3.35;
-      this.camState.targetLookY = 1.05;
+      this.camera.fov = 50;
+      this.camState.targetRadius = 3.70;
+      this.camState.targetLookY = 1.06;
     } else if (aspect < 0.85) {
       // Tablets verticais (iPads Portrait, tablets Android 3:4 ou 9:16)
-      this.camera.fov = 44;
-      this.camState.targetRadius = 3.05;
-      this.camState.targetLookY = 1.05;
+      this.camera.fov = 47;
+      this.camState.targetRadius = 3.55;
+      this.camState.targetLookY = 1.06;
     } else if (aspect < 1.15) {
       // Tablets quase quadrados ou rotação intermediária
-      this.camera.fov = 40;
-      this.camState.targetRadius = 2.85;
-      this.camState.targetLookY = 1.05;
+      this.camera.fov = 45;
+      this.camState.targetRadius = 3.50;
+      this.camState.targetLookY = 1.06;
     } else {
       // Desktop / Telas widescreen
-      this.camera.fov = 37;
-      this.camState.targetRadius = 2.78;
-      this.camState.targetLookY = 1.05;
+      this.camera.fov = 45;
+      this.camState.targetRadius = 3.50;
+      this.camState.targetLookY = 1.06;
     }
 
     this.camera.updateProjectionMatrix();

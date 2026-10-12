@@ -2745,37 +2745,18 @@ body:not(.panel-collapsed) .tablet-top-actions {
 /* ========================================================================= */
 /* ESTILOS DO ESTÚDIO 3D INTERATIVO 360° (THREE.JS / WEBGL)                  */
 /* ========================================================================= */
+.hidden,
 .totem-frame.hidden,
 .totem-3d-stage.hidden {
   display: none !important;
 }
 
-.btn-3d-mode {
-  margin-top: 4px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border: 1.5px solid #38bdf8;
-  color: #38bdf8;
-  font-size: 12.5px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn-3d-mode.active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  border-color: #7dd3fc;
-  color: #ffffff;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
-}
-
 .totem-3d-stage {
   flex: 1;
-  width: calc(100% - 1cm);
-  margin: 0 0.5cm;
+  width: 100vw;
+  margin: 0;
   height: 100vh;
-  max-height: none;
+  max-height: 100vh;
   background: #eef2f6;
   border: none;
   border-radius: 0;
@@ -4319,3 +4300,360 @@ body:not(.panel-collapsed) .tablet-top-actions {
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   transform: scale(1.04);
 }
+
+/* ========================================================================= */
+/* NOVO LAYOUT MINIMALISTA:                                                  */
+/* - 3 BOLINHAS NO CANTO SUPERIOR ESQUERDO (TELA, RAIO-X, PARTE TÉCNICA)     */
+/* - 1 BOLINHA NO CANTO INFERIOR DIREITO (CARACTERÍSTICAS DO 360°)           */
+/* ========================================================================= */
+
+/* Canto Superior Esquerdo: 3 Bolinhas Empilhadas Verticalmente */
+.top-left-orbs {
+  position: fixed;
+  top: 22px;
+  left: 22px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.orb-btn {
+  pointer-events: auto;
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orb-btn:hover {
+  transform: scale(1.08);
+  background: var(--gov-blue);
+  border-color: #7dd3fc;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(19, 81, 180, 0.5);
+}
+
+.orb-btn.active {
+  background: linear-gradient(135deg, #0284c7 0%, #1351b4 100%);
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.65);
+}
+
+.orb-svg {
+  width: 24px;
+  height: 24px;
+}
+
+.orb-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #38bdf8;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0f172a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.orb-btn.active .orb-badge {
+  background: #ffcd07;
+  color: #000000;
+}
+
+.orb-tooltip {
+  position: absolute;
+  left: 68px;
+  white-space: nowrap;
+  background: rgba(15, 23, 42, 0.94);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  transition: all 0.18s ease;
+}
+
+.orb-btn:hover .orb-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Canto Inferior Direito: 1 Bolinha para as Características do 360° */
+.bottom-right-orb-wrap {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1150;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.orb-360-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 2.5px solid #38bdf8;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45), 0 0 18px rgba(56, 189, 248, 0.3);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orb-360-btn:hover,
+.orb-360-btn.active {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #0284c7 0%, #1351b4 100%);
+  border-color: #ffffff;
+  box-shadow: 0 14px 34px rgba(2, 132, 199, 0.6);
+}
+
+.orb-360-svg {
+  width: 24px;
+  height: 24px;
+  color: #38bdf8;
+}
+
+.orb-360-btn:hover .orb-360-svg,
+.orb-360-btn.active .orb-360-svg {
+  color: #ffffff;
+}
+
+.orb-360-tag {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #e2e8f0;
+}
+
+/* Menu Flutuante de Características do 360° (Popover acima da bolinha inferior direita) */
+.orb-360-popover {
+  margin-bottom: 14px;
+  width: 340px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+  color: #f8fafc;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popover-360-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(2, 132, 199, 0.16);
+}
+
+.popover-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.popover-360-head h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 2px 0 0 0;
+}
+
+.btn-close-popover {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-close-popover:hover {
+  background: #ef4444;
+  border-color: #f87171;
+  color: #ffffff;
+}
+
+.popover-360-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.popover-section {
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.popover-sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sec-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #93c5fd;
+  margin-bottom: 7px;
+  letter-spacing: 0.3px;
+}
+
+.popover-sec-header .sec-title {
+  margin-bottom: 0;
+}
+
+.spin-mini-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-spin-mini {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #38bdf8;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-spin-mini:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.popover-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.popover-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.popover-360-body .btn-dock {
+  width: 100%;
+  justify-content: center;
+  padding: 7px 6px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.popover-screen-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.popover-screen-pills .btn-3d-screen {
+  flex: 1 1 calc(33.33% - 5px);
+  text-align: center;
+  padding: 6px 6px;
+  font-size: 11px;
+}
+
+/* Ajuste da posição do Seletor de Cores quando aberto pelo menu 360° */
+.totem-color-picker-panel {
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1250;
+}
+
+/* Estilização do Dossiê de Texto Técnico na 3ª Bolinha */
+.tech-text-dossier {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+.tech-text-section {
+  background: #1e293b;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-left: 4px solid #38bdf8;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tech-text-section h5 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.tech-text-section p {
+  margin: 0;
+  font-size: 12.8px;
+  line-height: 1.58;
+  color: #e2e8f0;
+  text-align: justify;
+}
+
+.tech-text-section p strong {
+  color: #ffffff;
+}
+

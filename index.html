@@ -17,89 +17,54 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans select-none">
 
-  <!-- BARRA SUPERIOR DE NAVEGAÇÃO PRINCIPAL DO PROJETO (TABLET / DESKTOP) -->
-  <div class="tablet-top-actions">
-    <!-- As 3 Abas Principais do Projeto -->
-    <div class="main-project-tabs" role="tablist" aria-label="Abas Principais do Totem">
-      <button id="btn-tab-menu" class="btn-project-tab" role="tab" aria-selected="false" title="Interface 2D do Quiosque Touch (Autoatendimento do Cidadão)">
-        <span class="tab-icon">📱</span>
-        <span class="tab-label">Menu 2D</span>
-      </button>
-      <button id="btn-tab-3d-external" class="btn-project-tab active" role="tab" aria-selected="true" title="Visualizador 3D 360° do Totem Externo (Praça)">
-        <span class="tab-icon">🧊</span>
-        <span class="tab-label">Totem 3D</span>
-      </button>
-      <button id="btn-tab-3d-hardware" class="btn-project-tab btn-tab-highlight" role="tab" aria-selected="false" title="Arquitetura de Hardware & Máquina Aberta por Dentro">
-        <span class="tab-icon">🔌</span>
-        <span class="tab-label">Hardware & Máquina Aberta</span>
-        <span class="tab-chip">NOVO</span>
-      </button>
-    </div>
+  <!-- =================================================================== -->
+  <!-- CANTO SUPERIOR ESQUERDO: 3 BOLINHAS UMA EMBAIXO DA OUTRA            -->
+  <!-- 1ª: Visão da Tela do Totem (2D)                                     -->
+  <!-- 2ª: Totem do Lado Interno a Raio-X (3D Interno)                     -->
+  <!-- 3ª: Texto com a Parte Técnica (Dossiê Completo)                     -->
+  <!-- =================================================================== -->
+  <nav class="top-left-orbs" aria-label="Menu Principal em 3 Bolinhas">
+    <!-- 1ª Bolinha: Visão da Tela do Totem -->
+    <button id="btn-orb-screen" class="orb-btn" title="1. Visão da Tela do Totem (Interface Touch 2D)">
+      <span class="orb-badge">1</span>
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+      </svg>
+      <span class="orb-tooltip">Tela do Totem</span>
+    </button>
 
-    <!-- Utilitários do Tablet / Painel -->
-    <div class="tablet-action-tools">
-      <button id="btn-toggle-panel" class="btn-float-dots" title="Recolher / Mostrar Painel Lateral">
-        <span class="dots-icon">⋯</span>
-        <span class="dots-label">Painel</span>
-      </button>
+    <!-- 2ª Bolinha: Totem do Lado Interno a Raio-X -->
+    <button id="btn-orb-xray" class="orb-btn" title="2. Totem do Lado Interno a Raio-X (Hardware & Fiação)">
+      <span class="orb-badge">2</span>
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+        <rect x="9" y="9" width="6" height="6"></rect>
+        <line x1="9" y1="1" x2="9" y2="4"></line>
+        <line x1="15" y1="1" x2="15" y2="4"></line>
+        <line x1="9" y1="20" x2="9" y2="23"></line>
+        <line x1="15" y1="20" x2="15" y2="23"></line>
+        <line x1="20" y1="9" x2="23" y2="9"></line>
+        <line x1="20" y1="14" x2="23" y2="14"></line>
+        <line x1="1" y1="9" x2="4" y2="9"></line>
+        <line x1="1" y1="14" x2="4" y2="14"></line>
+      </svg>
+      <span class="orb-tooltip">Raio-X Interno</span>
+    </button>
 
-      <button id="btn-float-fullscreen" class="btn-float-expand" title="Expandir para Tela Inteira no Tablet">
-        <span class="expand-icon">⛶</span>
-        <span class="expand-label">Tela Cheia</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- PAINEL DE CONTROLE EXTERNO DO MOCKUP (Para a Banca / Apresentação) -->
-  <aside id="simulator-controls" class="simulator-panel">
-    <div class="panel-header">
-      <div class="panel-header-row">
-        <span class="badge-live">Ao Vivo</span>
-        <button id="btn-close-panel" class="btn-collapse-arrow" title="Recolher para a Lateral">◀ Recolher</button>
-      </div>
-      <h3>Painel de Demonstração (Senac / Prefeitura)</h3>
-      <p>Simulador de Ambiente, Sensores e Hardware</p>
-    </div>
-    <div class="panel-body">
-      <div class="control-group">
-        <label>Abas Principais do Projeto:</label>
-        <div class="btn-row">
-          <button id="btn-toggle-frame" class="btn-ctrl">📱 Menu 2D</button>
-          <button id="btn-toggle-3d" class="btn-ctrl btn-3d-mode active">🧊 Totem 3D</button>
-        </div>
-        <button id="btn-toggle-hardware" class="btn-ctrl btn-hardware-mode">🔌 Hardware & Máquina Aberta 3D</button>
-        <button id="btn-fullscreen" class="btn-ctrl btn-kiosk-fs" style="margin-top: 6px;">⛶ Modo Quiosque Tela Cheia</button>
-      </div>
-
-      <div class="control-group">
-        <label>Simulação de Energia (ESG):</label>
-        <div class="btn-row">
-          <button id="btn-sim-idle" class="btn-ctrl">Modo Vitrine (Ocioso)</button>
-          <button id="btn-sim-sleep" class="btn-ctrl">Standby Noturno (00h-05h)</button>
-        </div>
-        <button id="btn-sim-pir" class="btn-ctrl btn-highlight">🚶 Sensor de Presença (Acordar)</button>
-      </div>
-
-      <div class="control-group">
-        <label>Timer de Inatividade Automática:</label>
-        <div class="timer-bar-container">
-          <div id="inactivity-progress" class="timer-bar"></div>
-        </div>
-        <small id="timer-text">Retorno automático em: 45s</small>
-      </div>
-
-      <div class="control-group">
-        <label>Estatísticas do Totem:</label>
-        <ul class="stats-list">
-          <li><strong>Consumo Atual:</strong> <span id="stat-power">145 W (Normal)</span></li>
-          <li><strong>Localização Atual:</strong> Jardim de Baixo (Praça da República), Jaú/SP</li>
-          <li><strong>Locais Oficiais (4 Totens):</strong> Rodoviária • Praça Matriz • Jardim de Baixo • Parque do Rio Jaú</li>
-          <li><strong>Alimentação:</strong> Solar Híbrida (Fotovoltaica + Bateria Reserva + 220V Auxiliar)</li>
-          <li><strong>Operação:</strong> Autônoma Local / Paperless (QR Code via Celular)</li>
-        </ul>
-      </div>
-    </div>
-  </aside>
+    <!-- 3ª Bolinha: Texto com a Parte Técnica -->
+    <button id="btn-orb-tech" class="orb-btn" title="3. Parte Técnica (Texto, Especificações, Fiação e Montagem)">
+      <span class="orb-badge">3</span>
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <line x1="10" y1="9" x2="8" y2="9"></line>
+      </svg>
+      <span class="orb-tooltip">Parte Técnica</span>
+    </button>
+  </nav>
 
   <!-- OVERLAY / MODAL: TELA 2D DO MENU DO TOTEM (ABRE POR CIMA DO 3D SEM DISTORCER) -->
   <div id="totem-menu-overlay" class="totem-menu-overlay hidden">
@@ -1161,225 +1126,264 @@
   </div><!-- Fim do totem-menu-overlay -->
 
   <!-- =================================================================== -->
-  <!-- ESTÚDIO 3D INTERATIVO 360° (WEBGL / THREE.JS)                       -->
+  <!-- ESTÚDIO 3D INTERATIVO 360° EM TELA CHEIA (WEBGL / THREE.JS)         -->
   <!-- =================================================================== -->
   <div id="totem-3d-stage" class="totem-3d-stage">
-      <!-- Barra Superior do Visualizador 3D: MODO EXTERNO (360°) -->
-      <div id="totem-external-topbar" class="totem-3d-topbar">
-        <div class="totem-3d-brand">
-          <span class="badge-3d">ROTAÇÃO 360° INTERATIVA</span>
-          <div>
-            <h4>Totem Inteligente de Jaú • Modelo Conceitual 3D</h4>
-            <p>🖱️ Arraste para os lados para girar 360° • Scroll para Zoom • Clique nos pontos 1 a 6</p>
-          </div>
+    <!-- Área do Canvas WebGL + Hotspots 3D -->
+    <div class="totem-3d-viewport">
+      <div id="totem-3d-canvas-mount" class="totem-3d-canvas-mount"></div>
+      <div id="totem-3d-hotspots" class="totem-3d-hotspots-layer"></div>
+
+      <!-- Seletor Flutuante Completo de Cores da Carcaça (Tabela Espectro + Branco ao Preto) -->
+      <div id="totem-color-picker-modal" class="totem-color-picker-panel hidden">
+        <div class="color-picker-header">
+          <span>🎨 Tabela de Cores do Totem (Ferro, Placa & Costas)</span>
+          <button id="btn-close-color-picker" class="btn-close-picker">✕</button>
+        </div>
+        <p class="color-picker-desc">Arraste no quadro (do Branco ao Preto passando pela cor) ou escolha a tonalidade na barra:</p>
+
+        <!-- 1. Quadro 2D: Do Branco (esq) à Cor Selecionada (dir) até o Preto (base) -->
+        <div class="color-sv-wrap" id="color-sv-wrap">
+          <canvas id="color-sv-canvas" width="280" height="135"></canvas>
+          <div id="color-sv-cursor" class="color-sv-cursor"></div>
         </div>
 
-        <!-- Seletor rápido de telas ao vivo dentro do Totem 3D -->
-        <div class="totem-3d-screen-tabs">
-          <span class="tabs-label">Tela no 3D:</span>
-          <button class="btn-3d-screen active" data-3d-screen="home">🏠 Início</button>
-          <button class="btn-3d-screen" data-3d-screen="bus">🚌 Ônibus</button>
-          <button class="btn-3d-screen" data-3d-screen="shoes">👠 Calçado</button>
-          <button class="btn-3d-screen" data-3d-screen="tourism">🏛️ Turismo</button>
-          <button class="btn-3d-screen" data-3d-screen="services">📋 Serviços</button>
+        <!-- 2. Barra de Matiz (Todas as Cores Principais: Azul, Ciano, Verde, Amarelo, Vermelho, Roxo...) -->
+        <div class="color-hue-wrap" id="color-hue-wrap">
+          <canvas id="color-hue-canvas" width="280" height="18"></canvas>
+          <div id="color-hue-cursor" class="color-hue-cursor"></div>
         </div>
 
-        <!-- Caixa de Ângulo e Giro 360° Interativo -->
-        <div class="totem-3d-angle-box" title="Controle de Ângulo e Giro 360°">
-          <div class="angle-header">
-            <span class="angle-lbl">Ângulo 360°</span>
-            <strong id="totem-3d-angle-deg">28°</strong>
+        <!-- Indicador da Cor Atual + Input Nativo -->
+        <div class="color-current-row">
+          <div class="color-current-left">
+            <span id="color-live-preview" class="color-live-preview" style="background: #8e96a0;"></span>
+            <span id="color-hex-label" class="color-hex-label">#8E96A0 (Neutro Natural)</span>
           </div>
-          <div class="angle-controls">
-            <button id="btn-spin-left" class="btn-spin" title="Girar 45° para a esquerda">↺ -45°</button>
-            <button id="btn-spin-right" class="btn-spin" title="Girar 45° para a direita">↻ +45°</button>
-          </div>
+          <button id="btn-reset-neutral-color" class="btn-reset-neutral" title="Voltar ao Aço Neutro Natural">↺ Neutro Natural</button>
+        </div>
+
+        <!-- 3. Tabela Rápida: Escala do Branco ao Preto Neutro + Cores Principais -->
+        <div class="color-table-label">Escala Neutra (Branco ➔ Cinza Natural ➔ Preto) & Cores Principais:</div>
+        <div class="color-matrix-grid" id="color-matrix-grid">
+          <button class="swatch-cell" data-hex="#ffffff" title="Branco Puro" style="background:#ffffff;"></button>
+          <button class="swatch-cell" data-hex="#e2e8f0" title="Cinza Gelo Claro" style="background:#e2e8f0;"></button>
+          <button class="swatch-cell" data-hex="#cbd5e1" title="Alumínio Claro" style="background:#cbd5e1;"></button>
+          <button class="swatch-cell" data-hex="#94a3b8" title="Aço Escovado Claro" style="background:#94a3b8;"></button>
+          <button class="swatch-cell active" data-hex="#8e96a0" title="Aço Neutro Natural (Padrão)" style="background:#8e96a0;"></button>
+          <button class="swatch-cell" data-hex="#64748b" title="Ferro Médio Natural" style="background:#64748b;"></button>
+          <button class="swatch-cell" data-hex="#475569" title="Cinza Chumbo" style="background:#475569;"></button>
+          <button class="swatch-cell" data-hex="#334155" title="Grafite Escuro" style="background:#334155;"></button>
+          <button class="swatch-cell" data-hex="#1e293b" title="Antracite Noturno" style="background:#1e293b;"></button>
+          <button class="swatch-cell" data-hex="#0f172a" title="Preto Fosco" style="background:#0f172a;"></button>
+
+          <button class="swatch-cell" data-hex="#93c5fd" title="Azul Céu Claro" style="background:#93c5fd;"></button>
+          <button class="swatch-cell" data-hex="#38bdf8" title="Azul Ciano" style="background:#38bdf8;"></button>
+          <button class="swatch-cell" data-hex="#0284c7" title="Azul Celeste" style="background:#0284c7;"></button>
+          <button class="swatch-cell" data-hex="#2563eb" title="Azul Royal" style="background:#2563eb;"></button>
+          <button class="swatch-cell" data-hex="#1351b4" title="Azul Oficial Gov.br" style="background:#1351b4;"></button>
+          <button class="swatch-cell" data-hex="#1e3a8a" title="Azul Marinho" style="background:#1e3a8a;"></button>
+          <button class="swatch-cell" data-hex="#0c326f" title="Azul Institucional Escuro" style="background:#0c326f;"></button>
+          <button class="swatch-cell" data-hex="#0d9488" title="Verde Petróleo / Teal" style="background:#0d9488;"></button>
+          <button class="swatch-cell" data-hex="#168821" title="Verde Gov" style="background:#168821;"></button>
+          <button class="swatch-cell" data-hex="#065f46" title="Verde Musgo Escuro" style="background:#065f46;"></button>
+
+          <button class="swatch-cell" data-hex="#fde047" title="Amarelo Solar Claro" style="background:#fde047;"></button>
+          <button class="swatch-cell" data-hex="#eab308" title="Ouro Solar" style="background:#eab308;"></button>
+          <button class="swatch-cell" data-hex="#d97706" title="Bronze Dossiê" style="background:#d97706;"></button>
+          <button class="swatch-cell" data-hex="#b45309" title="Cobre Escovado" style="background:#b45309;"></button>
+          <button class="swatch-cell" data-hex="#8b3a1a" title="Aço Corten" style="background:#8b3a1a;"></button>
+          <button class="swatch-cell" data-hex="#dc2626" title="Vermelho Institucional" style="background:#dc2626;"></button>
+          <button class="swatch-cell" data-hex="#7f1d1d" title="Vinho Escuro" style="background:#7f1d1d;"></button>
+          <button class="swatch-cell" data-hex="#7c3aed" title="Violeta" style="background:#7c3aed;"></button>
+          <button class="swatch-cell" data-hex="#4338ca" title="Índigo" style="background:#4338ca;"></button>
+          <button class="swatch-cell" data-hex="#000000" title="Preto Absoluto" style="background:#000000;"></button>
         </div>
       </div>
 
-      <!-- Barra Superior do Visualizador 3D: MODO HARDWARE & MÁQUINA ABERTA (ABA 3) -->
-      <div id="totem-hardware-topbar" class="totem-3d-topbar totem-hw-topbar hidden">
-        <div class="totem-3d-brand">
-          <span class="badge-3d badge-hw">ARQUITETURA & HARDWARE 3D</span>
-          <div>
-            <h4>Totem Aberto por Dentro • Engenharia & Chicote Elétrico</h4>
-            <p>🔧 Chassi Aberto • Mini-PC • Quadro DIN • Baterias LiFePO4 • Cabos com Cores Reais</p>
-          </div>
-        </div>
-
-        <!-- Botão de Ação Rápida: Abrir Diagrama Completo de Fiação -->
-        <div class="hw-topbar-actions">
-          <button id="btn-open-hw-diagram" class="btn-hw-diagram-action" title="Abrir Diagrama de Fiação Completo (Onde cada fio conecta)">
-            <span class="btn-icon">⚡</span>
-            <span>Diagrama de Fiação & Conexões</span>
-          </button>
+      <!-- Card Flutuante de Especificação Técnica (quando clica num ponto do Totem ou Hardware) -->
+      <div id="totem-3d-info-card" class="totem-3d-info-card hidden">
+        <button id="btn-close-3d-info" class="btn-close-3d-info">✕</button>
+        <span class="info-tag" id="totem-3d-info-tag">ESPECIFICAÇÃO DE ENGENHARIA</span>
+        <h5 id="totem-3d-info-title">1. Placa Solar Fotovoltaica</h5>
+        <p id="totem-3d-info-desc">Detalhes técnicos do componente selecionado.</p>
+        <div id="totem-3d-info-wires" class="info-wires-box hidden">
+          <strong>🔌 Conexões de Fios:</strong>
+          <span id="totem-3d-info-wires-text">Fio Vermelho (+) e Preto (-) conectados à entrada PV do controlador MPPT.</span>
         </div>
       </div>
 
-      <!-- Área do Canvas WebGL + Hotspots 3D -->
-      <div class="totem-3d-viewport">
-        <div id="totem-3d-canvas-mount" class="totem-3d-canvas-mount"></div>
-        <div id="totem-3d-hotspots" class="totem-3d-hotspots-layer"></div>
-
-        <!-- Seletor Flutuante Completo de Cores da Carcaça (Tabela Espectro + Branco ao Preto) -->
-        <div id="totem-color-picker-modal" class="totem-color-picker-panel hidden">
-          <div class="color-picker-header">
-            <span>🎨 Tabela de Cores do Totem (Ferro, Placa & Costas)</span>
-            <button id="btn-close-color-picker" class="btn-close-picker">✕</button>
-          </div>
-          <p class="color-picker-desc">Arraste no quadro (do Branco ao Preto passando pela cor) ou escolha a tonalidade na barra:</p>
-
-          <!-- 1. Quadro 2D: Do Branco (esq) à Cor Selecionada (dir) até o Preto (base) -->
-          <div class="color-sv-wrap" id="color-sv-wrap">
-            <canvas id="color-sv-canvas" width="280" height="135"></canvas>
-            <div id="color-sv-cursor" class="color-sv-cursor"></div>
-          </div>
-
-          <!-- 2. Barra de Matiz (Todas as Cores Principais: Azul, Ciano, Verde, Amarelo, Vermelho, Roxo...) -->
-          <div class="color-hue-wrap" id="color-hue-wrap">
-            <canvas id="color-hue-canvas" width="280" height="18"></canvas>
-            <div id="color-hue-cursor" class="color-hue-cursor"></div>
-          </div>
-
-          <!-- Indicador da Cor Atual + Input Nativo -->
-          <div class="color-current-row">
-            <div class="color-current-left">
-              <span id="color-live-preview" class="color-live-preview" style="background: #8e96a0;"></span>
-              <span id="color-hex-label" class="color-hex-label">#8E96A0 (Neutro Natural)</span>
+      <!-- =================================================================== -->
+      <!-- CANTO INFERIOR DIREITO: 1 BOLINHA COM AS CARACTERÍSTICAS DO 360°    -->
+      <!-- =================================================================== -->
+      <div class="bottom-right-orb-wrap">
+        <!-- Menu Popover das Características do 360° (Abre ao clicar na bolinha) -->
+        <div id="orb-360-popover" class="orb-360-popover hidden" role="dialog" aria-label="Características para o 360 do Totem">
+          <div class="popover-360-head">
+            <div>
+              <span class="popover-badge">CONTROLE 360°</span>
+              <h4>Características do Totem 360°</h4>
             </div>
-            <button id="btn-reset-neutral-color" class="btn-reset-neutral" title="Voltar ao Aço Neutro Natural">↺ Neutro Natural</button>
+            <button id="btn-close-360-popover" class="btn-close-popover" aria-label="Fechar opções 360">✕</button>
           </div>
 
-          <!-- 3. Tabela Rápida: Escala do Branco ao Preto Neutro + Cores Principais -->
-          <div class="color-table-label">Escala Neutra (Branco ➔ Cinza Natural ➔ Preto) & Cores Principais:</div>
-          <div class="color-matrix-grid" id="color-matrix-grid">
-            <button class="swatch-cell" data-hex="#ffffff" title="Branco Puro" style="background:#ffffff;"></button>
-            <button class="swatch-cell" data-hex="#e2e8f0" title="Cinza Gelo Claro" style="background:#e2e8f0;"></button>
-            <button class="swatch-cell" data-hex="#cbd5e1" title="Alumínio Claro" style="background:#cbd5e1;"></button>
-            <button class="swatch-cell" data-hex="#94a3b8" title="Aço Escovado Claro" style="background:#94a3b8;"></button>
-            <button class="swatch-cell active" data-hex="#8e96a0" title="Aço Neutro Natural (Padrão)" style="background:#8e96a0;"></button>
-            <button class="swatch-cell" data-hex="#64748b" title="Ferro Médio Natural" style="background:#64748b;"></button>
-            <button class="swatch-cell" data-hex="#475569" title="Cinza Chumbo" style="background:#475569;"></button>
-            <button class="swatch-cell" data-hex="#334155" title="Grafite Escuro" style="background:#334155;"></button>
-            <button class="swatch-cell" data-hex="#1e293b" title="Antracite Noturno" style="background:#1e293b;"></button>
-            <button class="swatch-cell" data-hex="#0f172a" title="Preto Fosco" style="background:#0f172a;"></button>
+          <div class="popover-360-body">
+            <!-- Seção 1: Giro e Ângulo 360° -->
+            <div class="popover-section">
+              <div class="popover-sec-header">
+                <span class="sec-title">🔄 Rotação & Ângulo (<strong id="totem-3d-angle-deg">28°</strong>)</span>
+                <div class="spin-mini-btns">
+                  <button id="btn-spin-left" class="btn-spin-mini" title="Girar -45°">↺ -45°</button>
+                  <button id="btn-spin-right" class="btn-spin-mini" title="Girar +45°">↻ +45°</button>
+                </div>
+              </div>
+              <div class="popover-grid-2">
+                <button id="btn-3d-autorotate" class="btn-dock">🔄 Giro 360° Auto</button>
+                <button id="btn-open-color-picker" class="btn-dock btn-color-trigger">🎨 Cor da Carcaça</button>
+              </div>
+            </div>
 
-            <button class="swatch-cell" data-hex="#93c5fd" title="Azul Céu Claro" style="background:#93c5fd;"></button>
-            <button class="swatch-cell" data-hex="#38bdf8" title="Azul Ciano" style="background:#38bdf8;"></button>
-            <button class="swatch-cell" data-hex="#0284c7" title="Azul Celeste" style="background:#0284c7;"></button>
-            <button class="swatch-cell" data-hex="#2563eb" title="Azul Royal" style="background:#2563eb;"></button>
-            <button class="swatch-cell" data-hex="#1351b4" title="Azul Oficial Gov.br" style="background:#1351b4;"></button>
-            <button class="swatch-cell" data-hex="#1e3a8a" title="Azul Marinho" style="background:#1e3a8a;"></button>
-            <button class="swatch-cell" data-hex="#0c326f" title="Azul Institucional Escuro" style="background:#0c326f;"></button>
-            <button class="swatch-cell" data-hex="#0d9488" title="Verde Petróleo / Teal" style="background:#0d9488;"></button>
-            <button class="swatch-cell" data-hex="#168821" title="Verde Gov" style="background:#168821;"></button>
-            <button class="swatch-cell" data-hex="#065f46" title="Verde Musgo Escuro" style="background:#065f46;"></button>
+            <!-- Seção 2: Ângulos de Câmera -->
+            <div class="popover-section">
+              <span class="sec-title">📷 Ângulos de Visão</span>
+              <div class="popover-grid-3">
+                <button class="btn-dock active" data-cam-preset="perspective">🧊 3/4</button>
+                <button class="btn-dock" data-cam-preset="front">📱 Frente</button>
+                <button class="btn-dock" data-cam-preset="side">📐 Lateral</button>
+                <button class="btn-dock" data-cam-preset="back">🔧 Costas</button>
+                <button class="btn-dock" data-cam-preset="solar">☀️ Topo Solar</button>
+                <button id="btn-3d-daynight" class="btn-dock">☀️ Dia / Noite</button>
+              </div>
+            </div>
 
-            <button class="swatch-cell" data-hex="#fde047" title="Amarelo Solar Claro" style="background:#fde047;"></button>
-            <button class="swatch-cell" data-hex="#eab308" title="Ouro Solar" style="background:#eab308;"></button>
-            <button class="swatch-cell" data-hex="#d97706" title="Bronze Dossiê" style="background:#d97706;"></button>
-            <button class="swatch-cell" data-hex="#b45309" title="Cobre Escovado" style="background:#b45309;"></button>
-            <button class="swatch-cell" data-hex="#8b3a1a" title="Aço Corten" style="background:#8b3a1a;"></button>
-            <button class="swatch-cell" data-hex="#dc2626" title="Vermelho Institucional" style="background:#dc2626;"></button>
-            <button class="swatch-cell" data-hex="#7f1d1d" title="Vinho Escuro" style="background:#7f1d1d;"></button>
-            <button class="swatch-cell" data-hex="#7c3aed" title="Violeta" style="background:#7c3aed;"></button>
-            <button class="swatch-cell" data-hex="#4338ca" title="Índigo" style="background:#4338ca;"></button>
-            <button class="swatch-cell" data-hex="#000000" title="Preto Absoluto" style="background:#000000;"></button>
+            <!-- Seção 3: Recursos Visuais & Cotas -->
+            <div class="popover-section">
+              <span class="sec-title">📏 Recursos & Inspeção no 3D</span>
+              <div class="popover-grid-2">
+                <button id="btn-3d-dimensions" class="btn-dock">📏 Cotas (2,20m)</button>
+                <button id="btn-3d-hotspots" class="btn-dock">📍 Pontos Externos</button>
+              </div>
+            </div>
+
+            <!-- Seção 4: Opções de Raio-X / Lado Interno -->
+            <div class="popover-section">
+              <span class="sec-title">🔍 Modos do Lado Interno / Raio-X</span>
+              <div class="popover-grid-3">
+                <button class="btn-dock" data-hw-view="xray" title="Carcaça Translúcida / Visão Raio-X">🔍 Raio-X</button>
+                <button class="btn-dock" data-hw-view="door" title="Porta Traseira Aberta 100°">🚪 Porta Aberta</button>
+                <button class="btn-dock" data-hw-view="exploded" title="Vista Explodida em Camadas">💥 Explodido</button>
+              </div>
+              <div class="popover-grid-3" style="margin-top:6px;">
+                <button class="btn-dock" id="btn-hw-glow-power">⚡ Fios Energia</button>
+                <button class="btn-dock" id="btn-hw-glow-data">🌐 Fios Dados</button>
+                <button class="btn-dock" id="btn-hw-hotspots">📍 Pontos (1-9)</button>
+              </div>
+            </div>
+
+            <!-- Seção 5: Tela Exibida no Monitor 3D -->
+            <div class="popover-section">
+              <span class="sec-title">🖥️ Tela Ativa no Monitor 3D</span>
+              <div class="popover-screen-pills">
+                <button class="btn-3d-screen active" data-3d-screen="home">🏠 Início</button>
+                <button class="btn-3d-screen" data-3d-screen="bus">🚌 Ônibus</button>
+                <button class="btn-3d-screen" data-3d-screen="shoes">👠 Calçado</button>
+                <button class="btn-3d-screen" data-3d-screen="tourism">🏛️ Turismo</button>
+                <button class="btn-3d-screen" data-3d-screen="services">📋 Serviços</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Card Flutuante de Especificação Técnica (quando clica num ponto do Totem ou Hardware) -->
-        <div id="totem-3d-info-card" class="totem-3d-info-card hidden">
-          <button id="btn-close-3d-info" class="btn-close-3d-info">✕</button>
-          <span class="info-tag" id="totem-3d-info-tag">ESPECIFICAÇÃO DE ENGENHARIA</span>
-          <h5 id="totem-3d-info-title">1. Placa Solar Fotovoltaica</h5>
-          <p id="totem-3d-info-desc">Detalhes técnicos do componente selecionado.</p>
-          <div id="totem-3d-info-wires" class="info-wires-box hidden">
-            <strong>🔌 Conexões de Fios:</strong>
-            <span id="totem-3d-info-wires-text">Fio Vermelho (+) e Preto (-) conectados à entrada PV do controlador MPPT.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dock Inferior 1: MODO EXTERNO (Câmeras e Recursos 3D) -->
-      <div id="totem-external-dock" class="totem-3d-dock">
-        <div class="dock-group">
-          <span class="dock-label">Ângulos:</span>
-          <button class="btn-dock active" data-cam-preset="perspective">🧊 3/4 Perspectiva</button>
-          <button class="btn-dock" data-cam-preset="front">📱 Frente</button>
-          <button class="btn-dock" data-cam-preset="side">📐 Lateral (0,35m)</button>
-          <button class="btn-dock" data-cam-preset="back">🔧 Traseira (Manutenção)</button>
-          <button class="btn-dock" data-cam-preset="solar">☀️ Topo (Placa Solar)</button>
-        </div>
-
-        <div class="dock-group">
-          <button id="btn-3d-autorotate" class="btn-dock">🔄 Giro 360° Auto</button>
-          <button id="btn-open-color-picker" class="btn-dock btn-color-trigger">🎨 Cor da Carcaça</button>
-          <button id="btn-3d-dimensions" class="btn-dock">📏 Cotas (2,20m)</button>
-          <button id="btn-3d-hotspots" class="btn-dock">📍 Pontos (1-6)</button>
-          <button id="btn-3d-daynight" class="btn-dock">☀️ Ambiente: Dia (Praça)</button>
-        </div>
-      </div>
-
-      <!-- Dock Inferior 2: MODO HARDWARE & MÁQUINA ABERTA (ABA 3) -->
-      <div id="totem-hardware-dock" class="totem-3d-dock totem-hw-dock hidden">
-        <div class="dock-group">
-          <span class="dock-label">Visão Interna:</span>
-          <button class="btn-dock active" data-hw-view="door" title="Porta Traseira Aberta 100° com Dobradiça Real e Pistão a Gás">
-            🚪 Porta Aberta 100°
-          </button>
-          <button class="btn-dock" data-hw-view="xray" title="Carcaça Translúcida / Visão Raio-X">
-            🔍 Raio-X Translúcido
-          </button>
-          <button class="btn-dock" data-hw-view="exploded" title="Vista Explodida em Camadas">
-            💥 Vista Explodida
-          </button>
-        </div>
-
-        <div class="dock-group">
-          <span class="dock-label">Fiação & Chicote:</span>
-          <button class="btn-dock" id="btn-hw-glow-power" title="Destacar Cabos de Energia AC 220V e DC 12V">
-            ⚡ Fiação Elétrica
-          </button>
-          <button class="btn-dock" id="btn-hw-glow-data" title="Destacar Cabos de Dados (HDMI / USB Touch / Telemetria Solar)">
-            🌐 Cabos de Dados
-          </button>
-          <button class="btn-dock active" id="btn-hw-hotspots" title="Mostrar Pontos Técnicos Clicáveis do Hardware (1 a 9)">
-            📍 Pontos (1-9)
-          </button>
-          <button class="btn-dock btn-dock-primary" id="btn-hw-schematics-modal" title="Abrir Tabela Completa de Fios e Memorial Descritivo">
-            📋 Diagrama de Fiação
-          </button>
-        </div>
+        <!-- Botão Redondo Principal no Canto Inferior Direito -->
+        <button id="btn-orb-360" class="orb-360-btn" title="Características e Opções para o 360° do Totem">
+          <svg class="orb-360-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <ellipse cx="12" cy="12" rx="10" ry="4"></ellipse>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span class="orb-360-tag">360°</span>
+        </button>
       </div>
     </div>
-  </main>
+  </div>
 
   <!-- =================================================================== -->
-  <!-- MODAL / PAINEL COMPLETO DE ARQUITETURA DE FIAÇÃO & HARDWARE         -->
+  <!-- MODAL / PAINEL COMPLETO DE PARTE TÉCNICA, ARQUITETURA & FIAÇÃO      -->
+  <!-- (Abre na 3ª Bolinha do Canto Superior Esquerdo)                     -->
   <!-- =================================================================== -->
   <div id="modal-hardware-schematics" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hw-modal-title">
     <div class="modal-card modal-card-hardware">
       <div class="modal-head">
         <div class="hw-head-badge">
-          <span class="badge-tag">ENGENHARIA & ARQUITETURA DO PRODUTO</span>
-          <h3 id="hw-modal-title">Esquema Elétrico, Fiação e Montagem do Hardware</h3>
+          <span class="badge-tag">3. PARTE TÉCNICA & ENGENHARIA DO PRODUTO</span>
+          <h3 id="hw-modal-title">Memorial Técnico, Arquitetura, Fiação e Especificações do Totem</h3>
           <p>Dossiê Técnico Construtivo do Totem Inteligente de Jaú • Totemize (Senac PI / Prefeitura de Jaú)</p>
         </div>
-        <button id="btn-close-hw-schematics" class="btn-close-modal" aria-label="Fechar Esquema Técnico">✕</button>
+        <button id="btn-close-hw-schematics" class="btn-close-modal" aria-label="Fechar Parte Técnica">✕</button>
       </div>
 
       <div class="modal-body modal-body-hardware">
-        <!-- ABAS INTERNAS DO MODAL DE HARDWARE -->
+        <!-- ABAS INTERNAS DO MODAL DE PARTE TÉCNICA -->
         <div class="hw-modal-tabs">
-          <button class="btn-hw-tab active" data-hw-tab="wiring">🔌 Tabela de Fiação ("Qual fio conecta onde")</button>
+          <button class="btn-hw-tab active" data-hw-tab="overview">📄 Texto Técnico Geral & Especificações</button>
+          <button class="btn-hw-tab" data-hw-tab="wiring">🔌 Tabela de Fiação ("Qual fio conecta onde")</button>
           <button class="btn-hw-tab" data-hw-tab="diagram">📐 Diagrama de Blocos & Fluxo de Energia</button>
           <button class="btn-hw-tab" data-hw-tab="bom">📦 Memorial de Componentes (BOM)</button>
           <button class="btn-hw-tab" data-hw-tab="assembly">🛠️ Manual de Montagem & Normas</button>
         </div>
 
+        <!-- ABA 0 (PADRÃO): TEXTO TÉCNICO GERAL & ESPECIFICAÇÕES DO PROJETO -->
+        <div id="hw-tab-content-overview" class="hw-tab-pane active">
+          <div class="hw-pane-intro">
+            <h4>📄 Memorial Descritivo & Especificação Técnica do Totem Inteligente de Jaú</h4>
+            <p>Documento técnico consolidado detalhando o funcionamento estrutural, elétrico, eletrônico, energético (ESG) e de acessibilidade do terminal urbano autônomo.</p>
+          </div>
+
+          <div class="tech-text-dossier">
+            <div class="tech-text-section">
+              <h5>1. Visão Geral da Arquitetura Física e Dimensional</h5>
+              <p>
+                O <strong>Totem Inteligente de Jaú (Projeto Totemize)</strong> foi projetado como um terminal de autoatendimento urbano de alta durabilidade para operação externa ininterrupta (<strong>24 horas por dia, 7 dias por semana</strong>). Sua estrutura possui <strong>2,20 metros de altura total</strong>, <strong>0,85 metro de largura frontal</strong> e <strong>0,35 metro de profundidade</strong> (perfil slim que preserva a circulação de pedestres em calçadas e praças públicas), ancorada sobre uma base de fixação flangeada de <strong>1,05m × 0,55m</strong> chumbada ao solo com parabolts de aço inox M12.
+              </p>
+              <p>
+                O gabinete externo é fabricado em <strong>chapa de aço carbono SAE 1020 eletrogalvanizada de 2,0 mm de espessura</strong> com pintura eletrostática a pó em poliéster microtexturizado de alta resistência a raios UV e intempéries. O conjunto atende integralmente aos graus de proteção <strong>IP65</strong> (totalmente vedado contra poeira e jatos de água/chuva) e <strong>IK10</strong> (proteção mecânica antivandalismo contra impactos externos de até 20 Joules).
+              </p>
+            </div>
+
+            <div class="tech-text-section">
+              <h5>2. Interface Visual, Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
+              <p>
+                Na face frontal, o equipamento integra um <strong>Display LCD Industrial de 43 polegadas em orientação vertical (9:16)</strong> com resolução Full HD (1920 × 1080px) e <strong>backlight de ultra alto brilho de 1.500 nits</strong>, garantindo leitura nítida mesmo sob incidência direta de luz solar ao meio-dia. O painel é protegido por um vidro temperado laminado de <strong>8 mm</strong> com película antirreflexo e camada sensível ao toque <strong>PCAP (Capacitiva Projetada) de 10 toques simultâneos</strong>.
+              </p>
+              <p>
+                Em conformidade rigorosa com a norma brasileira de acessibilidade <strong>ABNT NBR 9050</strong>, o centro operacional dos controles interativos está posicionado na faixa ergonômica entre <strong>0,80m e 1,20m de altura em relação ao piso</strong>. O sistema conta ainda com o <strong>Modo Cadeirante</strong> (que rebaixa toda a interface gráfica para a metade inferior da tela), <strong>Alto Contraste</strong>, <strong>Leitor de Voz (TTS)</strong>, <strong>Fonte Ampliada</strong> e tradução simultânea em <strong>LIBRAS (VLibras)</strong>.
+              </p>
+            </div>
+
+            <div class="tech-text-section">
+              <h5>3. Processamento Embarcado, Sensores e Conectividade</h5>
+              <p>
+                O núcleo de processamento é composto por um <strong>Mini-PC Industrial Fanless (IPC)</strong> em chassi de alumínio aletado com dissipação térmica passiva (sem ventoinhas no processador para evitar acúmulo de poeira), equipado com processador <strong>Intel Core i5 / Rockchip RK3588 de baixo consumo (15W TDP)</strong>, <strong>16 GB de RAM DDR4 Industrial</strong> e armazenamento <strong>SSD NVMe de 512 GB</strong>.
+              </p>
+              <p>
+                Na parte superior do painel frontal encontram-se o <strong>Sensor de Luminosidade Ambiente (LDR)</strong> e o <strong>Sensor de Presença Infravermelho/Radar Doppler</strong>: durante a madrugada (00h00 às 05h30), o totem reduz automaticamente o brilho da tela para 10% (consumo standby de apenas 15W) e desperta instantaneamente em 100% assim que um cidadão se aproxima a menos de 2,5 metros.
+              </p>
+            </div>
+
+            <div class="tech-text-section">
+              <h5>4. Matriz Energética Híbrida (Rede 220V + Energia Solar Fotovoltaica ESG)</h5>
+              <p>
+                No topo do totem está instalado um <strong>Painel Solar Fotovoltaico Monocristalino de 120Wp</strong> com inclinação de 14° voltada ao norte geográfico. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que carrega o banco de baterias estacionárias de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na base inferior.
+              </p>
+              <p>
+                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e telefones de emergência (SAMU 192, Bombeiros 193, Polícia 190 e Defesa Civil 199) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão, eliminando bobinas de papel, atolamentos mecânicos e resíduos urbanos.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- ABA 1: TABELA DE FIAÇÃO E CABEAMENTO DETALHADA -->
-        <div id="hw-tab-content-wiring" class="hw-tab-pane active">
+        <div id="hw-tab-content-wiring" class="hw-tab-pane">
           <div class="hw-pane-intro">
             <h4>⚡ Tabela de Conexões Elétricas, Dados e Aterramento</h4>
             <p>Mapeamento completo de cada chicote de cabos, cores padrão NBR 5410, bitolas, tensões operacionais e dispositivos conectados dentro da máquina:</p>
