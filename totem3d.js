@@ -468,6 +468,73 @@ class Totem3DViewer {
     this.mainCabinetMesh = mainCabinet;
     this.totemGroup.add(mainCabinet);
 
+    // -----------------------------------------------------------------------
+    // 2B. CARCAÇA METÁLICA OCA REAL (PAREDES LATERAIS, TETO, BASE E VÃO TRASEIRO)
+    //     Exibida quando o Tampão Traseiro é aberto ou no Modo Raio-X para mostrar
+    //     exatamente a espessura da chapa dobrada e o vão de acesso traseiro!
+    // -----------------------------------------------------------------------
+    this.hollowCabinetGroup = new THREE.Group();
+    this.hollowCabinetGroup.visible = false;
+
+    const wallExtrudeSettings = {
+      depth: 0.042,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      steps: 1,
+      bevelSize: 0.002,
+      bevelThickness: 0.002,
+      curveSegments: 24
+    };
+    const sideWallGeo = new THREE.ExtrudeGeometry(sideProfile, wallExtrudeSettings);
+
+    // Parede Lateral Direita da Carcaça
+    const rightWallMesh = new THREE.Mesh(sideWallGeo, bodyMat);
+    rightWallMesh.rotation.y = -Math.PI / 2;
+    rightWallMesh.position.set(0.346, 0, 0);
+    this.hollowCabinetGroup.add(rightWallMesh);
+
+    // Parede Lateral Esquerda da Carcaça
+    const leftWallMesh = new THREE.Mesh(sideWallGeo, bodyMat);
+    leftWallMesh.rotation.y = -Math.PI / 2;
+    leftWallMesh.position.set(-0.304, 0, 0);
+    this.hollowCabinetGroup.add(leftWallMesh);
+
+    // Fechamento Superior (Capô Curvo e Teto Solar da Carcaça)
+    const topHoodBox = new THREE.Mesh(new THREE.BoxGeometry(0.612, 0.17, 0.348), bodyMat);
+    topHoodBox.position.set(0, 2.115, 0);
+    this.hollowCabinetGroup.add(topHoodBox);
+
+    // Fechamento Inferior (Zócalo / Pedestal da Carcaça)
+    const bottomPedestalBox = new THREE.Mesh(new THREE.BoxGeometry(0.612, 0.09, 0.348), bodyMat);
+    bottomPedestalBox.position.set(0, 0.165, 0);
+    this.hollowCabinetGroup.add(bottomPedestalBox);
+
+    // Chapa Estrutural Frontal (onde a Tela Touch 43" e a Placa Jaú são fixadas)
+    const frontBackingWall = new THREE.Mesh(new THREE.BoxGeometry(0.612, 1.82, 0.016), bodyMat);
+    frontBackingWall.position.set(0, 1.11, 0.166);
+    this.hollowCabinetGroup.add(frontBackingWall);
+
+    // Batente Metálico Traseiro + Borracha de Vedação EPDM Preta (Grau IP65) onde o Tampão fecha
+    const epdmGasketMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.85, metalness: 0.1 });
+    // Trilhos verticais e horizontais da borracha de vedação do vão traseiro (0,62m x 1,82m)
+    const gasketLeft = new THREE.Mesh(new THREE.BoxGeometry(0.018, 1.84, 0.014), epdmGasketMat);
+    gasketLeft.position.set(-0.302, 1.10, -0.172);
+    this.hollowCabinetGroup.add(gasketLeft);
+
+    const gasketRight = new THREE.Mesh(new THREE.BoxGeometry(0.018, 1.84, 0.014), epdmGasketMat);
+    gasketRight.position.set(0.302, 1.10, -0.172);
+    this.hollowCabinetGroup.add(gasketRight);
+
+    const gasketTop = new THREE.Mesh(new THREE.BoxGeometry(0.622, 0.018, 0.014), epdmGasketMat);
+    gasketTop.position.set(0, 2.012, -0.172);
+    this.hollowCabinetGroup.add(gasketTop);
+
+    const gasketBottom = new THREE.Mesh(new THREE.BoxGeometry(0.622, 0.018, 0.014), epdmGasketMat);
+    gasketBottom.position.set(0, 0.188, -0.172);
+    this.hollowCabinetGroup.add(gasketBottom);
+
+    this.totemGroup.add(this.hollowCabinetGroup);
+
     // Chanfro sutil na junção superior em metal cru (sem detalhes amarelos ou LEDs laterais)
     const dividerBar = new THREE.Mesh(
       new THREE.BoxGeometry(0.696, 0.004, 0.008),
@@ -525,7 +592,6 @@ class Totem3DViewer {
     });
 
     // Placa Solar de 64cm x 21cm (35Wp) embutida de forma plana no topo (y = 2.203m)
-    // Como fica atrás da quina arredondada e rente ao topo, quem olha de frente NÃO vê!
     const solarPanelMesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.64, 0.008, 0.21),
       solarPanelMat
@@ -533,11 +599,8 @@ class Totem3DViewer {
     solarPanelMesh.position.set(0, 2.203, -0.055);
     this.totemGroup.add(solarPanelMesh);
 
-    // Topo metálico contínuo e limpo (sem antenas de modem ou Wi-Fi externo)
-
     // -----------------------------------------------------------------------
     // 4. FACE FRONTAL: PLACA SUPERIOR DE IDENTIFICAÇÃO DA MARCA (JAÚ, SP)
-    //    Sem câmera em cima. Fica apenas a placa de Jaú, SP e a tela do totem.
     // -----------------------------------------------------------------------
     this.headerTexture = new THREE.CanvasTexture(this.headerCanvas);
     const headerSignMat = new THREE.MeshStandardMaterial({
@@ -557,7 +620,6 @@ class Totem3DViewer {
     // -----------------------------------------------------------------------
     // 5. TELA TOUCHSCREEN 43" FULL HD (VIDRO TEMPERADO 8mm)
     // -----------------------------------------------------------------------
-    // Moldura protetora da tela (Bezel IP65)
     const screenBezel = new THREE.Mesh(
       new THREE.BoxGeometry(0.60, 1.06, 0.014),
       darkPanelMat
@@ -565,7 +627,6 @@ class Totem3DViewer {
     screenBezel.position.set(0, 1.18, 0.176);
     this.totemGroup.add(screenBezel);
 
-    // Display LCD ativo com Textura Canvas 2D Ao Vivo
     this.screenTexture = new THREE.CanvasTexture(this.screenCanvas);
     this.screenTexture.minFilter = THREE.LinearFilter;
     const screenDisplayMat = new THREE.MeshStandardMaterial({
@@ -585,15 +646,40 @@ class Totem3DViewer {
     screenMesh.position.set(0, 1.18, 0.184);
     this.totemGroup.add(screenMesh);
 
-    // A PARTE DE BAIXO É TOTALMENTE LIMPA: APENAS O FERRO MACIÇO DA CARCAÇA E BASE!
-    // (Removidos: painel QR/USB/Áudio e botão SOS a pedido do usuário)
+    // -----------------------------------------------------------------------
+    // 7. TAMPÃO TRASEIRO / PORTA DE ACESSO TÉCNICO ARTICULADA EM AÇO
+    //    Com Moldura de Vedação, 3 Dobradiças Externas, Puxador, 2 Fechaduras
+    //    e Pistão a Gás (abre 105° para acesso completo ao interior da máquina)
+    // -----------------------------------------------------------------------
+    // Fresta / Moldura perimetral externa do Tampão Traseiro (visível mesmo fechado)
+    const rearSeamFrame = new THREE.Group();
+    const seamTop = new THREE.Mesh(new THREE.BoxGeometry(0.636, 0.010, 0.006), epdmGasketMat);
+    seamTop.position.set(0, 2.015, -0.177);
+    rearSeamFrame.add(seamTop);
+    const seamBot = new THREE.Mesh(new THREE.BoxGeometry(0.636, 0.010, 0.006), epdmGasketMat);
+    seamBot.position.set(0, 0.185, -0.177);
+    rearSeamFrame.add(seamBot);
+    const seamLeft = new THREE.Mesh(new THREE.BoxGeometry(0.010, 1.84, 0.006), epdmGasketMat);
+    seamLeft.position.set(-0.315, 1.10, -0.177);
+    rearSeamFrame.add(seamLeft);
+    const seamRight = new THREE.Mesh(new THREE.BoxGeometry(0.010, 1.84, 0.006), epdmGasketMat);
+    seamRight.position.set(0.315, 1.10, -0.177);
+    rearSeamFrame.add(seamRight);
+    this.totemGroup.add(rearSeamFrame);
 
-    // -----------------------------------------------------------------------
-    // 7. FACE TRASEIRA ARTICULADA EM FERRO/AÇO NATURAL COM PISTÃO A GÁS
-    //    Porta de Manutenção com pivô na dobradiça esquerda (Abre na Aba 3)
-    // -----------------------------------------------------------------------
+    // 3 Dobradiças Industriais Externas na quina traseira esquerda (mostram onde o tampão gira)
+    const hingeMetalMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.75, roughness: 0.28 });
+    [0.42, 1.10, 1.78].forEach(hy => {
+      const hingeBarrel = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.012, 0.012, 0.065, 14),
+        hingeMetalMat
+      );
+      hingeBarrel.position.set(-0.315, hy, -0.182);
+      this.totemGroup.add(hingeBarrel);
+    });
+
+    // Grupo Articulado do Tampão Traseiro (pivô nas 3 dobradiças da esquerda)
     this.rearDoorHingeGroup = new THREE.Group();
-    // Pivô de dobradiça na quina traseira esquerda
     this.rearDoorHingeGroup.position.set(-0.31, 1.10, -0.178);
 
     this.rearTexture = new THREE.CanvasTexture(this.rearCanvas);
@@ -604,41 +690,84 @@ class Totem3DViewer {
       side: THREE.DoubleSide
     });
     this.dynamicMaterials.rearDoor = rearDoorMat;
-    const rearDoorMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.62, 1.82),
-      rearDoorMat
-    );
-    rearDoorMesh.rotation.y = Math.PI;
-    rearDoorMesh.position.set(0.31, 0, 0); // Centro da folha de porta deslocado do pivô
-    this.rearDoorHingeGroup.add(rearDoorMesh);
 
-    // 2 Fechaduras tubulares antivandalismo em 3D na porta traseira
+    // Chapa 3D de espessura real do Tampão Traseiro (18mm de aba dobrada)
+    const doorInnerMetalMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      metalness: 0.45,
+      roughness: 0.35
+    });
+    const rearDoorBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.62, 1.82, 0.016),
+      [
+        doorInnerMetalMat, // borda dir
+        doorInnerMetalMat, // borda esq
+        doorInnerMetalMat, // borda sup
+        doorInnerMetalMat, // borda inf
+        doorInnerMetalMat, // face interna (voltada para dentro da máquina)
+        rearDoorMat        // face externa (voltada para trás com venezianas e plaqueta)
+      ]
+    );
+    rearDoorBox.position.set(0.31, 0, -0.008);
+    rearDoorBox.castShadow = true;
+    this.rearDoorHingeGroup.add(rearDoorBox);
+
+    // Nervuras Internas de Reforço Estrutural (Omega Ribs) na parte de dentro do Tampão
+    [-0.52, 0.52].forEach(ry => {
+      const rib = new THREE.Mesh(
+        new THREE.BoxGeometry(0.54, 0.032, 0.014),
+        doorInnerMetalMat
+      );
+      rib.position.set(0.31, ry, 0.006);
+      this.rearDoorHingeGroup.add(rib);
+    });
+
+    // Puxador Metálico Vertical Externo (Alça para puxar e abrir o Tampão Traseiro)
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.65, roughness: 0.25 });
+    const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.18, 14), handleMat);
+    handleBar.position.set(0.57, 0.0, -0.032);
+    this.rearDoorHingeGroup.add(handleBar);
+    [-0.075, 0.075].forEach(hpy => {
+      const handlePost = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.014, 0.022), handleMat);
+      handlePost.position.set(0.57, hpy, -0.020);
+      this.rearDoorHingeGroup.add(handlePost);
+    });
+
+    // 2 Fechaduras tubulares antivandalismo (lado direito, perto do puxador) + Linguetas internas
     [0.75 - 1.10, 1.45 - 1.10].forEach(ly => {
       const lockCylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.015, 0.016, 16),
+        new THREE.CylinderGeometry(0.016, 0.016, 0.022, 16),
         boltMat
       );
       lockCylinder.rotation.x = Math.PI / 2;
-      lockCylinder.position.set(0.31 - 0.23, ly, -0.003);
+      lockCylinder.position.set(0.56, ly, -0.012);
       this.rearDoorHingeGroup.add(lockCylinder);
+
+      // Lingueta interna giratória da tranca
+      const latchCam = new THREE.Mesh(
+        new THREE.BoxGeometry(0.045, 0.016, 0.006),
+         new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 })
+      );
+      latchCam.position.set(0.58, ly, 0.008);
+      this.rearDoorHingeGroup.add(latchCam);
     });
 
-    // Bolsa interna metálica para manual técnico e documentos
+    // Bolsa interna metálica para manual técnico e esquema elétrico na face interna do Tampão
     const doorDocPocket = new THREE.Mesh(
-      new THREE.BoxGeometry(0.26, 0.32, 0.014),
+      new THREE.BoxGeometry(0.28, 0.30, 0.016),
       darkPanelMat
     );
-    doorDocPocket.position.set(0.31, -0.05, 0.012);
+    doorDocPocket.position.set(0.31, -0.08, 0.008);
     this.rearDoorHingeGroup.add(doorDocPocket);
 
-    // Amortecedor hidráulico / pistão a gás para sustentação da porta aberta
+    // Amortecedor hidráulico / pistão a gás no topo segurando o Tampão Traseiro aberto
     const pistonGroup = new THREE.Group();
-    pistonGroup.position.set(0.12, 0.38, 0.010);
+    pistonGroup.position.set(0.16, 0.82, 0.012);
     const pCyl = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.007, 0.007, 0.22, 12),
+      new THREE.CylinderGeometry(0.008, 0.008, 0.26, 12),
       new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 })
     );
-    pCyl.rotation.z = Math.PI / 4;
+    pCyl.rotation.z = Math.PI / 3;
     pistonGroup.add(pCyl);
     this.rearDoorHingeGroup.add(pistonGroup);
 
@@ -731,16 +860,19 @@ class Totem3DViewer {
       }
     });
 
-    // 2. MINI-PC INDUSTRIAL FANLESS (CÉREBRO COMPUTACIONAL)
+    // =======================================================================
+    // 2A. OPÇÃO A: MINI-PC INDUSTRIAL SEPARADO NO RACK (PADRÃO MODULAR)
+    // =======================================================================
+    this.separateMiniPcGroup = new THREE.Group();
     const ipcBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.068), ipcBodyMat);
     ipcBox.position.set(0.06, 1.38, 0.03);
-    this.internalHardwareGroup.add(ipcBox);
+    this.separateMiniPcGroup.add(ipcBox);
 
     // 10 Aletas dissipadoras passivas de alumínio
     for (let f = -0.10; f <= 0.10; f += 0.02) {
       const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.16, 0.024), ipcBodyMat);
       fin.position.set(0.06 + f, 1.38, 0.076);
-      this.internalHardwareGroup.add(fin);
+      this.separateMiniPcGroup.add(fin);
     }
 
     // Painel I/O do Mini-PC voltado para quem abre a porta (z = -0.005)
@@ -749,7 +881,7 @@ class Totem3DViewer {
       new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.9 })
     );
     ledIpc.position.set(-0.03, 1.43, -0.005);
-    this.internalHardwareGroup.add(ledIpc);
+    this.separateMiniPcGroup.add(ledIpc);
 
     for (let u = 0; u < 4; u++) {
       const usbPort = new THREE.Mesh(
@@ -757,7 +889,7 @@ class Totem3DViewer {
         new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 })
       );
       usbPort.position.set(-0.01 + u * 0.022, 1.43, -0.005);
-      this.internalHardwareGroup.add(usbPort);
+      this.separateMiniPcGroup.add(usbPort);
     }
 
     for (let l = 0; l < 2; l++) {
@@ -766,17 +898,64 @@ class Totem3DViewer {
         new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 })
       );
       rj45.position.set(0.10 + l * 0.025, 1.43, -0.005);
-      this.internalHardwareGroup.add(rj45);
+      this.separateMiniPcGroup.add(rj45);
     }
 
     const hdmiPort = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.008, 0.008), goldPortMat);
     hdmiPort.position.set(0.10, 1.36, -0.005);
-    this.internalHardwareGroup.add(hdmiPort);
+    this.separateMiniPcGroup.add(hdmiPort);
 
     const dcJack = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.010, 16), dinRailMat);
     dcJack.rotation.x = Math.PI / 2;
     dcJack.position.set(-0.03, 1.34, -0.005);
-    this.internalHardwareGroup.add(dcJack);
+    this.separateMiniPcGroup.add(dcJack);
+    this.internalHardwareGroup.add(this.separateMiniPcGroup);
+
+    // =======================================================================
+    // 2B. OPÇÃO B: TELA TOUCH ALL-IN-ONE COM COMPUTADOR ACOPLADO (MÓDULO OPS)
+    // =======================================================================
+    this.allInOnePcGroup = new THREE.Group();
+    const opsFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.82, roughness: 0.25 });
+    const opsAccentMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.70, roughness: 0.25 });
+
+    // Gaveta/Slot OPS acoplada diretamente no chassi traseiro da tela Touch 43" (z = 0.132, sem ocupar o rack!)
+    const opsCradle = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.19, 0.016), aluRailMat);
+    opsCradle.position.set(0.0, 1.26, 0.144);
+    this.allInOnePcGroup.add(opsCradle);
+
+    const opsModule = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.034), opsFrameMat);
+    opsModule.position.set(0.0, 1.26, 0.125);
+    this.allInOnePcGroup.add(opsModule);
+
+    // Faixa azul identificadora "ALL-IN-ONE TOUCH PC / SLOT OPS 80-PIN"
+    const opsStripe = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.018, 0.004), opsAccentMat);
+    opsStripe.position.set(0.0, 1.32, 0.107);
+    this.allInOnePcGroup.add(opsStripe);
+
+    // Aletas dissipadoras passivas direto no módulo acoplado à tela
+    for (let af = -0.08; af <= 0.08; af += 0.02) {
+      const opsFin = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.10, 0.008), opsFrameMat);
+      opsFin.position.set(af, 1.24, 0.105);
+      this.allInOnePcGroup.add(opsFin);
+    }
+
+    // 2 Parafusos recartilhados (Thumbscrews) de saque rápido do módulo OPS
+    [-0.10, 0.10].forEach(tx => {
+      const thumbScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.014, 16), goldPortMat);
+      thumbScrew.rotation.x = Math.PI / 2;
+      thumbScrew.position.set(tx, 1.26, 0.104);
+      this.allInOnePcGroup.add(thumbScrew);
+    });
+
+    // LEDs de status integrados na traseira da tela All-in-One
+    const opsLed = new THREE.Mesh(
+      new THREE.SphereGeometry(0.005, 12, 12),
+      new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.95 })
+    );
+    opsLed.position.set(-0.07, 1.32, 0.106);
+    this.allInOnePcGroup.add(opsLed);
+
+    this.internalHardwareGroup.add(this.allInOnePcGroup);
 
     // 3. QUADRO ELÉTRICO DIN (QDE) NO TRILHO INTERMEDIÁRIO (y = 1.05)
     // Disjuntor Bipolar 16A
@@ -887,14 +1066,14 @@ class Totem3DViewer {
 
     const pcbAd = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.008), pcbGreenMat);
     pcbAd.position.set(-0.06, 1.36, 0.14);
-    this.internalHardwareGroup.add(pcbAd);
+    this.separateMiniPcGroup.add(pcbAd);
 
     const heatSinkAd = new THREE.Mesh(
       new THREE.BoxGeometry(0.045, 0.045, 0.015),
       new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 })
     );
     heatSinkAd.position.set(-0.06, 1.36, 0.13);
-    this.internalHardwareGroup.add(heatSinkAd);
+    this.separateMiniPcGroup.add(heatSinkAd);
 
     const pcbTouch = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.006), pcbBlueMat);
     pcbTouch.position.set(0.14, 1.15, 0.14);
@@ -961,11 +1140,11 @@ class Totem3DViewer {
     }
 
     // 11. CHICOTES DE CABOS FÍSICOS CURVOS 3D
-    const createWire = (pts, mat, r = 0.004) => {
+    const createWire = (pts, mat, r = 0.004, targetGroup = this.internalHardwareGroup) => {
       const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
       const geo = new THREE.TubeGeometry(curve, 28, r, 7, false);
       const mesh = new THREE.Mesh(geo, mat);
-      this.internalHardwareGroup.add(mesh);
+      targetGroup.add(mesh);
       return mesh;
     };
 
@@ -996,21 +1175,22 @@ class Totem3DViewer {
       [-0.13, 0.72, 0.0]
     ], this.hardwareWiringMaterials.acNeutral, 0.004);
 
-    // DC 12V Positivo Vermelho -> Mini-PC
+    // --- Cabos exclusivos da Opção A (Mini-PC Separado no Rack) ---
+    // DC 12V Positivo Vermelho -> Mini-PC Separado
     createWire([
       [-0.12, 0.72, 0.0],
       [-0.25, 0.74, 0.01],
       [-0.25, 1.30, 0.01],
       [-0.03, 1.34, 0.01]
-    ], this.hardwareWiringMaterials.dc12vPos, 0.005);
+    ], this.hardwareWiringMaterials.dc12vPos, 0.005, this.separateMiniPcGroup);
 
-    // DC 12V Negativo Preto -> Mini-PC
+    // DC 12V Negativo Preto -> Mini-PC Separado
     createWire([
       [-0.11, 0.72, 0.0],
       [-0.24, 0.73, 0.01],
       [-0.24, 1.32, 0.01],
       [-0.03, 1.34, 0.01]
-    ], this.hardwareWiringMaterials.dc12vNeg, 0.005);
+    ], this.hardwareWiringMaterials.dc12vNeg, 0.005, this.separateMiniPcGroup);
 
     // Cabo de Vídeo HDMI 2.1 (Azul Escuro) -> Placa AD
     createWire([
@@ -1018,23 +1198,40 @@ class Totem3DViewer {
       [0.08, 1.36, 0.07],
       [-0.04, 1.36, 0.08],
       [-0.06, 1.36, 0.13]
-    ], this.hardwareWiringMaterials.hdmi, 0.0055);
+    ], this.hardwareWiringMaterials.hdmi, 0.0055, this.separateMiniPcGroup);
 
-    // Cabo USB Touchscreen (Amarelo) -> Mini-PC
+    // Cabo USB Touchscreen (Amarelo) -> Mini-PC Separado
     createWire([
       [0.14, 1.15, 0.13],
       [0.18, 1.15, 0.08],
       [0.18, 1.40, 0.04],
       [0.04, 1.43, 0.01]
-    ], this.hardwareWiringMaterials.usb, 0.0045);
+    ], this.hardwareWiringMaterials.usb, 0.0045, this.separateMiniPcGroup);
 
-    // Cabo de Telemetria Solar RS485 (Verde) -> Módulo Solar MPPT
+    // Cabo de Telemetria Solar RS485 (Verde) -> Mini-PC Separado
     createWire([
       [0.11, 1.43, 0.01],
       [0.24, 1.48, 0.01],
       [0.24, 1.72, 0.01],
       [0.08, 1.75, 0.01]
-    ], this.hardwareWiringMaterials.ethernet, 0.0045);
+    ], this.hardwareWiringMaterials.ethernet, 0.0045, this.separateMiniPcGroup);
+
+    // --- Cabos enxutos da Opção B (Tela Touch All-in-One c/ PC Acoplado OPS) ---
+    // Alimentação única DC 12V/24V direto na Tela All-in-One (sem HDMI e sem USB externo!)
+    createWire([
+      [-0.12, 0.72, 0.0],
+      [-0.25, 0.74, 0.04],
+      [-0.25, 1.24, 0.09],
+      [-0.09, 1.24, 0.12]
+    ], this.hardwareWiringMaterials.dc12vPos, 0.005, this.allInOnePcGroup);
+
+    // Telemetria Solar RS485 ligada direto no Módulo OPS Acoplado
+    createWire([
+      [0.08, 1.28, 0.12],
+      [0.24, 1.35, 0.08],
+      [0.24, 1.72, 0.02],
+      [0.08, 1.75, 0.01]
+    ], this.hardwareWiringMaterials.ethernet, 0.0045, this.allInOnePcGroup);
 
     // Cabos Solares (Laranja) -> MPPT
     createWire([
@@ -1059,6 +1256,11 @@ class Totem3DViewer {
       [-0.26, 1.05, -0.02],
       [-0.01, 1.05, -0.02]
     ], this.hardwareWiringMaterials.groundPE, 0.005);
+
+    // Define arquitetura inicial (All-in-One Touch c/ PC Acoplado ou Mini-PC Separado)
+    this.pcArchitecture = 'allinone';
+    this.separateMiniPcGroup.visible = false;
+    this.allInOnePcGroup.visible = true;
 
     this.totemGroup.add(this.internalHardwareGroup);
   }
@@ -1304,7 +1506,7 @@ class Totem3DViewer {
     }
 
     // -----------------------------------------------------------------------
-    // 3. PARTE DE FERRO DAS COSTAS (PORTA TRASEIRA + VENEZIANAS + PLAQUETA TÉCNICA)
+    // 3. PARTE DE FERRO DAS COSTAS (TAMPÃO TRASEIRO DE ACESSO + VENEZIANAS + PLAQUETA)
     // -----------------------------------------------------------------------
     {
       const rctx = this.rearCtx;
@@ -1316,15 +1518,15 @@ class Totem3DViewer {
       rctx.fillRect(0, 0, 512, 1400);
       this.drawBrushedGrain(rctx, 0, 0, 512, 1400, 0.06, 0.09);
 
-      // Fresta/contorno estrutural da porta de ferro traseira
-      rctx.strokeStyle = '#334155';
-      rctx.lineWidth = 6;
-      rctx.strokeRect(36, 40, 440, 1320);
-      rctx.strokeStyle = 'rgba(255,255,255,0.22)';
-      rctx.lineWidth = 2;
-      rctx.strokeRect(42, 46, 428, 1308);
+      // Fresta/contorno de vedação de borracha EPDM do Tampão Traseiro (Porta de Acesso)
+      rctx.strokeStyle = '#0f172a';
+      rctx.lineWidth = 10;
+      rctx.strokeRect(22, 24, 468, 1352);
+      rctx.strokeStyle = 'rgba(255,255,255,0.28)';
+      rctx.lineWidth = 2.5;
+      rctx.strokeRect(32, 34, 448, 1332);
 
-      // Venezianas / Grelhas de ventilação superior estampadas no ferro
+      // Venezianas / Grelhas de ventilação superior estampadas no tampão de ferro
       for (let i = 0; i < 9; i++) {
         rctx.fillStyle = '#1e293b';
         rctx.fillRect(86, 85 + i * 22, 340, 10);
@@ -1332,59 +1534,59 @@ class Totem3DViewer {
         rctx.fillRect(86, 82 + i * 22, 340, 3);
       }
 
-      // Plaqueta Institucional & Técnica Traseira em Aço Escovado Natural (sem branco estourado)
-      const rearPlateGrad = rctx.createLinearGradient(68, 340, 444, 760);
+      // Plaqueta Institucional & Técnica do Tampão Traseiro em Aço Escovado Natural
+      const rearPlateGrad = rctx.createLinearGradient(64, 330, 448, 775);
       rearPlateGrad.addColorStop(0, metalLight);
       rearPlateGrad.addColorStop(1, metalMid);
       rctx.fillStyle = rearPlateGrad;
-      rctx.fillRect(68, 340, 376, 420);
-      this.drawBrushedGrain(rctx, 68, 340, 376, 420, 0.07, 0.07);
+      rctx.fillRect(64, 330, 384, 445);
+      this.drawBrushedGrain(rctx, 64, 330, 384, 445, 0.07, 0.07);
 
       rctx.strokeStyle = metalBorder;
       rctx.lineWidth = 3.5;
-      rctx.strokeRect(68, 340, 376, 420);
-      this.drawCornerRivets(rctx, 68, 340, 376, 420, 16);
+      rctx.strokeRect(64, 330, 384, 445);
+      this.drawCornerRivets(rctx, 64, 330, 384, 445, 16);
 
       rctx.fillStyle = titleColor;
-      rctx.font = 'bold 22px sans-serif';
+      rctx.font = 'bold 21px sans-serif';
       rctx.textAlign = 'center';
-      rctx.fillText('PREFEITURA DE JAÚ', 256, 405);
+      rctx.fillText('PREFEITURA DE JAÚ • CARCAÇA IP65', 256, 388);
       rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 29px sans-serif';
-      rctx.fillText('TOTEM INTELIGENTE', 256, 448);
+      rctx.font = 'bold 26px sans-serif';
+      rctx.fillText('TAMPÃO TRASEIRO DE ACESSO', 256, 430);
       rctx.fillStyle = greenBadgeColor;
-      rctx.font = 'bold 16.5px sans-serif';
-      rctx.fillText('☀️ ENERGIA HÍBRIDA (SOLAR 35Wp + 220V)', 256, 495);
+      rctx.font = 'bold 15.5px sans-serif';
+      rctx.fillText('🚪 PORTA DE MANUTENÇÃO C/ 3 DOBRADIÇAS', 256, 472);
 
       const specs = [
-        '• Estrutura: Chapa de Aço/Ferro Escovado Natural',
-        '• Proteção: Vidro Temperado 8mm + Grau IP65',
-        '• Exaustão: Venezianas com Cooler Termostático',
-        '• Painel Solar Topo: 35Wp (64x21cm Embutido)',
-        '• Bateria na Base: Backup LiFePO4 24h (Zona Fria)',
-        '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)',
-        '• Peso Aproximado: 120 kg'
+        '• Carcaça: Chapa de Aço Dobrado 2,5mm (Oca)',
+        '• Tampão Traseiro: Abertura 105° c/ Puxador',
+        '• Trava Dupla: 2 Fechaduras Tubulares + Lingueta',
+        '• Vedação: Borracha EPDM Perimetral anti-chuva',
+        '• Computador: Touch All-in-One (OPS) ou Mini-PC',
+        '• Energia: Híbrida Solar 35Wp + Rede 220V + LiFePO4',
+        '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)'
       ];
       rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 14.5px sans-serif';
+      rctx.font = 'bold 14px sans-serif';
       rctx.textAlign = 'left';
       specs.forEach((line, idx) => {
-        rctx.fillText(line, 88, 548 + idx * 28, 340);
+        rctx.fillText(line, 82, 522 + idx * 29, 348);
       });
 
-      // Plaqueta de Aviso de Acesso Técnico Restrito em metal natural
+      // Plaqueta de Aviso de Abertura do Tampão Traseiro
       rctx.fillStyle = metalLight;
-      rctx.fillRect(106, 810, 300, 64);
+      rctx.fillRect(86, 805, 340, 82);
       rctx.strokeStyle = metalBorder;
       rctx.lineWidth = 2.5;
-      rctx.strokeRect(106, 810, 300, 64);
+      rctx.strokeRect(86, 805, 340, 82);
       rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 15px sans-serif';
+      rctx.font = 'bold 14.5px sans-serif';
       rctx.textAlign = 'center';
-      rctx.fillText('⚡ ACESSO TÉCNICO RESTRITO', 256, 838);
+      rctx.fillText('🔑 DESTRAVAR FECHADURAS À DIREITA', 256, 836);
       rctx.fillStyle = mutedTextColor;
       rctx.font = 'bold 11.5px sans-serif';
-      rctx.fillText('SISTEMA ELÉTRICO SOLAR + REDE 220V', 256, 858);
+      rctx.fillText('PUXE A ALÇA PARA ABRIR O TAMPÃO E ACESSAR A MÁQUINA', 256, 864, 320);
 
       // Venezianas de ventilação inferior no ferro traseiro
       for (let i = 0; i < 8; i++) {
@@ -2249,8 +2451,8 @@ class Totem3DViewer {
       {
         id: 'rear',
         num: '5',
-        title: 'Porta Traseira & Exaustão Térmica',
-        desc: 'Costas retas com porta técnica de manutenção, fechadura dupla antivandalismo, venezianas de ventilação natural e plaqueta técnica IP65.',
+        title: 'Carcaça Oca & Tampão Traseiro de Acesso (Porta 105°)',
+        desc: 'Carcaça em chapa de aço dobrado (2,5mm) com tampão traseiro de abertura lateral em 105° sobre 3 dobradiças reforçadas, puxador vertical, 2 fechaduras tubulares antivandalismo, pistão a gás e vedação perimetral de borracha EPDM IP65.',
         pos: new THREE.Vector3(0.0, 1.25, -0.19),
         cam: { theta: Math.PI, phi: 1.40, radius: 2.65, targetY: 1.15 }
       },
@@ -2264,17 +2466,17 @@ class Totem3DViewer {
       }
     ];
 
-    // PONTOS TÉCNICOS ESPECÍFICOS DO HARDWARE INTERNO (ABA 3)
+    // PONTOS TÉCNICOS ESPECÍFICOS DO HARDWARE INTERNO (RAIO-X & TAMPÃO ABERTO)
     this.hardwareHotspotsData = [
       {
         id: 'hw-ipc',
         num: '1',
-        tag: 'CÉREBRO COMPUTACIONAL',
-        title: 'Mini-PC Industrial Fanless (Core i5 / IPC)',
-        desc: 'Computador industrial robusto em gabinete de alumínio extrudado preto com dissipação 100% passiva por aletas (sem ventoinha interna que puxa poeira). Equipado com 16GB RAM industrial, SSD NVMe 512GB (-20°C a +70°C), watchdog timer de hardware e sistema operacional Linux Kiosk.',
-        wires: 'Alimentação: 12V DC (5A) com filtro de ferrite toroidal. Vídeo: Saída HDMI 2.1 para tela 43". Dados: 4x USB 3.0 (Touch PCAP, telemetria) e 2x LAN Gigabit.',
-        pos: new THREE.Vector3(0.06, 1.38, 0.03),
-        cam: { theta: Math.PI + 0.15, phi: 1.38, radius: 1.65, targetY: 1.38 }
+        tag: 'OPÇÃO RECOMENDADA • ALL-IN-ONE (PC ACOPLADO)',
+        title: 'Tela Touch 43" c/ Computador Acoplado (Módulo OPS)',
+        desc: 'Sim! Não é obrigatório ter um Mini-PC separado no rack: podemos comprar a Tela Touch 43" Industrial já com o Computador Acoplado na própria tela (All-in-One / Slot Industrial OPS). O módulo PC encaixa como uma gaveta direto atrás do monitor, eliminando cabos HDMI e USB soltos e deixando o interior muito mais limpo.',
+        wires: 'Zero cabos de vídeo/touch externos! Vídeo HDMI, USB Touch e Áudio passam direto pelo conector interno de 80 pinos da tela. Liga apenas 12V DC e telemetria solar.',
+        pos: new THREE.Vector3(0.0, 1.26, 0.11),
+        cam: { theta: Math.PI + 0.18, phi: 1.38, radius: 1.75, targetY: 1.28 }
       },
       {
         id: 'hw-din',
@@ -2291,7 +2493,7 @@ class Totem3DViewer {
         num: '3',
         tag: 'CONVERSÃO DE ENERGIA',
         title: 'Fonte Chaveada Industrial MeanWell 12V 20A (240W)',
-        desc: 'Fonte industrial metálica perfurada tipo gaiola com PFC ativo e 90% de eficiência. Converte 100~240V AC da rede pública em 12V DC contínuo estabilizado com proteção contra sobrecarga, curto-circuito e sobretensão para alimentar o Mini-PC, tela e exaustores.',
+        desc: 'Fonte industrial metálica perfurada tipo gaiola com PFC ativo e 90% de eficiência. Converte 100~240V AC da rede pública em 12V DC contínuo estabilizado com proteção contra sobrecarga, curto-circuito e sobretensão para alimentar o computador, tela e exaustores.',
         wires: 'Entrada: 220V AC (L, N, PE) do quadro DIN. Saída: Barramento DC 12V estabilizado (cabos Vermelho + / Preto - 2,5mm² flexível).',
         pos: new THREE.Vector3(-0.14, 0.76, 0.02),
         cam: { theta: Math.PI - 0.25, phi: 1.45, radius: 1.55, targetY: 0.76 }
@@ -2300,11 +2502,11 @@ class Totem3DViewer {
         id: 'hw-screen-backend',
         num: '4',
         tag: 'PAINEL TOUCH & DISPLAY',
-        title: 'Placa Scaler AD Board & Controladora Touch PCAP',
-        desc: 'Atrás da moldura frontal: Placa AD Scaler (converte sinal HDMI em sinal LVDS/eDP para o LCD 43" 1500 nits) e Placa Controladora Touch PCAP conectada ao vidro temperado de 8mm antivandalismo com suporte a 10 toques simultâneos com luvas ou sob chuva.',
-        wires: 'Vídeo: Cabo HDMI 2.1 do Mini-PC + Cabos Flat LVDS. Touch: Cabo Flat FPC da tela + Cabo USB blindado para o Mini-PC. Força: 12V DC.',
-        pos: new THREE.Vector3(-0.06, 1.36, 0.12),
-        cam: { theta: 0.35, phi: 1.45, radius: 1.85, targetY: 1.36 }
+        title: 'Chassi Traseiro da Tela Touch 43" (1500 nits)',
+        desc: 'Estrutura traseira blindada do painel LCD 43" de alto brilho (1500 nits) com vidro temperado antivandalismo de 8mm (IK10). Possui gaveta integrada para o Computador Acoplado (Slot OPS All-in-One) ou conexões HDMI/USB caso opte por Mini-PC separado.',
+        wires: 'No modo Touch c/ PC Acoplado (All-in-One), a tela e o computador formam uma peça única alimentada por 12V/24V DC, sem cabos HDMI expostos.',
+        pos: new THREE.Vector3(0.14, 1.15, 0.13),
+        cam: { theta: 0.35, phi: 1.45, radius: 1.85, targetY: 1.25 }
       },
       {
         id: 'hw-mppt',
@@ -2321,7 +2523,7 @@ class Totem3DViewer {
         num: '6',
         tag: 'BACKUP SUSTENTÁVEL',
         title: 'Banco de Baterias LiFePO4 12,8V 40Ah (480 Wh)',
-        desc: 'Bateria de Lítio-Ferro-Fosfato de alta densidade e segurança intrínseca (não inflama) com BMS interno inteligente. Garante mais de 3.500 ciclos de vida útil e autonomia de backup para o Mini-PC, iluminação e controladores caso falte energia na rede 220V do município de Jaú.',
+        desc: 'Bateria de Lítio-Ferro-Fosfato de alta densidade e segurança intrínseca (não inflama) com BMS interno inteligente. Garante mais de 3.500 ciclos de vida útil e autonomia de backup para o computador, iluminação e botão SOS caso falte energia na rede 220V de Jaú.',
         wires: 'Conexão: Cabos automotivos 10mm² Vermelho (+) e Preto (-) com fusível de lâmina 30A e terminais olhais M6 estanhados.',
         pos: new THREE.Vector3(0.0, 0.28, 0.0),
         cam: { theta: Math.PI, phi: 1.35, radius: 1.65, targetY: 0.28 }
@@ -2331,7 +2533,7 @@ class Totem3DViewer {
         num: '7',
         tag: 'TELEMETRIA SOLAR & ENERGIA',
         title: 'Módulo de Comunicação Solar & Telemetria MPPT',
-        desc: 'Módulo de comunicação e telemetria inteligente interligando o painel solar fotovoltaico, o banco de bateria de backup e o computador de bordo do totem. Permite leitura contínua da geração solar, nível de carga da bateria e status da rede elétrica 220V sem necessitar de modem de internet nem custos de operadora celular.',
+        desc: 'Módulo de comunicação e telemetria inteligente interligando o painel solar fotovoltaico, o banco de bateria de backup e o computador do totem. Permite leitura contínua da geração solar, nível de carga da bateria e status da rede elétrica 220V.',
         wires: 'Comunicação: Cabo blindado de telemetria serial RS485 ligado ao controlador MPPT solar. Alimentação: 12V DC da bateria.',
         pos: new THREE.Vector3(0.0, 1.75, 0.0),
         cam: { theta: Math.PI, phi: 1.40, radius: 1.60, targetY: 1.75 }
@@ -2351,10 +2553,20 @@ class Totem3DViewer {
         num: '9',
         tag: 'ATERRAMENTO E FIAÇÃO',
         title: 'Barramento de Aterramento PE & Canaletas de Cabos',
-        desc: 'Barramento de cobre maciço eletrolítico interligando em estrela todas as partes metálicas (chassi estrutural, porta traseira, suporte da tela, trilhos DIN e fonte) com cordoalha de aterramento verde-amarela de 4mm². Cabos organizados em canaletas perfuradas de PVC cinza.',
+        desc: 'Barramento de cobre maciço eletrolítico interligando em estrela todas as partes metálicas (carcaça estrutural, tampão traseiro, suporte da tela, trilhos DIN e fonte) com cordoalha de aterramento verde-amarela de 4mm².',
         wires: 'Aterramento equipotencial PE conforme NBR 5410 com impedância menor que 10 ohms medida no chumbador da base.',
         pos: new THREE.Vector3(-0.08, 0.55, -0.03),
         cam: { theta: Math.PI - 0.35, phi: 1.42, radius: 1.75, targetY: 0.55 }
+      },
+      {
+        id: 'hw-cabinet-door',
+        num: '10',
+        tag: 'CARCAÇA & TAMPÃO TRASEIRO DE ACESSO',
+        title: 'Tampão Traseiro (Porta c/ 3 Dobradiças) & Carcaça Oca',
+        desc: 'Acesso total por trás da máquina: a carcaça é um gabinete oco em chapa de aço dobrada de 2,5mm com quadro de borracha EPDM. O Tampão Traseiro abre 105° para a esquerda sobre 3 dobradiças externas reforçadas, possuindo puxador vertical, 2 fechaduras tubulares com linguetas internas, 3 costelas Ômega de reforço, porta-documentos e pistão a gás.',
+        wires: 'Aterramento da porta: Cordoalha flexível de cobre entre o tampão traseiro e a carcaça para proteção NR-10. Vedação IP65 contra chuva e poeira.',
+        pos: new THREE.Vector3(-0.38, 1.15, -0.45),
+        cam: { theta: Math.PI + 0.38, phi: 1.36, radius: 2.95, targetY: 1.10 }
       }
     ];
 
@@ -2640,7 +2852,7 @@ class Totem3DViewer {
       });
     }
 
-    // 9. Controles Específicos de Raio-X / Lado Interno
+    // 9. Controles Específicos de Raio-X / Lado Interno / Tampão Traseiro / Arquitetura PC
     this.setupHardwareControls();
   }
 
@@ -2648,7 +2860,7 @@ class Totem3DViewer {
   // CONTROLES E MODOS DO LADO INTERNO / RAIO-X (2ª BOLINHA & MENU 360°)
   // =========================================================================
   setupHardwareControls() {
-    // 1. Modos de Visão Interna (Raio-X Translúcido, Porta Aberta 100°, Vista Explodida)
+    // 1. Modos de Visão Interna (Raio-X Translúcido, Porta Aberta 105°, Vista Explodida)
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
       btn.addEventListener('click', () => {
         const mode = btn.getAttribute('data-hw-view');
@@ -2663,6 +2875,22 @@ class Totem3DViewer {
           const orbXray = document.getElementById('btn-orb-xray');
           if (orbXray) orbXray.classList.add('active');
         }
+      });
+    });
+
+    // 1B. Botão direto de Abrir / Fechar o Tampão Traseiro (Porta de Acesso às Costas)
+    const btnToggleDoor = document.getElementById('btn-toggle-rear-door');
+    if (btnToggleDoor) {
+      btnToggleDoor.addEventListener('click', () => {
+        this.toggleRearDoor();
+      });
+    }
+
+    // 1C. Botões de Escolha da Arquitetura Computacional (Touch c/ PC Acoplado All-in-One vs Mini-PC Separado)
+    document.querySelectorAll('[data-pc-arch]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const arch = btn.getAttribute('data-pc-arch');
+        this.setPcArchitecture(arch, true);
       });
     });
 
@@ -2692,7 +2920,7 @@ class Totem3DViewer {
       });
     }
 
-    // 4. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 9)
+    // 4. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 10)
     const btnHwHotspots = document.getElementById('btn-hw-hotspots');
     if (btnHwHotspots) {
       btnHwHotspots.addEventListener('click', () => {
@@ -2751,19 +2979,106 @@ class Totem3DViewer {
     });
   }
 
+  toggleRearDoor() {
+    const isDoorCurrentlyOpen = Math.abs(this.targetDoorAngle) > 0.1;
+    if (isDoorCurrentlyOpen) {
+      // Fecha o tampão traseiro
+      this.targetDoorAngle = 0;
+      if (!this.isHardwareMode) {
+        if (this.internalHardwareGroup) this.internalHardwareGroup.visible = false;
+      }
+      const btnDoor = document.getElementById('btn-toggle-rear-door');
+      if (btnDoor) {
+        btnDoor.classList.remove('active');
+        btnDoor.textContent = '🚪 Abrir Tampão Traseiro (105°)';
+      }
+    } else {
+      // Abre o tampão traseiro em 105° mostrando a carcaça oca e o interior da máquina
+      this.autoRotate = false;
+      const btnAuto = document.getElementById('btn-3d-autorotate');
+      if (btnAuto) btnAuto.classList.remove('active');
+
+      if (this.mainCabinetMesh) this.mainCabinetMesh.visible = false;
+      if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = true;
+      if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
+
+      this.targetDoorAngle = -Math.PI * 0.58; // 105 graus aberto
+      this.camState.targetTheta = Math.PI + 0.32;
+      this.camState.targetPhi = 1.38;
+      this.camState.targetRadius = 3.25;
+      this.camState.targetLookY = 1.08;
+
+      const btnDoor = document.getElementById('btn-toggle-rear-door');
+      if (btnDoor) {
+        btnDoor.classList.add('active');
+        btnDoor.textContent = '🚪 Fechar Tampão Traseiro';
+      }
+    }
+  }
+
+  setPcArchitecture(arch = 'allinone', focusOnChange = false) {
+    this.pcArchitecture = arch === 'minipc' ? 'minipc' : 'allinone';
+    const isAllInOne = this.pcArchitecture === 'allinone';
+
+    if (this.allInOnePcGroup) this.allInOnePcGroup.visible = isAllInOne;
+    if (this.separateMiniPcGroup) this.separateMiniPcGroup.visible = !isAllInOne;
+
+    // Atualiza o Hotspot #1 (Cérebro Computacional) de acordo com a opção escolhida
+    if (this.hardwareHotspotsData && this.hardwareHotspotsData.length > 0) {
+      const ipcSpot = this.hardwareHotspotsData.find(h => h.id === 'hw-ipc');
+      if (ipcSpot) {
+        if (isAllInOne) {
+          ipcSpot.tag = 'OPÇÃO RECOMENDADA • ALL-IN-ONE (PC ACOPLADO NA TELA)';
+          ipcSpot.title = 'Tela Touch 43" c/ Computador Acoplado (Módulo OPS)';
+          ipcSpot.desc = 'Sim! Não é obrigatório ter um Mini-PC separado no rack: podemos comprar a Tela Touch 43" Industrial já com o Computador Acoplado na própria tela (All-in-One / Slot Industrial OPS). O módulo PC encaixa como uma gaveta direto atrás do monitor, eliminando cabos HDMI e USB soltos e deixando o interior muito mais limpo.';
+          ipcSpot.wires = 'Zero cabos de vídeo/touch externos! Vídeo HDMI, USB Touch e Áudio passam direto pelo conector interno de 80 pinos da tela. Liga apenas 12V DC e telemetria solar.';
+          ipcSpot.pos = new THREE.Vector3(0.0, 1.26, 0.11);
+          ipcSpot.cam = { theta: Math.PI + 0.18, phi: 1.38, radius: 1.75, targetY: 1.28 };
+        } else {
+          ipcSpot.tag = 'OPÇÃO MODULAR • MINI-PC SEPARADO NO RACK';
+          ipcSpot.title = 'Mini-PC Industrial Fanless Separado (Core i5 / IPC)';
+          ipcSpot.desc = 'Arquitetura modular tradicional: a Tela Touch 43" funciona apenas como monitor touch e o Mini-PC Fanless fica fixado separadamente no trilho do rack interno. Vantagem: caso queira substituir apenas o computador ou apenas a tela no futuro por qualquer marca, as peças são independentes.';
+          ipcSpot.wires = 'Alimentação: 12V DC (5A). Vídeo: Cabo HDMI 2.1 ligando o Mini-PC à Placa AD da tela. Touch: Cabo USB 3.0 blindado ligando a tela ao Mini-PC.';
+          ipcSpot.pos = new THREE.Vector3(0.06, 1.38, 0.03);
+          ipcSpot.cam = { theta: Math.PI + 0.15, phi: 1.38, radius: 1.65, targetY: 1.38 };
+        }
+      }
+    }
+
+    document.querySelectorAll('[data-pc-arch]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-pc-arch') === this.pcArchitecture);
+    });
+
+    this.renderHotspotPins();
+
+    if (focusOnChange) {
+      if (!this.isHardwareMode) {
+        this.setHardwareMode(true);
+        const orbXray = document.getElementById('btn-orb-xray');
+        if (orbXray) orbXray.classList.add('active');
+      }
+      const ipcSpot = this.hardwareHotspotsData.find(h => h.id === 'hw-ipc');
+      if (ipcSpot) this.focusHotspot(ipcSpot);
+    }
+  }
+
   setHardwareMode(active) {
     this.isHardwareMode = active;
 
     if (active) {
+      // Troca o bloco maciço pela Carcaça Oca real para que o vão traseiro e as paredes da carcaça apareçam
+      if (this.mainCabinetMesh) this.mainCabinetMesh.visible = false;
+      if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = true;
       if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
+
       this.showHotspots = true;
       const btnHwHotspots = document.getElementById('btn-hw-hotspots');
       if (btnHwHotspots) btnHwHotspots.classList.add('active');
 
-      // Aplica o modo de visão interna (padrão: 'xray' - Totem do lado interno a raio-x)
+      // Aplica o modo de visão interna (padrão: 'xray' - Carcaça semi-transparente + Tampão Traseiro Aberto)
       this.setHardwareView(this.hardwareViewMode || 'xray');
     } else {
-      // Fecha a porta suavemente e restaura a opacidade original da carcaça
+      // Fecha o tampão traseiro suavemente e restaura a opacidade original da carcaça
       this.targetDoorAngle = 0;
       this.targetExplodeOffset = 0;
       ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
@@ -2775,10 +3090,18 @@ class Totem3DViewer {
           mat.needsUpdate = true;
         }
       });
+      if (this.mainCabinetMesh) this.mainCabinetMesh.visible = true;
+      if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = false;
       if (this.internalHardwareGroup) this.internalHardwareGroup.visible = false;
+
       this.showHotspots = false;
       const btnHwHotspots = document.getElementById('btn-hw-hotspots');
       if (btnHwHotspots) btnHwHotspots.classList.remove('active');
+      const btnDoor = document.getElementById('btn-toggle-rear-door');
+      if (btnDoor) {
+        btnDoor.classList.remove('active');
+        btnDoor.textContent = '🚪 Abrir Tampão Traseiro (105°)';
+      }
       const card = document.getElementById('totem-3d-info-card');
       if (card) card.classList.add('hidden');
 
@@ -2798,6 +3121,9 @@ class Totem3DViewer {
     this.hardwareViewMode = mode;
     this.autoRotate = false;
 
+    if (this.mainCabinetMesh) this.mainCabinetMesh.visible = false;
+    if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = true;
+
     // Reseta transparências prévias
     ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
       const mat = this.dynamicMaterials[matKey];
@@ -2811,36 +3137,51 @@ class Totem3DViewer {
     this.targetExplodeOffset = 0;
 
     if (mode === 'door') {
-      // Porta aberta em 100 graus com visão técnica das costas
-      this.targetDoorAngle = -Math.PI * 0.55;
-      this.camState.targetTheta = Math.PI + 0.30;
+      // Carcaça 100% sólida com o Tampão Traseiro aberto em 105 graus mostrando o acesso por trás
+      this.targetDoorAngle = -Math.PI * 0.58;
+      this.camState.targetTheta = Math.PI + 0.32;
       this.camState.targetPhi = 1.38;
       this.camState.targetRadius = 3.25;
       this.camState.targetLookY = 1.08;
     } else if (mode === 'xray') {
-      // Carcaça translúcida / Raio-X (Visão interna 360° de todos os componentes e fios)
-      this.targetDoorAngle = 0;
-      ['body', 'headerSign', 'rearDoor'].forEach(matKey => {
+      // Raio-X + Carcaça Visível (48% opacidade) + Tampão Traseiro Sólido ABERTO em 105°!
+      // Assim o usuário enxerga claramente a CARCAÇA, o TAMPÃO TRASEIRO aberto na dobradiça e os componentes lá dentro!
+      this.targetDoorAngle = -Math.PI * 0.58;
+      ['body', 'headerSign'].forEach(matKey => {
         const mat = this.dynamicMaterials[matKey];
         if (mat) {
           mat.transparent = true;
-          mat.opacity = 0.18;
+          mat.opacity = 0.46;
           mat.depthWrite = false;
           mat.needsUpdate = true;
         }
       });
-      this.camState.targetTheta = 0.72;
+      // O Tampão Traseiro (rearDoor) permanece 100% opaco e aberto ao lado para evidenciar a porta de manutenção
+      if (this.dynamicMaterials.rearDoor) {
+        this.dynamicMaterials.rearDoor.transparent = false;
+        this.dynamicMaterials.rearDoor.opacity = 1.0;
+        this.dynamicMaterials.rearDoor.depthWrite = true;
+        this.dynamicMaterials.rearDoor.needsUpdate = true;
+      }
+      this.camState.targetTheta = Math.PI + 0.48;
       this.camState.targetPhi = 1.35;
       this.camState.targetRadius = 3.35;
       this.camState.targetLookY = 1.06;
     } else if (mode === 'exploded') {
-      // Vista explodida em camadas
-      this.targetDoorAngle = -Math.PI * 0.40;
-      this.targetExplodeOffset = 0.32;
-      this.camState.targetTheta = 0.95;
+      // Vista explodida em camadas (Carcaça deslocada + Tampão aberto)
+      this.targetDoorAngle = -Math.PI * 0.50;
+      this.targetExplodeOffset = 0.36;
+      this.camState.targetTheta = Math.PI + 0.65;
       this.camState.targetPhi = 1.28;
       this.camState.targetRadius = 3.65;
       this.camState.targetLookY = 1.06;
+    }
+
+    const btnDoor = document.getElementById('btn-toggle-rear-door');
+    if (btnDoor) {
+      const doorOpen = Math.abs(this.targetDoorAngle) > 0.1;
+      btnDoor.classList.toggle('active', doorOpen);
+      btnDoor.textContent = doorOpen ? '🚪 Fechar Tampão Traseiro' : '🚪 Abrir Tampão Traseiro (105°)';
     }
 
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
@@ -3299,16 +3640,25 @@ class Totem3DViewer {
       degEl.textContent = `${deg}°`;
     }
 
-    // Animação suave de abertura/fechamento da porta traseira (Aba 3)
+    // Animação suave de abertura/fechamento do tampão traseiro (porta de manutenção)
     if (this.rearDoorHingeGroup) {
       this.currentDoorAngle += (this.targetDoorAngle - this.currentDoorAngle) * 0.10;
       this.rearDoorHingeGroup.rotation.y = this.currentDoorAngle;
+    }
+
+    // Se o tampão traseiro acabou de fechar completamente fora do modo Raio-X, volta para a malha externa
+    if (!this.isHardwareMode && Math.abs(this.targetDoorAngle) < 0.01 && Math.abs(this.currentDoorAngle) < 0.015) {
+      if (this.mainCabinetMesh && !this.mainCabinetMesh.visible) this.mainCabinetMesh.visible = true;
+      if (this.hollowCabinetGroup && this.hollowCabinetGroup.visible) this.hollowCabinetGroup.visible = false;
     }
 
     // Animação suave de vista explodida
     this.currentExplodeOffset += (this.targetExplodeOffset - this.currentExplodeOffset) * 0.10;
     if (this.mainCabinetMesh) {
       this.mainCabinetMesh.position.x = 0.346 + this.currentExplodeOffset;
+    }
+    if (this.hollowCabinetGroup) {
+      this.hollowCabinetGroup.position.x = this.currentExplodeOffset;
     }
     if (this.rearDoorHingeGroup) {
       this.rearDoorHingeGroup.position.z = -0.178 - this.currentExplodeOffset * 1.5;

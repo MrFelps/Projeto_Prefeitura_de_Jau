@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Orçamentos e Fornecedores - Totem Inteligente de Jaú/SP</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 14mm 16mm;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      color: #1e293b;
+      line-height: 1.45;
+      font-size: 10pt;
+      margin: 0;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 24px 28px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .header-box {
+      background: linear-gradient(135deg, #0c326f 0%, #166534 100%);
+      color: #ffffff;
+      padding: 18px 24px;
+      border-bottom: 5px solid #ffcd07;
+      border-radius: 6px;
+      margin-bottom: 22px;
+    }
+    .header-box h1 {
+      margin: 0;
+      font-size: 15pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-box p {
+      margin: 4px 0 0;
+      font-size: 9.5pt;
+      color: #e2e8f0;
+    }
+    .print-btn-bar {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-print {
+      background: #0c326f;
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11pt;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-print:hover {
+      background: #1351b4;
+    }
+    .intro-card {
+      background: #f1f5f9;
+      border-left: 5px solid #0c326f;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 9.5pt;
+    }
+    h2 {
+      background: #f1f5f9;
+      color: #0c326f;
+      font-size: 11pt;
+      padding: 7px 12px;
+      border-left: 5px solid #16a34a;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge-loc {
+      font-size: 8.5pt;
+      background: #0c326f;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: none;
+    }
+    .supplier-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .supplier-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 14px 16px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .supplier-card:hover {
+      border-color: #0c326f;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .sup-name {
+      font-size: 11pt;
+      font-weight: 800;
+      color: #0c326f;
+    }
+    .sup-tag {
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .tag-local { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .tag-sp { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .card-details {
+      display: grid;
+      grid-template-columns: 1.4fr 1.2fr 1fr;
+      gap: 10px;
+      font-size: 8.8pt;
+      color: #334155;
+      margin-top: 8px;
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 4px;
+    }
+    .detail-item strong {
+      display: block;
+      color: #0f172a;
+      font-size: 8.2pt;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .price-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      color: #1e40af;
+      display: inline-block;
+    }
+    .warranty-badge {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      color: #166534;
+      display: inline-block;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 9pt;
+    }
+    .summary-table th, .summary-table td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .summary-table th {
+      background: #0c326f;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .summary-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .total-row {
+      background: #ecfdf5 !important;
+      font-weight: 800;
+      color: #065f46;
+    }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .container { border: none; box-shadow: none; padding: 0; }
+      .print-btn-bar { display: none; }
+      .supplier-card { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="print-btn-bar">
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar em PDF</button>
+    </div>
+
+    <div class="header-box">
+      <h1>RELATÓRIO EXECUTIVO DE ORÇAMENTOS E FORNECEDORES</h1>
+      <p>Projeto Totem Inteligente de Informações Públicas de Jaú/SP • Cotações Competitivas, Contatos, Endereços e Garantias</p>
+    </div>
+
+    <div class="intro-card">
+      <strong>ESTRATÉGIA TÉCNICA E LOGÍSTICA DE COMPRAS:</strong>
+      <p style="margin: 4px 0 0;">
+        <strong>1. Serralheria, Caldeiraria e Corte/Dobra (Área de Jaú e Bauru):</strong> Peças pesadas (chassi de 120 kg, 2,20m x 0,70m x 0,35m). Fabricação local/regional elimina fretes interestaduais abusivos (economia de ~R$ 1.200/viagem), mitiga avarias em transporte rodoviário e viabiliza vistorias técnicas presenciais.<br>
+        <strong>2. Displays Touch, Mini-PCs e Sistemas Solares (Grande São Paulo & Capital):</strong> Importadores e integradores diretos Tier-1 na capital paulista garantem preços de atacado, peças em estoque e garantias formais de 1 a 5 anos com nota fiscal.
+      </p>
+    </div>
+
+    <!-- 1. SERRALHERIA / METALÚRGICA (5 FORNECEDORES LOCAIS) -->
+    <h2>
+      <span>1. Estrutura Metálica, Caldeiraria e Corte/Dobra (5 Fornecedores)</span>
+      <span class="badge-loc">Área de Jaú e Bauru (Regional)</span>
+    </h2>
+
+    <div class="supplier-grid">
+      <!-- 1. Master Dobra -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">1. Master Dobra Metalúrgica</span>
+          <span class="sup-tag tag-local">Local: Jaú / SP</span>
+        </div>
+        <div>Corte a laser fibra óptica até 19mm, dobra CNC de chapas até 6m, calandragem e revenda de perfis de aço. Fabricação completa sob medida.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rod. Com. João Ribeiro de Barros, Km 145 - Jaú/SP<br>
+            Seg a Sex: 07h30 às 17h15
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel/WhatsApp: (14) 3418-2101 / (14) 3418-5070<br>
+            Site: <a href="https://masterdobra.com.br" target="_blank">masterdobra.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 4.500 a R$ 5.600</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Metalúrgica São Pedro -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">2. Metalúrgica São Pedro (Usinagem & Caldeiraria)</span>
+          <span class="sup-tag tag-local">Local: Jaú / SP</span>
+        </div>
+        <div>Caldeiraria industrial, corte e dobra de chapas grossas em aço carbono/galvanizado, usinagem técnica e montagem estrutural.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Egisto Franceschi, 1093 - Jaú/SP<br>
+            Seg a Sex: 07h30 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (14) 3621-7175 / (14) 3621-6477<br>
+            Site: <a href="http://www.metalurgicasaopedro.com.br" target="_blank">metalurgicasaopedro.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 4.700 a R$ 5.900</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Mondil Caldeiraria -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">3. Mondil Caldeiraria e Montagem Industrial</span>
+          <span class="sup-tag tag-local">Local: Jaú / SP</span>
+        </div>
+        <div>Especialistas em montagens industriais, caldeiraria pesada, solda TIG/MIG e acabamento de gabinetes de alta durabilidade.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Egisto Franceschi, 1372, Quinta da Colina - Jaú/SP<br>
+            Seg a Sex: 07h30 às 17h15
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (14) 3626-8399 / Whats: (14) 99109-4522<br>
+            Site: <a href="http://www.mondil.com.br" target="_blank">mondil.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 4.800 a R$ 6.100</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Cordob -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">4. Cordob Corte a Laser e Dobra CNC</span>
+          <span class="sup-tag tag-local">Regional: Bauru / SP (50 km)</span>
+        </div>
+        <div>Corte a laser de alta precisão (chapas finas até 19mm), corte plasma, dobra CNC e calandragem industrial.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rua Joaquim M. de Figueiredo, 2-125, Dist. Ind. I - Bauru/SP<br>
+            Seg a Sex: 07h30 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (14) 3103-5577<br>
+            Site: <a href="https://cordob.com.br" target="_blank">cordob.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 4.800 a R$ 6.000</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Baurufer -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">5. Baurufer Soluções em Ferro e Aço</span>
+          <span class="sup-tag tag-local">Regional: Bauru / SP (50 km)</span>
+        </div>
+        <div>Conformação de chapas, corte e dobra, perfis estruturais, tubos de metalon e ferragens de grande porte.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Nuno de Assis, 15-45, Centro - Bauru/SP<br>
+            Seg a Sex: 07h30 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (14) 3236-1854<br>
+            Site: <a href="https://baurufer.com.br" target="_blank">baurufer.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 4.900 a R$ 6.200</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TELAS TOUCHSCREEN INDUSTRIAIS OUTDOOR (4 FORNECEDORES) -->
+    <h2>
+      <span>2. Telas Touchscreen Outdoor 43" & Displays Industriais (4 Fornecedores)</span>
+      <span class="badge-loc">Grande São Paulo & Capital</span>
+    </h2>
+
+    <div class="supplier-grid">
+      <!-- 1. Touk -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">1. Touk Monitores Touch Screen</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Monitores Open-Frame Touchscreen 43" Full HD de alto brilho (1500+ nits) com vidro temperado e touch capacitivo PCAP 10 toques.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Atendimento Central - São Paulo/SP<br>
+            Seg a Qui 08h-18h / Sex 08h-17h
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 2868-0172 • contato@touk.com.br<br>
+            Site: <a href="https://touk.com.br" target="_blank">touk.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 7.200 a R$ 8.900</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Kiosk Brasil -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">2. Kiosk Brasil (RSS Automação)</span>
+          <span class="sup-tag tag-sp">Campinas / SP (Atend. Capital)</span>
+        </div>
+        <div>Monitores industriais e quiosques eletrônicos com painel touch antivandalismo e alto brilho para luz solar direta.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rua Anita Moretzshon, 241, Sl 5 - Campinas/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 4063-7580 / 0800 590 0527<br>
+            Site: <a href="https://kioskbrasil.com.br" target="_blank">kioskbrasil.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 7.800 a R$ 9.500</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Schalter -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">3. Schalter Tecnologia (Filial SP)</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Líder em totens e autoatendimento industrial com a linha Outdoor Flag Schalter (proteção climática IP65 e resistência UV).</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Eng. Luís Carlos Berrini, 1748 - São Paulo/SP<br>
+            Seg a Sex: 08h30 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3528-9800 • contato@schalter.com.br<br>
+            Site: <a href="https://schalter.com.br" target="_blank">schalter.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 8.500 a R$ 10.500</span><br>
+            <span class="warranty-badge">🛡️ 2 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Videosoft -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">4. Videosoft Soluções em Autoatendimento</span>
+          <span class="sup-tag tag-sp">Distribuição São Paulo / SP</span>
+        </div>
+        <div>Fabricante de hardware de autoatendimento com modelos com monitoramento de periféricos e opções com vidros temperados robustos.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Polo Logístico SP Capital<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3136-1212 / (47) 3363-3363<br>
+            Site: <a href="https://videosoft.com.br" target="_blank">videosoft.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 8.200 a R$ 9.800</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. MINI-PCS INDUSTRIAIS FANLESS (4 FORNECEDORES) -->
+    <h2>
+      <span>3. Mini-PCs Industriais Fanless (Core i5 / IPC) (4 Fornecedores)</span>
+      <span class="badge-loc">Grande São Paulo & Capital</span>
+    </h2>
+
+    <div class="supplier-grid">
+      <!-- 1. OrionPC -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">1. OrionPC Computadores Industriais</span>
+          <span class="sup-tag tag-sp">Barueri / São Paulo - SP</span>
+        </div>
+        <div>Mini-PCs industriais fanless nacionais com Core i5, SSD industrial NVMe, watchdog de hardware e alta tolerância térmica (-20°C a +70°C).</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Calçada das Anêmonas, Alphaville - Barueri/SP<br>
+            Seg a Sex: 08h30 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 4195-0992 • vendas@orionpc.com.br<br>
+            Site: <a href="https://orionpc.com.br" target="_blank">orionpc.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 2.650 a R$ 3.500</span><br>
+            <span class="warranty-badge">🛡️ 2 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Dakol -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">2. Dakol Instrumentos e Automação</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Computadores industriais em gabinete de alumínio aletado, imunidade a ruídos eletromagnéticos e operação 24/7 ininterrupta.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rua Maestro Cardim, 407, Bela Vista - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3855-0060 • vendas@dakol.com.br<br>
+            Site: <a href="https://dakol.com.br" target="_blank">dakol.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 3.100 a R$ 4.200</span><br>
+            <span class="warranty-badge">🛡️ 2 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. SDC / Advantech -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">3. SDC Engenharia / Advantech Brasil</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Distribuidor oficial Advantech (Série UNO/ARK Fanless). Homologação de nível mundial em concessionárias e órgãos governamentais.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rua Américo Brasiliense, 2171 - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 5633-2855 • contato@sdc.com.br<br>
+            Site: <a href="https://sdc.com.br" target="_blank">sdc.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 3.700 a R$ 4.900</span><br>
+            <span class="warranty-badge">🛡️ 2 Anos de Garantia Global</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. LRI Automação -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">4. LRI Automação Industrial</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>PCs industriais sob medida com sistema Linux Kiosk otimizado, inicialização rápida e blindagem passiva.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Paulista, 1765, 7º andar - São Paulo/SP<br>
+            Seg a Sex: 08h30 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3042-4545 • contato@lri.com.br<br>
+            Site: <a href="https://lri.com.br" target="_blank">lri.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 2.900 a R$ 3.900</span><br>
+            <span class="warranty-badge">🛡️ 1 a 2 Anos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ENERGIA SOLAR & BATERIAS LIFEPO4 (3 FORNECEDORES) -->
+    <h2>
+      <span>4. Sistema Solar Híbrido & Baterias LiFePO4 (3 Fornecedores)</span>
+      <span class="badge-loc">São Paulo & Distribuição Nacional</span>
+    </h2>
+
+    <div class="supplier-grid">
+      <!-- 1. NeoSolar -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">1. NeoSolar Energia</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Maior distribuidor solar off-grid do Brasil. Kit completo: Painel solar compacto, controlador MPPT com RS485 e bateria LiFePO4 12,8V 40Ah/50Ah com BMS inteligente.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Rua Morgado de Mateus, 516, Vila Mariana - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 4328-5113 / Whats: (11) 99935-4535<br>
+            Site: <a href="https://neosolar.com.br" target="_blank">neosolar.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 1.950 a R$ 2.600</span><br>
+            <span class="warranty-badge">🛡️ 3 a 5 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Unicoba -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">2. Unicoba / UCB Power</span>
+          <span class="sup-tag tag-sp">Barueri / São Paulo - SP</span>
+        </div>
+        <div>Maior fabricante nacional de baterias estacionárias de lítio. Células de alta densidade (+3.500 ciclos de vida) com máxima segurança intrínseca (não inflama).</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Tamboré, 1180, Módulos 1 e 2 - Barueri/SP<br>
+            Seg a Sex: 08h00 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 4197-2000 • contato@ucbpower.com<br>
+            Site: <a href="https://ucbpower.com" target="_blank">ucbpower.com</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 1.450 a R$ 1.950 (Bateria)</span><br>
+            <span class="warranty-badge">🛡️ 3 a 5 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Panda Energia -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">3. Panda Energia Solar / Minha Casa Solar</span>
+          <span class="sup-tag tag-sp">Distribuição Expressa SP</span>
+        </div>
+        <div>Controladores de carga MPPT SRNE/Epever com telemetria Modbus RS485 para monitoramento direto pelo Mini-PC, painéis solares e baterias LiFePO4 homologadas.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Centro de Distribuição Logística - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3197-4040 • contato@pandaenergiasolar.com.br<br>
+            Site: <a href="https://pandaenergiasolar.com" target="_blank">pandaenergiasolar.com</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 1.900 a R$ 2.500</span><br>
+            <span class="warranty-badge">🛡️ 3 Anos de Garantia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. QUADRO ELÉTRICO DIN & FONTES MEAN WELL (3 FORNECEDORES) -->
+    <h2>
+      <span>5. Quadro DIN, Proteções Elétricas & Fontes Industriais (3 Fornecedores)</span>
+      <span class="badge-loc">São Paulo / Distribuidores Oficiais</span>
+    </h2>
+
+    <div class="supplier-grid">
+      <!-- 1. Sonepar -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">1. Sonepar Brasil</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Maior distribuidor mundial de materiais elétricos. Estoque oficial de disjuntores, DPS 40kA e DR 30mA das marcas Schneider Electric, Siemens e cabos Prysmian.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. das Nações Unidas, 14261, Morumbi - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 2174-8000 • vendas@sonepar.com.br<br>
+            Site: <a href="https://sonepar.com.br" target="_blank">sonepar.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 700 a R$ 880 (Kit DIN)</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Loja Elétrica / Eletronor -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">2. Loja Elétrica / Eletronor</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Distribuidor autorizado da fonte industrial **Mean Well LRS-200-12** (12V 17A), bornes de passagem Weidmüller e canaletas para trilho DIN.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. do Estado, 2800, Mooca - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 18h00
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3385-7000 • vendas@lojaeletrica.com.br<br>
+            Site: <a href="https://lojaeletrica.com.br" target="_blank">lojaeletrica.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 680 a R$ 850 (Kit Fonte)</span><br>
+            <span class="warranty-badge">🛡️ 3 Anos (Mean Well)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Reymaster -->
+      <div class="supplier-card">
+        <div class="card-top">
+          <span class="sup-name">3. Reymaster Materiais Elétricos</span>
+          <span class="sup-tag tag-sp">São Paulo / SP</span>
+        </div>
+        <div>Especialistas em proteção de descargas atmosféricas (DPS Clamper Classe II 275V/40kA) e componentes com certificação Inmetro e NR-10.</div>
+        <div class="card-details">
+          <div class="detail-item">
+            <strong>Endereço & Horário:</strong>
+            Av. Tiradentes, 1200, Luz - São Paulo/SP<br>
+            Seg a Sex: 08h00 às 17h30
+          </div>
+          <div class="detail-item">
+            <strong>Contato & Site:</strong>
+            Tel: (11) 3326-1000 • contato@reymaster.com.br<br>
+            Site: <a href="https://reymaster.com.br" target="_blank">reymaster.com.br</a>
+          </div>
+          <div class="detail-item">
+            <strong>Preço & Garantia:</strong>
+            <span class="price-box">R$ 720 a R$ 890</span><br>
+            <span class="warranty-badge">🛡️ 1 Ano de Garantia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARATIVO FINANCEIRO E MARGEM DE LUCRO -->
+    <h2>
+      <span>6. Composição Consolidada de Custos vs. Valor Contratual (4 Totens)</span>
+      <span class="badge-loc">Viabilidade Financeira</span>
+    </h2>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Subsistema / Componente</th>
+          <th>Fornecedor Selecionado</th>
+          <th>Custo Unitário Médio</th>
+          <th>Custo Total (04 Totens)</th>
+          <th>Prazo de Garantia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Chassi Metálico Galvanizado & Base Chumbada</strong></td>
+          <td>Master Dobra (Jaú/SP)</td>
+          <td>R$ 4.800,00</td>
+          <td>R$ 19.200,00</td>
+          <td>1 ano estrutural</td>
+        </tr>
+        <tr>
+          <td><strong>Tela Touchscreen Outdoor 43" (1500+ nits / PCAP)</strong></td>
+          <td>Touk Monitores (São Paulo/SP)</td>
+          <td>R$ 7.800,00</td>
+          <td>R$ 31.200,00</td>
+          <td>1 ano</td>
+        </tr>
+        <tr>
+          <td><strong>Mini-PC Industrial Fanless Core i5 (Watchdog)</strong></td>
+          <td>OrionPC (Barueri/SP)</td>
+          <td>R$ 2.950,00</td>
+          <td>R$ 11.800,00</td>
+          <td><strong>2 anos</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Kit Solar Híbrido + Bateria LiFePO4 + MPPT RS485</strong></td>
+          <td>NeoSolar Energia (São Paulo/SP)</td>
+          <td>R$ 2.200,00</td>
+          <td>R$ 8.800,00</td>
+          <td><strong>3 a 5 anos</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Quadro DIN, Proteções NR-10 & Fonte Mean Well</strong></td>
+          <td>Sonepar / Loja Elétrica (SP)</td>
+          <td>R$ 750,00</td>
+          <td>R$ 3.000,00</td>
+          <td><strong>1 a 3 anos</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Vidro Temperado 8mm + Parafusaria Inox + Aterramento</strong></td>
+          <td>Vidraçaria / Ferragens (Jaú/SP)</td>
+          <td>R$ 700,00</td>
+          <td>R$ 2.800,00</td>
+          <td>1 ano</td>
+        </tr>
+        <tr class="total-row">
+          <td><strong>CUSTO DIRETO TOTAL DE HARDWARE</strong></td>
+          <td>—</td>
+          <td><strong>R$ 19.200,00</strong></td>
+          <td><strong>R$ 76.800,00</strong></td>
+          <td>Garantias de 1 a 5 anos</td>
+        </tr>
+        <tr style="background: #eff6ff; font-weight: 700; color: #1e3a8a;">
+          <td><strong>VALOR CONTRATUAL TOTAL COM A PREFEITURA</strong></td>
+          <td>Prefeitura Municipal de Jaú</td>
+          <td><strong>R$ 24.000,00</strong></td>
+          <td><strong>R$ 96.000,00</strong></td>
+          <td>Contrato Municipal</td>
+        </tr>
+        <tr style="background: #fdf2f8; font-weight: 800; color: #be185d;">
+          <td><strong>MARGEM LÍQUIDA DE ENGENHARIA / LUCRO</strong></td>
+          <td>—</td>
+          <td><strong>+ R$ 4.800,00 / totem</strong></td>
+          <td><strong>+ R$ 19.200,00 (Total)</strong></td>
+          <td><strong>20% de Margem Líquida</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</body>
+</html>

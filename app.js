@@ -339,16 +339,18 @@ class TotemApp {
     }
   }
 
-  // 5. CONTROLE DOS 3 BOTÕES (SUPERIOR ESQUERDO) E 1 BOTÃO 360° (INFERIOR DIREITO)
+  // 5. CONTROLE DOS 4 BOTÕES (SUPERIOR ESQUERDO) E 1 BOTÃO 360° (INFERIOR DIREITO)
   setupSimulatorControls() {
     const menuOverlay = document.getElementById('totem-menu-overlay');
     const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
     const modalSchematics = document.getElementById('modal-hardware-schematics');
+    const modalEstrutura = document.getElementById('modal-estrutura-blueprint');
 
-    // Os 3 Botões no Canto Superior Esquerdo
-    const btnOrbScreen = document.getElementById('btn-orb-screen'); // 1º: Visão da Tela do Totem
-    const btnOrbXray = document.getElementById('btn-orb-xray');     // 2º: Totem do Lado Interno a Raio-X
-    const btnOrbTech = document.getElementById('btn-orb-tech');     // 3º: Texto com a Parte Técnica
+    // Os 4 Botões no Canto Superior Esquerdo
+    const btnOrbScreen = document.getElementById('btn-orb-screen');       // 1º: Visão da Tela do Totem
+    const btnOrbXray = document.getElementById('btn-orb-xray');           // 2º: Totem do Lado Interno a Raio-X
+    const btnOrbTech = document.getElementById('btn-orb-tech');           // 3º: Texto com a Parte Técnica
+    const btnOrbEstrutura = document.getElementById('btn-orb-estrutura'); // 4º: Estrutura (Caixa Desmontada, Dobras, Furação e Interior)
 
     // O Botão no Canto Inferior Direito (Características para o 360 do Totem)
     const btnOrb360 = document.getElementById('btn-orb-360');
@@ -361,8 +363,10 @@ class TotemApp {
         if (isCurrentlyHidden) {
           if (menuOverlay) menuOverlay.classList.remove('hidden');
           if (modalSchematics) modalSchematics.classList.add('hidden');
+          if (modalEstrutura) modalEstrutura.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.add('active');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
+          if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
           this.resetInactivityTimer();
           this.falar('Abrindo visão da tela interativa do totem.');
         } else {
@@ -374,8 +378,10 @@ class TotemApp {
         // Fecha overlays para exibir o Totem 3D no centro com Raio-X Interno
         if (menuOverlay) menuOverlay.classList.add('hidden');
         if (modalSchematics) modalSchematics.classList.add('hidden');
+        if (modalEstrutura) modalEstrutura.classList.add('hidden');
         if (btnOrbScreen) btnOrbScreen.classList.remove('active');
         if (btnOrbTech) btnOrbTech.classList.remove('active');
+        if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
 
         if (!this.viewer3D && window.Totem3DViewer) {
           this.setup3DViewer();
@@ -392,7 +398,9 @@ class TotemApp {
         const isHidden = modalSchematics.classList.contains('hidden');
         if (isHidden) {
           if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (modalEstrutura) modalEstrutura.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+          if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
           modalSchematics.classList.remove('hidden');
           if (btnOrbTech) btnOrbTech.classList.add('active');
           this.falar('Abrindo documento com a parte técnica e arquitetura do totem.');
@@ -400,8 +408,49 @@ class TotemApp {
           modalSchematics.classList.add('hidden');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
         }
+      } else if (action === 'estrutura') {
+        if (!modalEstrutura) return;
+        const isHidden = modalEstrutura.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+          if (modalSchematics) modalSchematics.classList.add('hidden');
+          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+          if (btnOrbTech) btnOrbTech.classList.remove('active');
+          modalEstrutura.classList.remove('hidden');
+          if (btnOrbEstrutura) btnOrbEstrutura.classList.add('active');
+          this.falar('Abrindo plano de estrutura: caixa desmontada, dobras, furação e estrutura interna.');
+        } else {
+          modalEstrutura.classList.add('hidden');
+          if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+        }
       }
     };
+
+    // Fechar e alternar abas do Modal da 4ª Bolinha (ESTRUTURA)
+    const btnCloseEstModal = document.getElementById('btn-close-estrutura-modal');
+    const btnCloseEstFoot = document.getElementById('btn-close-estrutura-foot');
+    const closeEstruturaModal = () => {
+      if (modalEstrutura) modalEstrutura.classList.add('hidden');
+      if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+    };
+    if (btnCloseEstModal) btnCloseEstModal.addEventListener('click', closeEstruturaModal);
+    if (btnCloseEstFoot) btnCloseEstFoot.addEventListener('click', closeEstruturaModal);
+    if (modalEstrutura) {
+      modalEstrutura.addEventListener('click', (e) => {
+        if (e.target === modalEstrutura) closeEstruturaModal();
+      });
+    }
+
+    document.querySelectorAll('.btn-est-tab[data-est-tab]').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        const targetKey = tabBtn.getAttribute('data-est-tab');
+        document.querySelectorAll('.btn-est-tab').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+        document.querySelectorAll('.est-tab-pane').forEach(pane => {
+          pane.classList.toggle('active', pane.id === `est-tab-content-${targetKey}`);
+        });
+      });
+    });
 
     if (btnCloseMenuOverlay) {
       btnCloseMenuOverlay.addEventListener('click', () => {

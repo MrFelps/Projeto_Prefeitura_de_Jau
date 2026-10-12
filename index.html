@@ -181,6 +181,17 @@
       <span class="orb-tag">TÉCNICO</span>
       <span class="orb-tooltip">Parte Técnica</span>
     </button>
+
+    <!-- 4ª Bolinha Redonda Azul: ESTRUTURA (Caixa Desmontada / Molde Papel / Furação & Estrutura Interna) -->
+    <button type="button" id="btn-orb-estrutura" class="orb-btn" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('estrutura')" title="4. Estrutura (Caixa Desmontada, Onde Dobrar, Onde Furar e Estrutura Interna)">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      <span class="orb-tag" style="font-size:8px !important;">ESTRUTURA</span>
+      <span class="orb-tooltip">Estrutura (Caixa Desmontada & Interior)</span>
+    </button>
   </nav>
 
   <!-- OVERLAY / MODAL: TELA 2D DO MENU DO TOTEM (ABRE POR CIMA DO 3D SEM DISTORCER) -->
@@ -1382,18 +1393,30 @@
               </div>
             </div>
 
-            <!-- Seção 4: Opções de Raio-X / Lado Interno -->
+            <!-- Seção 4: Carcaça, Tampão Traseiro & Raio-X Interno -->
             <div class="popover-section">
-              <span class="sec-title">🔍 Modos do Lado Interno / Raio-X</span>
+              <span class="sec-title">🚪 Carcaça, Tampão Traseiro & Raio-X</span>
+              <div style="margin-bottom:6px;">
+                <button type="button" id="btn-toggle-rear-door" class="btn-dock" style="width:100%; justify-content:center; font-weight:800;">🚪 Abrir Tampão Traseiro (105°)</button>
+              </div>
               <div class="popover-grid-3">
-                <button class="btn-dock" data-hw-view="xray" title="Carcaça Translúcida / Visão Raio-X">🔍 Raio-X</button>
-                <button class="btn-dock" data-hw-view="door" title="Porta Traseira Aberta 100°">🚪 Porta Aberta</button>
+                <button class="btn-dock" data-hw-view="xray" title="Carcaça Visível + Tampão Aberto + Raio-X">🔍 Raio-X + Tampão</button>
+                <button class="btn-dock" data-hw-view="door" title="Carcaça Sólida + Tampão Traseiro Aberto 105°">🚪 Tampão Aberto</button>
                 <button class="btn-dock" data-hw-view="exploded" title="Vista Explodida em Camadas">💥 Explodido</button>
               </div>
               <div class="popover-grid-3" style="margin-top:6px;">
                 <button class="btn-dock" id="btn-hw-glow-power">⚡ Fios Energia</button>
                 <button class="btn-dock" id="btn-hw-glow-data">🌐 Fios Dados</button>
-                <button class="btn-dock" id="btn-hw-hotspots">📍 Pontos (1-9)</button>
+                <button class="btn-dock" id="btn-hw-hotspots">📍 Pontos (1-10)</button>
+              </div>
+            </div>
+
+            <!-- Seção 4B: Opção de Computador (Touch c/ PC Acoplado All-in-One vs Mini-PC Separado) -->
+            <div class="popover-section">
+              <span class="sec-title">💻 Computador: Acoplado na Tela vs Separado</span>
+              <div class="popover-grid-2">
+                <button type="button" class="btn-dock active" data-pc-arch="allinone" title="Tela Touch 43&quot; já com Computador Acoplado atrás da própria tela (All-in-One / Slot OPS)">🖥️ Touch c/ PC Acoplado</button>
+                <button type="button" class="btn-dock" data-pc-arch="minipc" title="Monitor Touch + Mini-PC Industrial Separado no Rack">💻 Mini-PC Separado</button>
               </div>
             </div>
 
@@ -1433,7 +1456,7 @@
       <div class="modal-head">
         <div class="hw-head-badge">
           <span class="badge-tag">3. PARTE TÉCNICA & ENGENHARIA DO PRODUTO</span>
-          <h3 id="hw-modal-title">Memorial Técnico, Arquitetura, Fiação e Especificações do Totem</h3>
+          <h3 id="hw-modal-title">Memorial Técnico, Carcaça, Tampão Traseiro e Opções de Computador</h3>
           <p>Dossiê Técnico Construtivo do Totem Inteligente de Jaú • Totemize (Senac PI / Prefeitura de Jaú)</p>
         </div>
         <button id="btn-close-hw-schematics" class="btn-close-modal" aria-label="Fechar Parte Técnica">✕</button>
@@ -1452,23 +1475,50 @@
         <!-- ABA 0 (PADRÃO): TEXTO TÉCNICO GERAL & ESPECIFICAÇÕES DO PROJETO -->
         <div id="hw-tab-content-overview" class="hw-tab-pane active">
           <div class="hw-pane-intro">
-            <h4>📄 Memorial Descritivo & Especificação Técnica do Totem Inteligente de Jaú</h4>
-            <p>Documento técnico consolidado detalhando o funcionamento estrutural, elétrico, eletrônico, energético (ESG) e de acessibilidade do terminal urbano autônomo.</p>
+            <h4>📄 Memorial Descritivo: Carcaça, Tampão Traseiro de Acesso e Computador Acoplado vs Separado</h4>
+            <p>Documento técnico consolidado detalhando como a carcaça metálica e a porta traseira ("tampão") são construídas para manutenção e comparando a compra de uma <strong>Tela Touch já com Computador Acoplado (All-in-One / Slot OPS)</strong> versus <strong>Mini-PC Separado</strong>.</p>
           </div>
 
           <div class="tech-text-dossier">
             <div class="tech-text-section">
-              <h5>1. Visão Geral da Arquitetura Física e Dimensional</h5>
+              <h5>1. Como é a Carcaça Oca e o Tampão Traseiro de Acesso ("Porta de Manutenção")</h5>
               <p>
-                O <strong>Totem Inteligente de Jaú (Projeto Totemize)</strong> foi projetado como um terminal de autoatendimento urbano de alta durabilidade para operação externa ininterrupta (<strong>24 horas por dia, 7 dias por semana</strong>). Sua estrutura possui <strong>2,20 metros de altura total</strong>, <strong>0,85 metro de largura frontal</strong> e <strong>0,35 metro de profundidade</strong> (perfil slim que preserva a circulação de pedestres em calçadas e praças públicas), ancorada sobre uma base de fixação flangeada de <strong>1,05m × 0,55m</strong> chumbada ao solo com parabolts de aço inox M12.
+                A <strong>Carcaça do Totem</strong> é construída como um gabinete monobloco <strong>oco por dentro</strong> em <strong>chapa de aço carbono galvanizado dobrado de 2,5 mm de espessura</strong> (dimensões externas de <strong>2,20m de altura × 0,70m de largura × 0,35m de profundidade</strong>), com paredes laterais dobradas de 4,2 cm de aba estrutural, chapéu superior curvo na frente e pedestal inferior chumbado ao solo.
               </p>
               <p>
-                O gabinete externo é fabricado em <strong>chapa de aço carbono SAE 1020 eletrogalvanizada de 2,0 mm de espessura</strong> com pintura eletrostática a pó em poliéster microtexturizado de alta resistência a raios UV e intempéries. O conjunto atende integralmente aos graus de proteção <strong>IP65</strong> (totalmente vedado contra poeira e jatos de água/chuva) e <strong>IK10</strong> (proteção mecânica antivandalismo contra impactos externos de até 20 Joules).
+                Nas costas da máquina fica o <strong>Tampão Traseiro de Acesso Técnico (Porta Traseira de 0,60m × 1,80m)</strong> por onde a equipe abre o totem para acessar os componentes internos:
+              </p>
+              <ul style="margin: 8px 0 8px 20px; line-height: 1.6;">
+                <li><strong>3 Dobradiças Externas Reforçadas (Lado Esquerdo):</strong> Permitem abrir o tampão traseiro em até <strong>105°</strong> com total estabilidade sem empenar a folha metálica.</li>
+                <li><strong>Puxador Vertical + 2 Fechaduras Tubulares Antivandalismo (Lado Direito):</strong> Duas fechaduras de alta segurança acionam linguetas internas giratórias de aço que travam o tampão por trás da aba da carcaça.</li>
+                <li><strong>Quadro de Vedação em Borracha EPDM (IP65) + Pingadeira:</strong> Todo o vão traseiro da carcaça possui perfil esponjoso de borracha automotiva EPDM que é comprimido pelo tampão quando fechado, impedindo 100% a entrada de água de chuva e poeira.</li>
+                <li><strong>3 Costelas Ômega Internas, Pistão a Gás e Porta-Documentos:</strong> Na face interna do tampão há 3 perfis metálicos horizontais de reforço (contra torção), bolso em chapa para guardar o esquema elétrico impresso e amortecedor a gás que segura o tampão aberto contra o vento durante a manutenção.</li>
+              </ul>
+            </div>
+
+            <div class="tech-text-section" style="border-left: 4px solid #0284c7; padding-left: 14px; background: rgba(2, 132, 199, 0.06); border-radius: 8px; padding: 14px;">
+              <h5>2. É necessário ter um Computador Separado ou podemos comprar a Tela Touch já com Computador Acoplado?</h5>
+              <p>
+                <strong>NÃO é obrigatório ter um computador separado no rack!</strong> Existe sim — e é inclusive a solução mais moderna usada hoje em totens profissionais — a opção de comprarmos um <strong>Monitor Touch Industrial All-in-One (Tela Touch já com o Computador Acoplado)</strong>. Existem duas formas comerciais de adquirir essa tela com computador acoplado:
+              </p>
+              <ul style="margin: 8px 0 10px 20px; line-height: 1.65;">
+                <li>
+                  <strong>Opção Recomendada — Tela Touch 43" com Slot OPS Acoplado (Open Pluggable Specification):</strong> A tela touch industrial já vem de fábrica com um encaixe traseiro padrão Intel OPS (conector interno de 80 pinos). O computador é um módulo compacto que desliza como uma gaveta diretamente atrás da própria tela e é preso por 2 parafusos manuais. <strong>Vantagens:</strong> Elimina 100% os cabos HDMI, USB Touch e fonte separada (tudo passa pelo conector interno da própria tela), não ocupa espaço no rack da carcaça, evita mau contato por vibração e, se um dia precisar trocar ou atualizar o PC, basta soltar 2 parafusos e puxar a gaveta OPS sem precisar desmontar a tela!
+                </li>
+                <li>
+                  <strong>Opção All-in-One Integrado (Placa-Mãe Embutida na Tela — Android Industrial RK3588 ou Windows/Linux):</strong> O próprio chassi fechado do monitor Touch 43" já traz a placa de computador embutida internamente. Você só liga <strong>1 único cabo de energia</strong> na tela e ela já funciona como computador completo + touchscreen. É a opção mais simples de montar e mais barata na compra inicial.
+                </li>
+                <li>
+                  <strong>Opção Modular Tradicional — Monitor Touch + Mini-PC Separado no Rack:</strong> Compram-se duas peças independentes (apenas o monitor touch + um Mini-PC fanless tipo Intel NUC/Industrial preso no trilho interno) ligadas por cabo HDMI e cabo USB. Só é necessária caso vocês já possuam o Mini-PC separado ou queiram comprar monitor e PC de fornecedores totalmente distintos.
+                </li>
+              </ul>
+              <p style="margin-top: 6px;">
+                💡 <em>Dica interativa: No menu da bolinha <strong>360°</strong> (canto inferior direito), você pode alternar em tempo real entre <strong>"🖥️ Touch c/ PC Acoplado"</strong> e <strong>"💻 Mini-PC Separado"</strong> para ver a diferença dentro da carcaça 3D!</em>
               </p>
             </div>
 
             <div class="tech-text-section">
-              <h5>2. Interface Visual, Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
+              <h5>3. Interface Visual, Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
               <p>
                 Na face frontal, o equipamento integra um <strong>Display LCD Industrial de 43 polegadas em orientação vertical (9:16)</strong> com resolução Full HD (1920 × 1080px) e <strong>backlight de ultra alto brilho de 1.500 nits</strong>, garantindo leitura nítida mesmo sob incidência direta de luz solar ao meio-dia. O painel é protegido por um vidro temperado laminado de <strong>8 mm</strong> com película antirreflexo e camada sensível ao toque <strong>PCAP (Capacitiva Projetada) de 10 toques simultâneos</strong>.
               </p>
@@ -1478,22 +1528,12 @@
             </div>
 
             <div class="tech-text-section">
-              <h5>3. Processamento Embarcado, Sensores e Conectividade</h5>
+              <h5>4. Matriz Energética Híbrida (Rede 220V + Energia Solar Fotovoltaica 35Wp ESG)</h5>
               <p>
-                O núcleo de processamento é composto por um <strong>Mini-PC Industrial Fanless (IPC)</strong> em chassi de alumínio aletado com dissipação térmica passiva (sem ventoinhas no processador para evitar acúmulo de poeira), equipado com processador <strong>Intel Core i5 / Rockchip RK3588 de baixo consumo (15W TDP)</strong>, <strong>16 GB de RAM DDR4 Industrial</strong> e armazenamento <strong>SSD NVMe de 512 GB</strong>.
+                No topo traseiro plano do totem (atrás da quina frontal arredondada, invisível para quem olha de frente) está embutido um <strong>Painel Solar Fotovoltaico Monocristalino de 35Wp (64 × 21 cm)</strong>. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que mantém carregado o banco de baterias estacionárias de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na zona fria da base inferior.
               </p>
               <p>
-                Na parte superior do painel frontal encontram-se o <strong>Sensor de Luminosidade Ambiente (LDR)</strong> e o <strong>Sensor de Presença Infravermelho/Radar Doppler</strong>: durante a madrugada (00h00 às 05h30), o totem reduz automaticamente o brilho da tela para 10% (consumo standby de apenas 15W) e desperta instantaneamente em 100% assim que um cidadão se aproxima a menos de 2,5 metros.
-              </p>
-            </div>
-
-            <div class="tech-text-section">
-              <h5>4. Matriz Energética Híbrida (Rede 220V + Energia Solar Fotovoltaica ESG)</h5>
-              <p>
-                No topo do totem está instalado um <strong>Painel Solar Fotovoltaico Monocristalino de 120Wp</strong> com inclinação de 14° voltada ao norte geográfico. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que carrega o banco de baterias estacionárias de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na base inferior.
-              </p>
-              <p>
-                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e telefones de emergência (SAMU 192, Bombeiros 193, Polícia 190 e Defesa Civil 199) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão, eliminando bobinas de papel, atolamentos mecânicos e resíduos urbanos.
+                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e o botão físico de socorro (SAMU 192, Bombeiros 193, GCM 153 e Polícia 190) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão.
               </p>
             </div>
           </div>
@@ -1879,12 +1919,558 @@
 
       <div class="modal-foot">
         <span class="foot-disclaimer">Totemize • Projeto Prefeitura de Jaú • Sistema Desenvolvido com Engenharia Nacional 100% Homologada</span>
-        <button id="btn-close-hw-schematics-foot" class="btn-primary-blue">Concluir Visualização</button>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button type="button" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('estrutura')" class="btn-primary-blue" style="background:#0284c7;">📐 Ver Estrutura & Caixa Desmontada</button>
+          <button id="btn-close-hw-schematics-foot" class="btn-primary-blue">Concluir Visualização</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261012_v4"></script>
-  <script src="app.js?v=20261012_v4"></script>
+  <!-- =================================================================== -->
+  <!-- MODAL DA 4ª BOLINHA (ESTRUTURA): CAIXA DESMONTADA, DOBRAS, FURAÇÃO  -->
+  <!-- E RAIO-X DA ESTRUTURA INTERNA + MOCKUP NO PAPEL                     -->
+  <!-- =================================================================== -->
+  <div id="modal-estrutura-blueprint" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="est-modal-title">
+    <div class="modal-card modal-card-hardware">
+      <div class="modal-head">
+        <div class="hw-head-badge">
+          <span class="badge-tag" style="background:rgba(2,132,199,0.25); color:#38bdf8; border:1px solid #38bdf8;">4. ARQUIVO: ESTRUTURA • PLANO DE CONSTRUÇÃO, CORTE, DOBRA, FURAÇÃO & INTERIOR</span>
+          <h3 id="est-modal-title">Caixa Desmontada (Mockup no Papel 1:10 / Chapa CNC 1:1) e Estrutura Interna</h3>
+          <p>Planta completa mostrando onde cortar, onde dobrar a 90°, onde curvar a quina frontal, onde furar e o que vai dentro da máquina</p>
+        </div>
+        <button id="btn-close-estrutura-modal" class="btn-close-modal" aria-label="Fechar Estrutura">✕</button>
+      </div>
+
+      <div class="modal-body modal-body-hardware">
+        <!-- ABAS INTERNAS DO MODAL DE ESTRUTURA -->
+        <div class="hw-modal-tabs">
+          <button class="btn-est-tab btn-hw-tab active" data-est-tab="est-unfolded">📦 1. Caixa Desmontada (Onde Dobrar e Furar)</button>
+          <button class="btn-est-tab btn-hw-tab" data-est-tab="est-internal">⚙️ 2. Estrutura Interna ("O que vai lá dentro")</button>
+          <button class="btn-est-tab btn-hw-tab" data-est-tab="est-table">📏 3. Tabela de Furação & Montagem no Papel</button>
+        </div>
+
+        <!-- ===============================================================
+             ABA 1: PRANCHA 01/03 — A CAIXA DESMONTADA (CORTE, DOBRA E FURAÇÃO)
+             =============================================================== -->
+        <div id="est-tab-content-est-unfolded" class="est-tab-pane hw-tab-pane active">
+          <div class="hw-pane-intro">
+            <h4>📦 Prancha 01/03 — A Caixa Desmontada (Planificação de Corte, Dobra e Furação)</h4>
+            <p>Totem <strong>100% aberto/planificado</strong> na escala proporcional <strong>1:10</strong> (1 cm no papel = 10 cm reais, ou seja, <strong>22,0 cm × 7,0 cm × 3,5 cm</strong> na folha impressa):</p>
+          </div>
+
+          <!-- Legenda Rápida de Linhas -->
+          <div style="display:flex; flex-wrap:wrap; gap:12px; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#f8fafc;">
+            <span><strong>─── Linha Preta Contínua:</strong> Corte Externo (Tesoura / Laser CNC)</span>
+            <span style="color:#38bdf8;"><strong>- - - Tracejada Azul:</strong> Dobra Seca a 90° (Vinco)</span>
+            <span style="color:#fbbf24;"><strong>· · · Pontilhada Laranja:</strong> Curva Suave da Quina Frontal (11cm)</span>
+            <span style="color:#f87171;"><strong>⊕ Vermelho:</strong> Pontos Exatos de Furação e Recorte Vazado</span>
+            <span style="color:#cbd5e1;"><strong>/// Hachurado:</strong> Abas de Colagem (Papel) ou Solda MIG (Metal)</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.35fr 1fr; gap:16px; align-items:start;">
+            <!-- DESENHO SVG DA CAIXA DESMONTADA -->
+            <div style="background:#ffffff; border:2px solid #38bdf8; border-radius:10px; padding:10px;">
+              <svg viewBox="0 0 820 920" style="width:100%; height:auto; max-height:660px;" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="estGlueHatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="0" y2="8" stroke="#64748b" stroke-width="2" />
+                  </pattern>
+                  <pattern id="estCutoutHatch" width="8" height="8" patternTransform="rotate(-45 0 0)" patternUnits="userSpaceOnUse">
+                    <rect width="8" height="8" fill="rgba(220, 38, 38, 0.12)" />
+                    <line x1="0" y1="0" x2="0" y2="8" stroke="#dc2626" stroke-width="1.5" />
+                  </pattern>
+                  <pattern id="estSolarGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+                    <rect width="16" height="16" fill="#1e3a8a" stroke="#38bdf8" stroke-width="0.8"/>
+                  </pattern>
+                </defs>
+
+                <text x="410" y="24" text-anchor="middle" font-family=" monospace" font-size="12" font-weight="700" fill="#0f172a">
+                  VISTA PLANIFICADA (CAIXA ABERTA / DESMONTADA) — ESCALA PROPORCIONAL 1:10
+                </text>
+
+                <!-- Abas de Colagem / Solda Numeradas -->
+                <polygon points="122,190 134,166 198,166 210,190" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <text x="166" y="182" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ABA 1 (CURVA)</text>
+                <polygon points="385,190 397,166 461,166 473,190" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <text x="429" y="182" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ABA 2 (CURVA)</text>
+                <polygon points="210,102 186,114 186,178 210,190" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <polygon points="385,102 409,114 409,178 385,190" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <polygon points="210,102 225,80 370,80 385,102" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <text x="297" y="95" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ABA 5 (FECHO TOPO TRASEIRO)</text>
+                <polygon points="648,190 676,210 676,720 648,740" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <text x="662" y="465" text-anchor="middle" transform="rotate(90 662,465)" font-size="10" font-weight="700" fill="#334155">ABA 6 — COLAGEM / SOLDA VERTICAL DE FECHAMENTO DA CAIXA</text>
+                <polygon points="122,740 134,764 198,764 210,740" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <polygon points="385,740 397,764 461,764 473,740" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <polygon points="210,828 225,850 370,850 385,828" fill="url(#estGlueHatch)" stroke="#475569" stroke-width="1.5"/>
+                <text x="297" y="843" text-anchor="middle" font-size="9" font-weight="700" fill="#334155">ABA 7 (FECHO DA BASE)</text>
+
+                <!-- 1. Topo Plano Solar + Quina Arredondada -->
+                <rect x="210" y="102" width="175" height="60" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="210" y="162" width="175" height="28" fill="#fef3c7" stroke="#0f172a" stroke-width="2"/>
+                <line x1="210" y1="162" x2="385" y2="162" stroke="#d97706" stroke-width="2.5" stroke-dasharray="3,3"/>
+                <line x1="210" y1="171" x2="385" y2="171" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2,4"/>
+                <line x1="210" y1="180" x2="385" y2="180" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2,4"/>
+                <text x="297" y="179" text-anchor="middle" font-size="8.5" font-weight="800" fill="#92400e">QUINA CURVA ARREDONDADA (11cm)</text>
+
+                <rect x="218" y="108" width="159" height="46" fill="url(#estSolarGrid)" stroke="#dc2626" stroke-width="2"/>
+                <rect x="228" y="117" width="139" height="28" fill="rgba(15, 23, 42, 0.82)" rx="3"/>
+                <text x="297" y="129" text-anchor="middle" font-size="8.5" font-weight="700" fill="#38bdf8">☀️ BERÇO PAINEL SOLAR 35Wp</text>
+                <text x="297" y="140" text-anchor="middle" font-size="7.5" fill="#f8fafc">Recorte 64x21cm + Furo Cabo Ø16mm</text>
+                <circle cx="362" cy="131" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="1.2"/>
+                <circle cx="355" cy="113" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="1"/>
+
+                <!-- 2. Lateral Esquerda -->
+                <rect x="122" y="190" width="88" height="550" fill="#eef2f6" stroke="#0f172a" stroke-width="2.5"/>
+                <path d="M 182,190 Q 210,190 210,230" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="3,3"/>
+                <rect x="160" y="240" width="12" height="450" fill="#cbd5e1" stroke="#64748b" stroke-width="1"/>
+                <text x="166" y="465" text-anchor="middle" transform="rotate(-90 166,465)" font-size="11" font-weight="800" fill="#334155">LATERAL ESQUERDA (0,35m x 2,20m) — DOBRA 90°</text>
+
+                <!-- 3. Face Frontal com Todas as Furações -->
+                <rect x="210" y="190" width="175" height="550" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="225" y="236" width="145" height="14" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
+                <circle cx="297" cy="243" r="5" fill="#dc2626"/>
+                <rect x="312" y="239" width="10" height="8" fill="#dc2626"/>
+                <text x="297" y="232" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">[F1] FURO CÂMERA Ø22mm + PIR</text>
+
+                <rect x="225" y="256" width="145" height="52" fill="#e2e8f0" stroke="#1351b4" stroke-width="1.8"/>
+                <circle cx="231" cy="262" r="2.5" fill="#dc2626"/><circle cx="364" cy="262" r="2.5" fill="#dc2626"/>
+                <circle cx="231" cy="302" r="2.5" fill="#dc2626"/><circle cx="364" cy="302" r="2.5" fill="#dc2626"/>
+                <text x="297" y="280" text-anchor="middle" font-size="11" font-weight="800" fill="#0c326f">PLACA JAÚ TOPO</text>
+                <text x="297" y="294" text-anchor="middle" font-size="7.5" fill="#dc2626">[F2] 4 Furos Ø5mm (58x22cm)</text>
+
+                <!-- F3: Recorte da Tela 43" -->
+                <rect x="228" y="322" width="139" height="240" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="228" y1="322" x2="367" y2="562" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="367" y1="322" x2="228" y2="562" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
+                <rect x="240" y="408" width="115" height="68" fill="#ffffff" stroke="#dc2626" stroke-width="1.5" rx="4"/>
+                <text x="297" y="428" text-anchor="middle" font-size="10" font-weight="800" fill="#dc2626">[F3] RECORTE VAZADO</text>
+                <text x="297" y="442" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f172a">TELA TOUCH 43" VERTICAL</text>
+                <text x="297" y="456" text-anchor="middle" font-size="8" fill="#475569">Real: 55,0 x 96,0 cm</text>
+                <text x="297" y="468" text-anchor="middle" font-size="8" font-weight="700" fill="#0284c7">Papel (1:10): 5,5 x 9,6 cm</text>
+
+                <!-- F4 & F5: Som, USB e Botão SOS -->
+                <rect x="225" y="576" width="88" height="46" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+                <g fill="#dc2626">
+                  <circle cx="235" cy="592" r="1.6"/><circle cx="242" cy="592" r="1.6"/><circle cx="249" cy="592" r="1.6"/><circle cx="256" cy="592" r="1.6"/><circle cx="263" cy="592" r="1.6"/>
+                  <circle cx="235" cy="599" r="1.6"/><circle cx="242" cy="599" r="1.6"/><circle cx="249" cy="599" r="1.6"/><circle cx="256" cy="599" r="1.6"/><circle cx="263" cy="599" r="1.6"/>
+                  <circle cx="235" cy="606" r="1.6"/><circle cx="242" cy="606" r="1.6"/><circle cx="249" cy="606" r="1.6"/><circle cx="256" cy="606" r="1.6"/><circle cx="263" cy="606" r="1.6"/>
+                </g>
+                <rect x="278" y="590" width="10" height="18" fill="#dc2626"/>
+                <rect x="294" y="590" width="10" height="18" fill="#dc2626"/>
+                <text x="269" y="585" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">[F4] SOM + 2x USB</text>
+
+                <rect x="319" y="576" width="51" height="46" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+                <circle cx="344" cy="601" r="10" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
+                <circle cx="344" cy="601" r="3" fill="#dc2626"/>
+                <text x="344" y="586" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">[F5] SOS Ø38mm</text>
+
+                <!-- F6: Placa Jaú Base -->
+                <rect x="225" y="632" width="145" height="48" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+                <circle cx="231" cy="638" r="2.5" fill="#dc2626"/><circle cx="364" cy="638" r="2.5" fill="#dc2626"/>
+                <circle cx="231" cy="674" r="2.5" fill="#dc2626"/><circle cx="364" cy="674" r="2.5" fill="#dc2626"/>
+                <text x="297" y="655" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">PLACA PREFEITURA DE JAÚ</text>
+                <text x="297" y="667" text-anchor="middle" font-size="7" fill="#dc2626">[F6] 4 Rebites Ø5mm</text>
+                <text x="297" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">FACE FRONTAL (0,70m x 2,20m)</text>
+
+                <!-- 4. Lateral Direita -->
+                <rect x="385" y="190" width="88" height="550" fill="#eef2f6" stroke="#0f172a" stroke-width="2.5"/>
+                <path d="M 385,230 Q 385,190 413,190" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="3,3"/>
+                <rect x="423" y="240" width="12" height="450" fill="#cbd5e1" stroke="#64748b" stroke-width="1"/>
+                <text x="429" y="465" text-anchor="middle" transform="rotate(90 429,465)" font-size="11" font-weight="800" fill="#334155">LATERAL DIREITA (0,35m x 2,20m) — DOBRA 90°</text>
+
+                <!-- 5. Costa / Ferro Traseiro -->
+                <rect x="473" y="190" width="175" height="550" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="485" y="220" width="151" height="455" fill="#f1f5f9" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,3"/>
+                <g fill="#dc2626">
+                  <rect x="505" y="236" width="110" height="4" rx="1"/><rect x="505" y="245" width="110" height="4" rx="1"/>
+                  <rect x="505" y="254" width="110" height="4" rx="1"/><rect x="505" y="263" width="110" height="4" rx="1"/>
+                  <rect x="505" y="272" width="110" height="4" rx="1"/>
+                </g>
+                <text x="560" y="232" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F7] RASGOS EXAUSTÃO AR QUENTE</text>
+                <circle cx="497" cy="365" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
+                <circle cx="497" cy="540" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
+                <text x="560" y="368" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F8] FECHADURA SUP. Ø19mm</text>
+                <text x="560" y="543" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F8] FECHADURA INF. Ø19mm</text>
+                <rect x="505" y="395" width="112" height="115" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+                <text x="561" y="438" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">PORTA TRASEIRA</text>
+                <text x="561" y="452" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">ACESSO TÉCNICO</text>
+                <text x="561" y="466" text-anchor="middle" font-size="7.2" fill="#475569">Recorte: 62 x 182 cm</text>
+                <g fill="#dc2626">
+                  <rect x="505" y="610" width="110" height="4" rx="1"/><rect x="505" y="619" width="110" height="4" rx="1"/>
+                  <rect x="505" y="628" width="110" height="4" rx="1"/><rect x="505" y="637" width="110" height="4" rx="1"/>
+                </g>
+                <text x="560" y="655" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F9] ENTRADA AR FRIO (BASE)</text>
+                <text x="560" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">COSTA / FERRO TRASEIRO (0,70m x 2,20m)</text>
+
+                <!-- 6. Base Flangeada -->
+                <rect x="210" y="740" width="175" height="88" fill="#cbd5e1" stroke="#0f172a" stroke-width="2.5"/>
+                <g fill="#dc2626" stroke="#ffffff" stroke-width="1.2">
+                  <circle cx="226" cy="754" r="5"/><circle cx="297" cy="754" r="5"/><circle cx="368" cy="754" r="5"/>
+                  <circle cx="226" cy="814" r="5"/><circle cx="297" cy="814" r="5"/><circle cx="368" cy="814" r="5"/>
+                </g>
+                <circle cx="297" cy="784" r="14" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.2"/>
+                <text x="297" y="787" text-anchor="middle" font-size="7.5" font-weight="800" fill="#dc2626">Ø50mm</text>
+                <text x="297" y="770" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">BASE CHUMBADA + [F10] 6 FUROS Ø16mm</text>
+
+                <!-- Linhas Azuis de Dobra a 90° -->
+                <line x1="210" y1="190" x2="210" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
+                <line x1="385" y1="190" x2="385" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
+                <line x1="473" y1="190" x2="473" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
+                <line x1="210" y1="190" x2="385" y2="190" stroke="#d97706" stroke-width="3" stroke-dasharray="4,4"/>
+                <line x1="210" y1="740" x2="385" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
+
+                <!-- Cotas -->
+                <line x1="82" y1="190" x2="82" y2="740" stroke="#0c326f" stroke-width="1.8"/>
+                <text x="68" y="465" text-anchor="middle" transform="rotate(-90 68,465)" font-size="10.5" font-weight="700" fill="#0c326f">ALTURA: 2,20m (No Papel: 22,0 cm)</text>
+                <text x="166" y="898" text-anchor="middle" font-size="9" font-weight="700" fill="#0c326f">0,35m (3,5cm)</text>
+                <text x="297" y="898" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0c326f">FRENTE: 0,70m (7,0cm)</text>
+                <text x="429" y="898" text-anchor="middle" font-size="9" font-weight="700" fill="#0c326f">0,35m (3,5cm)</text>
+                <text x="560" y="898" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0c326f">COSTA: 0,70m (7,0cm)</text>
+              </svg>
+            </div>
+
+            <!-- EXPLICAÇÃO DAS DOBRAS E FUROS AO LADO -->
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="bom-card">
+                <div class="bom-header">
+                  <span class="bom-num">D</span>
+                  <h5>Onde Dobrar e Curvar (Plano de Dobras)</h5>
+                </div>
+                <ul>
+                  <li><strong>Linha Contínua Preta (───):</strong> Onde recortar o contorno externo com tesoura/estilete (no papel) ou corte a laser CNC (na chapa de aço).</li>
+                  <li><strong>Linha Tracejada Azul (- - -):</strong> Onde vincar e <strong>dobrar a 90°</strong> para fechar as 4 faces do "quadradão" e a base.</li>
+                  <li><strong>Linha Pontilhada Laranja (· · ·):</strong> A faixa de <strong>11 cm (1,1 cm no papel)</strong> da <strong>quina superior frontal arredondada</strong>, indicando onde curvar suavemente antes da parte plana de <strong>24 cm (2,4 cm no papel)</strong> onde fica o painel solar.</li>
+                  <li><strong>Abas Numeradas (Aba 1 a Aba 7):</strong> Abas hachuradas para passar cola (na maquete de papel) ou solda MIG (na fabricação em metal).</li>
+                </ul>
+              </div>
+
+              <div class="bom-card">
+                <div class="bom-header">
+                  <span class="bom-num" style="background:#dc2626;">F</span>
+                  <h5>Onde Furar e Recortar (F1 a F11)</h5>
+                </div>
+                <ul>
+                  <li><strong>[F1] Topo Frontal (Y=198,5cm):</strong> Furo da lente da Câmera IP (Ø 22 mm) + recorte do Sensor PIR (24 × 16 mm).</li>
+                  <li><strong>[F2] e [F6] Placas de Jaú:</strong> 4 furos de rebite (Ø 5 mm) para fixar as Placas de Jaú (superior 58×22cm e inferior 46,4×14,5cm).</li>
+                  <li><strong>[F3] Tela Touch 43" Vertical:</strong> Grande recorte central vazado de <strong>55 × 96 cm reais</strong> (<strong>5,5 × 9,6 cm no papel</strong>).</li>
+                  <li><strong>[F4] Áudio e USB:</strong> 40 microfuros (Ø 4 mm) da grelha de som + 2 recortes retangulares (28 × 44 mm) das tomadas USB.</li>
+                  <li><strong>[F5] Botão Físico SOS:</strong> Furo circular (Ø 38 mm) do Botão de Socorro no canto direito inferior.</li>
+                  <li><strong>[F7], [F8] e [F9] Costa de Ferro:</strong> Recorte da porta traseira (62 × 182 cm), 2 furos (Ø 19 mm) das fechaduras tubulares e rasgos das venezianas de ventilação superior e inferior.</li>
+                  <li><strong>[F10] e [F11] Base:</strong> 6 furos (Ø 16 mm) dos chumbadores Parabolt no chão + 1 furo central (Ø 50 mm) para entrada subterrânea do cabo 220V e fibra óptica.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 2: PRANCHA 02/03 — RAIO-X DA ESTRUTURA INTERNA ("O QUE VAI LÁ DENTRO")
+             =============================================================== -->
+        <div id="est-tab-content-est-internal" class="est-tab-pane hw-tab-pane">
+          <div class="hw-pane-intro">
+            <h4>⚙️ Prancha 02/03 — Raio-X da Estrutura Interna ("O que vai lá dentro")</h4>
+            <p>Desenhos técnicos em corte (<strong>Corte A-A Frontal</strong> e <strong>Corte B-B Lateral</strong>) mostrando o esqueleto interno em Metalon 40×40mm e onde cada peça é fixada e furada por dentro:</p>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.35fr 1fr; gap:16px; align-items:start;">
+            <!-- DESENHO SVG DO RAIO-X INTERNO -->
+            <div style="background:#ffffff; border:2px solid #38bdf8; border-radius:10px; padding:10px;">
+              <svg viewBox="0 0 820 860" style="width:100%; height:auto; max-height:640px;" xmlns="http://www.w3.org/2000/svg">
+                <text x="235" y="24" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">CORTE A-A: RAIO-X FRONTAL INTERNO</text>
+                <text x="635" y="24" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">CORTE B-B: PERFIL LATERAL INTERNO</text>
+
+                <!-- Esquerda: Vista Frontal Raio-X -->
+                <rect x="75" y="50" width="320" height="720" fill="#f1f5f9" stroke="#0f172a" stroke-width="3" rx="6"/>
+                <rect x="87" y="62" width="14" height="696" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
+                <rect x="369" y="62" width="14" height="696" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
+                <rect x="101" y="62" width="268" height="12" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
+                <rect x="101" y="165" width="268" height="12" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
+                <rect x="101" y="535" width="268" height="12" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
+                <rect x="101" y="625" width="268" height="14" fill="#d97706" stroke="#78350f" stroke-width="1.5"/>
+
+                <!-- Zona 1: Topo -->
+                <rect x="105" y="78" width="260" height="82" fill="#dbeafe" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,2"/>
+                <circle cx="165" cy="118" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="165" cy="118" r="8" fill="#38bdf8"/>
+                <circle cx="305" cy="118" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="305" cy="118" r="8" fill="#38bdf8"/>
+                <rect x="210" y="92" width="50" height="36" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
+                <circle cx="235" cy="110" r="7" fill="#38bdf8"/>
+                <text x="235" y="152" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[1] 2x COOLERS EXAUSTORES + CÂMERA IP + PIR</text>
+
+                <!-- Zona 2: Corpo Central -->
+                <rect x="115" y="192" width="240" height="328" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
+                <rect x="145" y="230" width="180" height="250" fill="none" stroke="#475569" stroke-width="4" stroke-dasharray="10,4"/>
+                <circle cx="165" cy="255" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="305" cy="255" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="165" cy="455" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="305" cy="455" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="235" y="214" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">[2] DISPLAY INDUSTRIAL 43" FULL HD (1500 NITS)</text>
+                <text x="235" y="227" text-anchor="middle" font-size="8" font-weight="700" fill="#dc2626">Fixado em Chassi VESA Interno (4 Parafusos M8)</text>
+
+                <rect x="155" y="280" width="95" height="75" fill="#0f172a" stroke="#10b981" stroke-width="2" rx="4"/>
+                <text x="202" y="308" text-anchor="middle" font-size="8.5" font-weight="800" fill="#10b981">[3] MINI-PC FANLESS</text>
+                <text x="202" y="322" text-anchor="middle" font-size="7.2" fill="#e2e8f0">Core i5 • SSD 256GB</text>
+
+                <rect x="262" y="280" width="65" height="75" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8" rx="4"/>
+                <text x="294" y="310" text-anchor="middle" font-size="8" font-weight="800" fill="#38bdf8">[4] MODEM 5G</text>
+                <text x="294" y="324" text-anchor="middle" font-size="7" fill="#f8fafc">Wi-Fi / GPS</text>
+
+                <rect x="115" y="553" width="150" height="62" fill="#f8fafc" stroke="#475569" stroke-width="1.5" rx="4"/>
+                <text x="190" y="575" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[5] ÁUDIO 10W & CONVERSOR USB 5V</text>
+                <text x="190" y="592" text-anchor="middle" font-size="7.2" fill="#334155">2x Alto-Falantes IP65 + 2 Portas USB</text>
+
+                <rect x="275" y="553" width="82" height="62" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8" rx="4"/>
+                <text x="316" y="575" text-anchor="middle" font-size="8.5" font-weight="800" fill="#dc2626">[6] CHAVE SOS</text>
+                <text x="316" y="590" text-anchor="middle" font-size="7" fill="#7f1d1d">Contato Seco</text>
+
+                <text x="235" y="635" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff">═══ CHAPA DEFLETORA / BARREIRA TÉRMICA ═══</text>
+
+                <!-- Zona 3: Base Fria -->
+                <rect x="108" y="646" width="122" height="104" fill="#f0fdf4" stroke="#15803d" stroke-width="1.8" rx="4"/>
+                <text x="169" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[7] ELÉTRICA & MPPT</text>
+                <text x="169" y="682" text-anchor="middle" font-size="7.2" fill="#1e293b">• Controlador MPPT 10A</text>
+                <text x="169" y="696" text-anchor="middle" font-size="7.2" fill="#1e293b">• Fonte 220V ➔ 12V/24V</text>
+                <text x="169" y="710" text-anchor="middle" font-size="7.2" fill="#1e293b">• Disjuntor + DPS + DR</text>
+
+                <rect x="238" y="646" width="124" height="104" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2" rx="4"/>
+                <text x="300" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1e3a8a">[8] BATERIA LiFePO4</text>
+                <text x="300" y="682" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0f172a">12,8V 30Ah (Zona Fria)</text>
+                <text x="300" y="698" text-anchor="middle" font-size="7" fill="#15803d">15cm do solo • Isolada</text>
+
+                <rect x="55" y="770" width="360" height="22" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
+                <rect x="75" y="758" width="8" height="45" fill="#dc2626"/>
+                <rect x="231" y="758" width="8" height="45" fill="#dc2626"/>
+                <rect x="387" y="758" width="8" height="45" fill="#dc2626"/>
+                <text x="235" y="818" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">[9] FLANGE DE BASE + 6 CHUMBADORES PARABOLT Ø16mm + ELETRODUTO Ø50mm</text>
+
+                <!-- Direita: Corte Lateral B-B -->
+                <path d="M 540,770 L 720,770 L 720,105 Q 720,50 664,50 L 540,50 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>
+                <rect x="548" y="54" width="112" height="10" fill="#1d4ed8" stroke="#38bdf8" stroke-width="1.5"/>
+                <rect x="548" y="66" width="112" height="6" fill="#f59e0b"/>
+                <text x="604" y="42" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">☀️ PAINEL SOLAR (PARTE PLANA)</text>
+                <text x="726" y="76" text-anchor="start" font-size="8" font-weight="800" fill="#d97706">⬅ QUINA CURVA</text>
+                <g stroke="#dc2626" stroke-width="2.5">
+                  <line x1="534" y1="95" x2="548" y2="102"/><line x1="534" y1="110" x2="548" y2="117"/><line x1="534" y1="125" x2="548" y2="132"/>
+                </g>
+                <text x="526" y="115" text-anchor="end" font-size="8" font-weight="700" fill="#dc2626">SAÍDA AR QUENTE 💨</text>
+                <rect x="712" y="195" width="8" height="320" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+                <rect x="682" y="205" width="28" height="300" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+                <rect x="615" y="285" width="42" height="90" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+                <path d="M 580,690 L 580,120" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6,4"/>
+                <polygon points="580,112 574,124 586,124" fill="#0284c7"/>
+                <text x="594" y="430" text-anchor="middle" transform="rotate(-90 594,430)" font-size="8.5" font-weight="800" fill="#0284c7">FLUXO DE VENTILAÇÃO INTERNA (EFEITO CHAMINÉ)</text>
+                <rect x="543" y="625" width="174" height="10" fill="#d97706"/>
+                <rect x="610" y="655" width="85" height="95" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
+                <text x="652" y="700" text-anchor="middle" font-size="8" font-weight="800" fill="#1e3a8a">BATERIA</text>
+                <text x="652" y="714" text-anchor="middle" font-size="7.2" fill="#0f172a">ZONA FRIA</text>
+                <g stroke="#0284c7" stroke-width="2.5">
+                  <line x1="534" y1="675" x2="548" y2="668"/><line x1="534" y1="690" x2="548" y2="683"/><line x1="534" y1="705" x2="548" y2="698"/>
+                </g>
+                <text x="526" y="692" text-anchor="end" font-size="8" font-weight="700" fill="#0284c7">ENTRADA AR FRIO ❄️</text>
+                <rect x="520" y="770" width="220" height="22" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
+              </svg>
+            </div>
+
+            <!-- EXPLICAÇÃO DAS 3 ZONAS INTERNAS E FURAÇÃO INTERNA -->
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="bom-card">
+                <div class="bom-header">
+                  <span class="bom-num">1</span>
+                  <h5>Topo (1,95m a 2,20m) — Captação & Exaustão</h5>
+                </div>
+                <ul>
+                  <li><strong>Placa Solar 35Wp (64×21cm):</strong> Embutida na parte plana do topo para ficar invisível a quem olha de frente.</li>
+                  <li><strong>Manta Térmica Isolante + 2 Coolers 120mm:</strong> Isola o calor do teto e sopra o ar quente para fora pelas venezianas superiores traseiras sempre que passar de 38°C.</li>
+                  <li><strong>Câmera IP + Sensor PIR + Antena 5G:</strong> Alojados no barramento superior frontal.</li>
+                </ul>
+              </div>
+
+              <div class="bom-card">
+                <div class="bom-header">
+                  <span class="bom-num">2</span>
+                  <h5>Corpo Central (0,65m a 1,75m) — Tela & Computação</h5>
+                </div>
+                <ul>
+                  <li><strong>Esqueleto em Metalon 40×40mm:</strong> Estrutura tubular interna soldada com <strong>4 furos M8 padrão VESA (400×400mm)</strong> que seguram o Monitor Industrial 43" atrás do vidro temperado 8mm (IK10).</li>
+                  <li><strong>Mini-PC Fanless + Modem 5G/Wi-Fi:</strong> Fixados na bandeja metálica central com 6 furos roscados M5.</li>
+                  <li><strong>Áudio 10W + Conversor USB 5V + Contato SOS:</strong> Alojados logo abaixo do monitor.</li>
+                </ul>
+              </div>
+
+              <div class="bom-card">
+                <div class="bom-header">
+                  <span class="bom-num">3</span>
+                  <h5>Base Fria (0,00m a 0,60m) — Energia & Bateria</h5>
+                </div>
+                <ul>
+                  <li><strong>Chapa Defletora Térmica (c/ 2 furos passa-cabo Ø 32mm):</strong> Separa o calor do monitor da base inferior.</li>
+                  <li><strong>Quadro Elétrico em Trilho DIN:</strong> Controlador Solar MPPT 10A, Fonte Híbrida 220V/12V, Disjuntor Bipolar, DPS anti-raios e DR.</li>
+                  <li><strong>Bateria LiFePO4 (12,8V 30Ah):</strong> Posicionada a 15 cm do solo (zona mais fresca), recebendo ar frio pelas venezianas inferiores.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 3: PRANCHA 03/03 — TABELA DE FURAÇÃO + MONTAGEM DO MOCKUP NO PAPEL
+             =============================================================== -->
+        <div id="est-tab-content-est-table" class="est-tab-pane hw-tab-pane">
+          <div class="hw-pane-intro">
+            <h4>📏 Prancha 03/03 — Tabela de Coordenadas de Furação e Guia de Montagem do Mockup no Papel</h4>
+            <p>Medidas exatas na escala real (<strong>1:1 em Metal</strong>) e na escala reduzida (<strong>1:10 para Maquete em Papel</strong>):</p>
+          </div>
+
+          <div class="table-responsive" style="margin-bottom:16px;">
+            <table class="hw-wiring-table">
+              <thead>
+                <tr>
+                  <th>Cód.</th>
+                  <th>Local / Face</th>
+                  <th>Componente / Função</th>
+                  <th>Formato / Tipo</th>
+                  <th>Medida Real (1:1 Metal)</th>
+                  <th>Medida no Papel (1:10)</th>
+                  <th>Altura do Centro (Y)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong style="color:#f87171;">F1</strong></td>
+                  <td>Frente (Topo)</td>
+                  <td>Câmera IP + Sensor PIR de Presença</td>
+                  <td>1 Furo Redondo + 1 Retângulo</td>
+                  <td>Ø 22 mm + 24×16 mm</td>
+                  <td>Ø 2,2 mm + 2,4×1,6 mm</td>
+                  <td>Y = 198,5 cm (19,8 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F2</strong></td>
+                  <td>Frente (Topo)</td>
+                  <td>Fixação da Placa Superior de Jaú</td>
+                  <td>4 Furos de Rebite nos Cantos</td>
+                  <td>4× Ø 5 mm (Placa 58×22cm)</td>
+                  <td>4× Ø 0,5 mm (5,8×2,2cm)</td>
+                  <td>Y = 184,0 cm (18,4 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F3</strong></td>
+                  <td>Frente (Centro)</td>
+                  <td>Janela da Tela Touchscreen 43" Vertical</td>
+                  <td>Recorte Retangular Vazado</td>
+                  <td>550 × 960 mm (55×96 cm)</td>
+                  <td>5,5 × 9,6 cm</td>
+                  <td>Y = 119,0 cm (11,9 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F4</strong></td>
+                  <td>Frente (Inf. Esq.)</td>
+                  <td>Grelha de Som 10W + 2 Tomadas USB</td>
+                  <td>40 Microfuros + 2 Retângulos</td>
+                  <td>40× Ø 4mm + 2× (28×44mm)</td>
+                  <td>Furos agulha + 2× (3×4mm)</td>
+                  <td>Y = 48,0 cm (4,8 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F5</strong></td>
+                  <td>Frente (Inf. Dir.)</td>
+                  <td>Botão Físico de Socorro (SOS 192/153)</td>
+                  <td>Furo Circular Passante</td>
+                  <td>Ø 38 mm (Flange Ø 52mm)</td>
+                  <td>Ø 3,8 mm</td>
+                  <td>Y = 48,0 cm (4,8 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F6</strong></td>
+                  <td>Frente (Base)</td>
+                  <td>Placa Institucional Prefeitura de Jaú</td>
+                  <td>4 Furos de Rebite nos Cantos</td>
+                  <td>4× Ø 5 mm (Placa 46×14,5cm)</td>
+                  <td>4× Ø 0,5 mm (4,6×1,45cm)</td>
+                  <td>Y = 32,0 cm (3,2 cm)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F7 / F9</strong></td>
+                  <td>Costa (Traseira)</td>
+                  <td>Venezianas de Exaustão (Topo) e Admissão (Base)</td>
+                  <td>17 Rasgos Horizontais</td>
+                  <td>340 × 10 mm cada aleta</td>
+                  <td>3,4 × 0,1 cm cada rasgo</td>
+                  <td>Y = 195 cm e Y = 35 cm</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F8</strong></td>
+                  <td>Costa (Porta)</td>
+                  <td>Porta Traseira + 2 Fechaduras Tubulares</td>
+                  <td>Recorte Porta + 2 Cilindros</td>
+                  <td>Porta 62×182cm + 2× Ø 19mm</td>
+                  <td>Porta 6,2×18,2cm + 2× Ø 2mm</td>
+                  <td>Y = 145 cm e Y = 75 cm</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">SOLAR</strong></td>
+                  <td>Topo Plano</td>
+                  <td>Berço do Painel Solar 35Wp + Passa-Cabo</td>
+                  <td>Rebaixo Retangular + 2 Furos</td>
+                  <td>640 × 210 mm + Furo Ø 16mm</td>
+                  <td>6,4 × 2,1 cm + Furo Ø 1,6mm</td>
+                  <td>Y = 220,0 cm (Topo)</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:#f87171;">F10 / F11</strong></td>
+                  <td>Base (Chão)</td>
+                  <td>6 Chumbadores Parabolt + Eletroduto Central</td>
+                  <td>6 Furos Periféricos + 1 Central</td>
+                  <td>6× Ø 16 mm + 1× Ø 50 mm</td>
+                  <td>6× Ø 1,6 mm + 1× Ø 5,0 mm</td>
+                  <td>Y = 0,0 cm (Piso)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bom-grid">
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num">✂️</span>
+                <h5>Passo a Passo: Montando a Caixa no Papel (Mockup Físico)</h5>
+              </div>
+              <ul>
+                <li><strong>1. Imprima a Prancha 01:</strong> Use Papel Cartão, Couchê 180g ou cole a folha impressa sobre cartolina.</li>
+                <li><strong>2. Abra os Recortes Vermelhos Primeiro:</strong> Com estilete e régua, recorte a janela da <strong>Tela 43" [F3]</strong>, o furo do <strong>Botão SOS [F5]</strong> e o furo central da base <strong>[F11]</strong> antes de soltar o molde.</li>
+                <li><strong>3. Recorte o Contorno Externo (Linha Preta):</strong> Recorte em volta da cruz planificada preservando as <strong>Abas 1 a 7</strong>.</li>
+                <li><strong>4. Vinque as Dobras Azuis a 90°:</strong> Passe uma caneta sem tinta com régua sobre as linhas tracejadas azuis para dobrar com precisão.</li>
+                <li><strong>5. Curva da Quina Superior Frontal:</strong> Enrole suavemente a faixa laranja (1,1 cm) sobre um lápis para criar a quina arredondada da frente, deixando os 2,4 cm de trás retos (onde fica o painel solar).</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num">🚪</span>
+                <h5>Como Mostrar a Estrutura Interna na Sua Maquete</h5>
+              </div>
+              <ul>
+                <li><strong>Porta Traseira que Abre de Verdade:</strong> Na face da <em>Costa</em>, corte apenas <strong>3 lados</strong> do pontilhado vermelho da porta (topo, base e esquerda) e dobre o lado direito como dobradiça.</li>
+                <li><strong>Prateleira da Barreira Térmica:</strong> Cole um retângulo de papel cartão (7,0 × 3,5 cm) por dentro a 3,5 cm da base para separar a Bateria LiFePO4 (embaixo, no frio) da Tela e Mini-PC (no meio).</li>
+                <li><strong>Cole o Raio-X da Prancha 02 por Dentro:</strong> Recorte o desenho do <em>Corte A-A Frontal</em> da Prancha 02 e cole na parede interna da maquete — ao abrir a porta traseira, a banca verá todos os componentes internos posicionados!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-foot">
+        <span class="foot-disclaimer">Arquivo: <strong>estrutura</strong> • Plano de Construção, Corte/Dobra/Furação e Estrutura Interna do Totem de Jaú</span>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <a href="estrutura.html" target="_blank" class="btn-primary-blue" style="background:#dc2626; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">📥 Abrir / Baixar estrutura.pdf (Pronto p/ Impressão)</a>
+          <button id="btn-close-estrutura-foot" class="btn-primary-blue">Fechar Estrutura</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="totem3d.js?v=20261012_v6"></script>
+  <script src="app.js?v=20261012_v6"></script>
 </body>
 </html>
