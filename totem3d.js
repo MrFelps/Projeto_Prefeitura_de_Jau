@@ -39,6 +39,23 @@ class Totem3DViewer {
     this.screenState = 'home';
     this.isWheelchair = false;
     this.isHighContrast = false;
+    this.showVLibrasBox = false; // VLibras inicia oculto por padrão (só aparece quando solicitado)
+
+    // ABA 3: Configurações do Modo Hardware & Máquina Aberta
+    this.isHardwareMode = false;
+    this.hardwareViewMode = 'door'; // 'door', 'xray', 'exploded'
+    this.glowPowerWiring = false;
+    this.glowDataWiring = false;
+    this.currentDoorAngle = 0;
+    this.targetDoorAngle = 0;
+    this.currentExplodeOffset = 0;
+    this.targetExplodeOffset = 0;
+    this.internalHardwareGroup = null;
+    this.rearDoorHingeGroup = null;
+    this.mainCabinetMesh = null;
+    this.pistonRod = null;
+    this.hardwareWiringMaterials = {};
+    this.hardwareHotspotsData = [];
 
     // Elementos 3D dinâmicos para atualização de tema/luz
     this.dynamicMaterials = {};
@@ -447,6 +464,7 @@ class Totem3DViewer {
     mainCabinet.position.set(0.346, 0, 0);
     mainCabinet.castShadow = true;
     mainCabinet.receiveShadow = true;
+    this.mainCabinetMesh = mainCabinet;
     this.totemGroup.add(mainCabinet);
 
     // Chanfro sutil na junção superior em metal cru (sem detalhes amarelos ou LEDs laterais)
@@ -514,20 +532,7 @@ class Totem3DViewer {
     solarPanelMesh.position.set(0, 2.203, -0.055);
     this.totemGroup.add(solarPanelMesh);
 
-    // Antena 5G/Wi-Fi low-profile embutida no canto traseiro do topo
-    const antennaBase = new THREE.Mesh(
-      new THREE.BoxGeometry(0.06, 0.014, 0.03),
-      darkPanelMat
-    );
-    antennaBase.position.set(0.26, 2.206, -0.145);
-    this.totemGroup.add(antennaBase);
-
-    const signalDot = new THREE.Mesh(
-      new THREE.SphereGeometry(0.006, 12, 12),
-      new THREE.MeshBasicMaterial({ color: 0x10b981 })
-    );
-    signalDot.position.set(0.26, 2.215, -0.145);
-    this.totemGroup.add(signalDot);
+    // Topo metálico contínuo e limpo (sem antenas de modem ou Wi-Fi externo)
 
     // -----------------------------------------------------------------------
     // 4. FACE FRONTAL: PLACA SUPERIOR DE IDENTIFICAÇÃO DA MARCA (JAÚ, SP)
@@ -583,34 +588,476 @@ class Totem3DViewer {
     // (Removidos: painel QR/USB/Áudio e botão SOS a pedido do usuário)
 
     // -----------------------------------------------------------------------
-    // 7. FACE TRASEIRA COMPLETA EM FERRO/AÇO NATURAL (PARA VISUALIZAÇÃO 360°!)
-    // Porta de Manutenção Antivandalismo, Fechaduras, Aletas de Exaustão e Plaqueta IP65
+    // 7. FACE TRASEIRA ARTICULADA EM FERRO/AÇO NATURAL COM PISTÃO A GÁS
+    //    Porta de Manutenção com pivô na dobradiça esquerda (Abre na Aba 3)
     // -----------------------------------------------------------------------
+    this.rearDoorHingeGroup = new THREE.Group();
+    // Pivô de dobradiça na quina traseira esquerda
+    this.rearDoorHingeGroup.position.set(-0.31, 1.10, -0.178);
+
     this.rearTexture = new THREE.CanvasTexture(this.rearCanvas);
     const rearDoorMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(0.62, 1.82),
       new THREE.MeshStandardMaterial({
         map: this.rearTexture,
         roughness: 0.40,
-        metalness: 0.28
+        metalness: 0.28,
+        side: THREE.DoubleSide
       })
     );
     rearDoorMesh.rotation.y = Math.PI;
-    rearDoorMesh.position.set(0, 1.10, -0.180);
-    this.totemGroup.add(rearDoorMesh);
+    rearDoorMesh.position.set(0.31, 0, 0); // Centro da folha de porta deslocado do pivô
+    this.rearDoorHingeGroup.add(rearDoorMesh);
 
     // 2 Fechaduras tubulares antivandalismo em 3D na porta traseira
-    [0.75, 1.45].forEach(ly => {
+    [0.75 - 1.10, 1.45 - 1.10].forEach(ly => {
       const lockCylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(0.015, 0.015, 0.016, 16),
         boltMat
       );
       lockCylinder.rotation.x = Math.PI / 2;
-      lockCylinder.position.set(-0.23, ly, -0.182);
-      this.totemGroup.add(lockCylinder);
+      lockCylinder.position.set(0.31 - 0.23, ly, -0.003);
+      this.rearDoorHingeGroup.add(lockCylinder);
     });
 
+    // Bolsa interna metálica para manual técnico e documentos
+    const doorDocPocket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.26, 0.32, 0.014),
+      darkPanelMat
+    );
+    doorDocPocket.position.set(0.31, -0.05, 0.012);
+    this.rearDoorHingeGroup.add(doorDocPocket);
+
+    // Amortecedor hidráulico / pistão a gás para sustentação da porta aberta
+    const pistonGroup = new THREE.Group();
+    pistonGroup.position.set(0.12, 0.38, 0.010);
+    const pCyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.007, 0.007, 0.22, 12),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 })
+    );
+    pCyl.rotation.z = Math.PI / 4;
+    pistonGroup.add(pCyl);
+    this.rearDoorHingeGroup.add(pistonGroup);
+
+    this.totemGroup.add(this.rearDoorHingeGroup);
+
+    // -----------------------------------------------------------------------
+    // 8. ARQUITETURA INTERNA DE HARDWARE & MÁQUINA ABERTA (ABA 3)
+    // -----------------------------------------------------------------------
+    this.createInternalHardware();
+
     this.scene.add(this.totemGroup);
+  }
+
+  // =========================================================================
+  // ARQUITETURA COMPLETA DE HARDWARE, RACK 19" E FIAÇÃO INTERNA 3D (ABA 3)
+  // =========================================================================
+  createInternalHardware() {
+    this.internalHardwareGroup = new THREE.Group();
+    this.internalHardwareGroup.visible = false; // Inicia oculto, visível na Aba 3
+
+    // Materiais dos Componentes de Hardware
+    const aluRailMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.22 });
+    const dinRailMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.18 });
+    const pvcTrunkMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65, metalness: 0.15 });
+    const ipcBodyMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.75, roughness: 0.30 });
+    const goldPortMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.90, roughness: 0.20 });
+    const smpsMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.80, roughness: 0.28 });
+    const pcbGreenMat = new THREE.MeshStandardMaterial({ color: 0x166534, metalness: 0.35, roughness: 0.40 });
+    const pcbBlueMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, metalness: 0.40, roughness: 0.35 });
+    const dinWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.50, metalness: 0.10 });
+    const dinOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.45, metalness: 0.10 });
+    const batteryMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.40, metalness: 0.30 });
+    const copperGroundMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.90, roughness: 0.25 });
+
+    // Materiais dos Chicotes de Cabos (com emissive controlável para destaque)
+    this.hardwareWiringMaterials = {
+      acLive: new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.4 }),
+      acNeutral: new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 }),
+      groundPE: new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.4 }),
+      dc12vPos: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 }),
+      dc12vNeg: new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 }),
+      solarPos: new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.35 }),
+      hdmi: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.3 }),
+      usb: new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.35 }),
+      ethernet: new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.35 }),
+      batteryLead: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 })
+    };
+
+    // 1. RACK ESTRUTURAL 19" (4 Colunas verticais em T-Slot de Alumínio)
+    [
+      [-0.27, -0.09], [0.27, -0.09],
+      [-0.27, 0.10], [0.27, 0.10]
+    ].forEach(([rx, rz]) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.024, 1.82, 0.024), aluRailMat);
+      col.position.set(rx, 1.10, rz);
+      this.internalHardwareGroup.add(col);
+    });
+
+    // Travessas horizontais de reforço
+    [0.35, 0.72, 1.05, 1.35, 1.70, 1.95].forEach(ty => {
+      const crossF = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.018, 0.018), aluRailMat);
+      crossF.position.set(0, ty, 0.10);
+      this.internalHardwareGroup.add(crossF);
+
+      const crossB = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.018, 0.018), aluRailMat);
+      crossB.position.set(0, ty, -0.09);
+      this.internalHardwareGroup.add(crossB);
+    });
+
+    // 3 Trilhos DIN TS-35 Galvanizados
+    [0.76, 1.05, 1.35].forEach(dy => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.035, 0.008), dinRailMat);
+      rail.position.set(0, dy, -0.04);
+      this.internalHardwareGroup.add(rail);
+    });
+
+    // 2 Canaletas aletadas de PVC cinza para organização dos cabos
+    [-0.27, 0.27].forEach(cx => {
+      const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.038, 1.65, 0.045), pvcTrunkMat);
+      trunk.position.set(cx, 1.12, 0.0);
+      this.internalHardwareGroup.add(trunk);
+
+      for (let sl = -0.75; sl <= 0.75; sl += 0.08) {
+        const slot = new THREE.Mesh(
+          new THREE.BoxGeometry(0.040, 0.012, 0.047),
+          new THREE.MeshBasicMaterial({ color: 0x1e293b })
+        );
+        slot.position.set(cx, 1.12 + sl, 0.0);
+        this.internalHardwareGroup.add(slot);
+      }
+    });
+
+    // 2. MINI-PC INDUSTRIAL FANLESS (CÉREBRO COMPUTACIONAL)
+    const ipcBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.068), ipcBodyMat);
+    ipcBox.position.set(0.06, 1.38, 0.03);
+    this.internalHardwareGroup.add(ipcBox);
+
+    // 10 Aletas dissipadoras passivas de alumínio
+    for (let f = -0.10; f <= 0.10; f += 0.02) {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.16, 0.024), ipcBodyMat);
+      fin.position.set(0.06 + f, 1.38, 0.076);
+      this.internalHardwareGroup.add(fin);
+    }
+
+    // Painel I/O do Mini-PC voltado para quem abre a porta (z = -0.005)
+    const ledIpc = new THREE.Mesh(
+      new THREE.SphereGeometry(0.005, 12, 12),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.9 })
+    );
+    ledIpc.position.set(-0.03, 1.43, -0.005);
+    this.internalHardwareGroup.add(ledIpc);
+
+    for (let u = 0; u < 4; u++) {
+      const usbPort = new THREE.Mesh(
+        new THREE.BoxGeometry(0.016, 0.010, 0.008),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 })
+      );
+      usbPort.position.set(-0.01 + u * 0.022, 1.43, -0.005);
+      this.internalHardwareGroup.add(usbPort);
+    }
+
+    for (let l = 0; l < 2; l++) {
+      const rj45 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.018, 0.016, 0.008),
+        new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 })
+      );
+      rj45.position.set(0.10 + l * 0.025, 1.43, -0.005);
+      this.internalHardwareGroup.add(rj45);
+    }
+
+    const hdmiPort = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.008, 0.008), goldPortMat);
+    hdmiPort.position.set(0.10, 1.36, -0.005);
+    this.internalHardwareGroup.add(hdmiPort);
+
+    const dcJack = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.010, 16), dinRailMat);
+    dcJack.rotation.x = Math.PI / 2;
+    dcJack.position.set(-0.03, 1.34, -0.005);
+    this.internalHardwareGroup.add(dcJack);
+
+    // 3. QUADRO ELÉTRICO DIN (QDE) NO TRILHO INTERMEDIÁRIO (y = 1.05)
+    // Disjuntor Bipolar 16A
+    const disjuntor = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinWhiteMat);
+    disjuntor.position.set(-0.18, 1.05, -0.01);
+    this.internalHardwareGroup.add(disjuntor);
+
+    const djLever = new THREE.Mesh(
+      new THREE.BoxGeometry(0.026, 0.018, 0.016),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 })
+    );
+    djLever.position.set(-0.18, 1.06, -0.042);
+    this.internalHardwareGroup.add(djLever);
+
+    // Protetor de Surtos DPS 40kA
+    const dpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinOrangeMat);
+    dpsBox.position.set(-0.13, 1.05, -0.01);
+    this.internalHardwareGroup.add(dpsBox);
+
+    const dpsStatus = new THREE.Mesh(
+      new THREE.BoxGeometry(0.014, 0.010, 0.004),
+      new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.6 })
+    );
+    dpsStatus.position.set(-0.13, 1.07, -0.041);
+    this.internalHardwareGroup.add(dpsStatus);
+
+    // Interruptor DR 30mA
+    const drBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinWhiteMat);
+    drBox.position.set(-0.08, 1.05, -0.01);
+    this.internalHardwareGroup.add(drBox);
+
+    const drTestBtn = new THREE.Mesh(
+      new THREE.BoxGeometry(0.010, 0.010, 0.008),
+      new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 })
+    );
+    drTestBtn.position.set(-0.08, 1.075, -0.042);
+    this.internalHardwareGroup.add(drTestBtn);
+
+    // Bornes de passagem Sakit/Wago
+    for (let b = 0; b < 6; b++) {
+      const borneColor = b < 2 ? 0x94a3b8 : (b < 4 ? 0x0284c7 : 0x84cc16);
+      const borne = new THREE.Mesh(
+        new THREE.BoxGeometry(0.009, 0.060, 0.048),
+        new THREE.MeshStandardMaterial({ color: borneColor, roughness: 0.5 })
+      );
+      borne.position.set(-0.02 + b * 0.011, 1.05, -0.015);
+      this.internalHardwareGroup.add(borne);
+    }
+
+    // 4. FONTE CHAVEADA INDUSTRIAL SMPS MEANWELL 12V 20A (y = 0.76)
+    const smpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.11, 0.052), smpsMat);
+    smpsBox.position.set(-0.14, 0.76, 0.02);
+    this.internalHardwareGroup.add(smpsBox);
+
+    const ledSmps = new THREE.Mesh(
+      new THREE.SphereGeometry(0.004, 10, 10),
+      new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.8 })
+    );
+    ledSmps.position.set(-0.08, 0.79, -0.008);
+    this.internalHardwareGroup.add(ledSmps);
+
+    // 5. CONTROLADOR SOLAR MPPT 20A (y = 0.76)
+    const mpptBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.15, 0.12, 0.050),
+      new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.5, roughness: 0.35 })
+    );
+    mpptBox.position.set(0.12, 0.76, 0.02);
+    this.internalHardwareGroup.add(mpptBox);
+
+    const mpptLcd = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.058, 0.030),
+      new THREE.MeshBasicMaterial({ color: 0x0284c7 })
+    );
+    mpptLcd.position.set(0.12, 0.78, -0.006);
+    mpptLcd.rotation.y = Math.PI;
+    this.internalHardwareGroup.add(mpptLcd);
+
+    // 6. BANCO DE BATERIAS LiFePO4 12,8V 40Ah NA BASE (y = 0.28)
+    const batBox = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.18, 0.18), batteryMat);
+    batBox.position.set(0.0, 0.28, 0.0);
+    this.internalHardwareGroup.add(batBox);
+
+    const batHandle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.22, 0.014, 0.020),
+      new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 })
+    );
+    batHandle.position.set(0.0, 0.375, 0.0);
+    this.internalHardwareGroup.add(batHandle);
+
+    const batTermPos = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 0.018, 16),
+      new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.7, roughness: 0.3 })
+    );
+    batTermPos.position.set(-0.11, 0.375, 0.05);
+    this.internalHardwareGroup.add(batTermPos);
+
+    const batTermNeg = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 0.018, 16),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 })
+    );
+    batTermNeg.position.set(0.11, 0.375, 0.05);
+    this.internalHardwareGroup.add(batTermNeg);
+
+    // 7. VERSO DO MONITOR 43" & PLACAS AD E TOUCH (z = 0.12 a 0.16)
+    const screenBackMetal = new THREE.Mesh(new THREE.BoxGeometry(0.56, 1.02, 0.015), aluRailMat);
+    screenBackMetal.position.set(0, 1.18, 0.155);
+    this.internalHardwareGroup.add(screenBackMetal);
+
+    const pcbAd = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.008), pcbGreenMat);
+    pcbAd.position.set(-0.06, 1.36, 0.14);
+    this.internalHardwareGroup.add(pcbAd);
+
+    const heatSinkAd = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.045, 0.015),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 })
+    );
+    heatSinkAd.position.set(-0.06, 1.36, 0.13);
+    this.internalHardwareGroup.add(heatSinkAd);
+
+    const pcbTouch = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.006), pcbBlueMat);
+    pcbTouch.position.set(0.14, 1.15, 0.14);
+    this.internalHardwareGroup.add(pcbTouch);
+
+    const pcbLedDriver = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 0.008), pcbGreenMat);
+    pcbLedDriver.position.set(-0.06, 0.95, 0.14);
+    this.internalHardwareGroup.add(pcbLedDriver);
+
+    // 8. SISTEMA DE EXAUSTÃO DUPLA 120mm (y = 1.95)
+    [-0.14, 0.14].forEach(fx => {
+      const fanFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(0.12, 0.12, 0.026),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })
+      );
+      fanFrame.position.set(fx, 1.95, -0.06);
+      this.internalHardwareGroup.add(fanFrame);
+
+      const fanGrill = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.003, 8, 24), dinRailMat);
+      fanGrill.position.set(fx, 1.95, -0.075);
+      this.internalHardwareGroup.add(fanGrill);
+    });
+
+    const thermoBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.055, 0.040), dinWhiteMat);
+    thermoBox.position.set(0.22, 1.05, -0.01);
+    this.internalHardwareGroup.add(thermoBox);
+
+    const thermoKnob = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.010, 0.010, 0.008, 16),
+      new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 })
+    );
+    thermoKnob.rotation.x = Math.PI / 2;
+    thermoKnob.position.set(0.22, 1.05, -0.032);
+    this.internalHardwareGroup.add(thermoKnob);
+
+    // 9. MÓDULO DE COMUNICAÇÃO SOLAR & GESTÃO MPPT (y = 1.75)
+    // Interliga diretamente o painel solar fotovoltaico, controlador e bateria ao Mini-PC
+    const solarCommBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.10, 0.045),
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, metalness: 0.65, roughness: 0.35 })
+    );
+    solarCommBox.position.set(0.0, 1.75, 0.0);
+    this.internalHardwareGroup.add(solarCommBox);
+
+    for (let m = 0; m < 4; m++) {
+      const ledM = new THREE.Mesh(
+        new THREE.SphereGeometry(0.003, 8, 8),
+        new THREE.MeshBasicMaterial({ color: m === 0 ? 0x22c55e : (m === 1 ? 0xeab308 : 0x38bdf8) })
+      );
+      ledM.position.set(-0.04 + m * 0.025, 1.78, -0.024);
+      this.internalHardwareGroup.add(ledM);
+    }
+
+    // 10. BARRAMENTO PE EM COBRE MACIÇO (y = 0.55)
+    const groundBar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.016, 0.006), copperGroundMat);
+    groundBar.position.set(-0.08, 0.55, -0.03);
+    this.internalHardwareGroup.add(groundBar);
+
+    for (let p = -0.11; p <= 0.11; p += 0.036) {
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.008, 12), dinRailMat);
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(-0.08 + p, 0.55, -0.034);
+      this.internalHardwareGroup.add(screw);
+    }
+
+    // 11. CHICOTES DE CABOS FÍSICOS CURVOS 3D
+    const createWire = (pts, mat, r = 0.004) => {
+      const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+      const geo = new THREE.TubeGeometry(curve, 28, r, 7, false);
+      const mesh = new THREE.Mesh(geo, mat);
+      this.internalHardwareGroup.add(mesh);
+      return mesh;
+    };
+
+    // AC 220V Subterrâneo -> Disjuntor
+    createWire([
+      [-0.18, 0.12, 0.0],
+      [-0.26, 0.40, -0.01],
+      [-0.27, 0.85, -0.02],
+      [-0.20, 1.01, -0.02],
+      [-0.18, 1.02, -0.02]
+    ], this.hardwareWiringMaterials.acLive, 0.0065);
+
+    // AC Fase Marrom do Disjuntor -> DR -> DPS -> Fonte SMPS
+    createWire([
+      [-0.18, 1.08, -0.02],
+      [-0.13, 1.08, -0.02],
+      [-0.08, 1.08, -0.02],
+      [-0.26, 1.00, 0.0],
+      [-0.26, 0.78, 0.0],
+      [-0.15, 0.72, 0.0]
+    ], this.hardwareWiringMaterials.acLive, 0.004);
+
+    // AC Neutro Azul -> Fonte SMPS
+    createWire([
+      [-0.07, 1.08, -0.02],
+      [-0.25, 0.98, 0.01],
+      [-0.25, 0.76, 0.01],
+      [-0.13, 0.72, 0.0]
+    ], this.hardwareWiringMaterials.acNeutral, 0.004);
+
+    // DC 12V Positivo Vermelho -> Mini-PC
+    createWire([
+      [-0.12, 0.72, 0.0],
+      [-0.25, 0.74, 0.01],
+      [-0.25, 1.30, 0.01],
+      [-0.03, 1.34, 0.01]
+    ], this.hardwareWiringMaterials.dc12vPos, 0.005);
+
+    // DC 12V Negativo Preto -> Mini-PC
+    createWire([
+      [-0.11, 0.72, 0.0],
+      [-0.24, 0.73, 0.01],
+      [-0.24, 1.32, 0.01],
+      [-0.03, 1.34, 0.01]
+    ], this.hardwareWiringMaterials.dc12vNeg, 0.005);
+
+    // Cabo de Vídeo HDMI 2.1 (Azul Escuro) -> Placa AD
+    createWire([
+      [0.10, 1.36, 0.01],
+      [0.08, 1.36, 0.07],
+      [-0.04, 1.36, 0.08],
+      [-0.06, 1.36, 0.13]
+    ], this.hardwareWiringMaterials.hdmi, 0.0055);
+
+    // Cabo USB Touchscreen (Amarelo) -> Mini-PC
+    createWire([
+      [0.14, 1.15, 0.13],
+      [0.18, 1.15, 0.08],
+      [0.18, 1.40, 0.04],
+      [0.04, 1.43, 0.01]
+    ], this.hardwareWiringMaterials.usb, 0.0045);
+
+    // Cabo de Telemetria Solar RS485 (Verde) -> Módulo Solar MPPT
+    createWire([
+      [0.11, 1.43, 0.01],
+      [0.24, 1.48, 0.01],
+      [0.24, 1.72, 0.01],
+      [0.08, 1.75, 0.01]
+    ], this.hardwareWiringMaterials.ethernet, 0.0045);
+
+    // Cabos Solares (Laranja) -> MPPT
+    createWire([
+      [0.0, 2.18, -0.05],
+      [0.25, 2.05, -0.02],
+      [0.25, 0.80, 0.01],
+      [0.13, 0.76, 0.01]
+    ], this.hardwareWiringMaterials.solarPos, 0.005);
+
+    // Cabos Bateria LiFePO4 (Vermelho Grosso) -> MPPT
+    createWire([
+      [0.12, 0.72, 0.01],
+      [0.12, 0.50, 0.02],
+      [-0.10, 0.40, 0.04],
+      [-0.11, 0.38, 0.05]
+    ], this.hardwareWiringMaterials.batteryLead, 0.007);
+
+    // Aterramento PE Equipotencial (Verde) -> Barramento
+    createWire([
+      [-0.08, 0.55, -0.03],
+      [-0.26, 0.55, -0.02],
+      [-0.26, 1.05, -0.02],
+      [-0.01, 1.05, -0.02]
+    ], this.hardwareWiringMaterials.groundPE, 0.005);
+
+    this.totemGroup.add(this.internalHardwareGroup);
   }
 
   // =========================================================================
@@ -764,9 +1211,9 @@ class Totem3DViewer {
 
       const badges = [
         { icon: '📲', label: 'QR CODE' },
-        { icon: '📶', label: 'WI-FI 5G' },
+        { icon: '🍃', label: '100% ESG' },
         { icon: '♿', label: 'LIBRAS/VOZ' },
-        { icon: '☀️', label: 'SOLAR ESG' }
+        { icon: '☀️', label: 'SOLAR' }
       ];
       badges.forEach((b, i) => {
         const bx = 52 + i * 112;
@@ -778,7 +1225,7 @@ class Totem3DViewer {
         lctx.fillText(b.label, bx + 36, 75);
       });
 
-      // Seção de Carregadores USB e Som Direcional (Caixa Esquerda em Metal Natural)
+      // Seção de Som Direcional e Acessibilidade (Caixa Esquerda em Metal Natural)
       lctx.save();
       lctx.fillStyle = metalMid;
       lctx.fillRect(24, 110, 286, 118);
@@ -792,29 +1239,17 @@ class Totem3DViewer {
       lctx.fillStyle = titleColor;
       lctx.font = 'bold 12px sans-serif';
       lctx.textAlign = 'left';
-      lctx.fillText('⚡ CARREGADORES USB & ÁUDIO 10W', 36, 133, 264);
+      lctx.fillText('🔊 SAÍDA DE ÁUDIO & ACESSIBILIDADE', 36, 133, 264);
 
-      // Grelha de som direcional perfurada no metal
+      // Grelha de som direcional perfurada no metal (área total, sem portas USB)
       lctx.fillStyle = '#1e293b';
       for (let rIdx = 0; rIdx < 4; rIdx++) {
-        for (let cIdx = 0; cIdx < 10; cIdx++) {
+        for (let cIdx = 0; cIdx < 16; cIdx++) {
           lctx.beginPath();
-          lctx.arc(46 + cIdx * 14, 156 + rIdx * 14, 3.5, 0, Math.PI * 2);
+          lctx.arc(46 + cIdx * 15, 160 + rIdx * 14, 3.5, 0, Math.PI * 2);
           lctx.fill();
         }
       }
-
-      // 2 portas USB embutidas
-      [218, 262].forEach(ux => {
-        lctx.fillStyle = '#0f172a';
-        lctx.fillRect(ux, 150, 28, 44);
-        lctx.fillStyle = '#38bdf8';
-        lctx.fillRect(ux + 6, 158, 16, 28);
-        lctx.fillStyle = titleColor;
-        lctx.font = 'bold 10px sans-serif';
-        lctx.textAlign = 'center';
-        lctx.fillText('USB', ux + 14, 210);
-      });
       lctx.restore();
 
       // Caixa Direita: Moldura do Botão Físico de Socorro (SOS)
@@ -1097,7 +1532,7 @@ class Totem3DViewer {
     const bodyY = wcOffset + 128;
 
     // 2. MENU LATERAL DE ACESSIBILIDADE UNIVERSAL (ABNT NBR 9050 / GOV.BR)
-    const sbW = 82;
+    const sbW = 152; // Alargado para os lados para ocupar a coluna de forma espaçosa
     const sbH = footY - (wcOffset + 115);
     ctx.fillStyle = hc ? '#000000' : '#0c326f';
     ctx.fillRect(0, wcOffset + 115, sbW, sbH);
@@ -1110,26 +1545,24 @@ class Totem3DViewer {
 
     // Tag Superior do Menu Lateral
     ctx.fillStyle = hc ? '#000000' : '#ffcd07';
-    ctx.fillRect(10, wcOffset + 125, sbW - 20, 22);
+    ctx.fillRect(8, wcOffset + 124, sbW - 16, 24);
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '900 11px sans-serif';
+    ctx.font = '900 12px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('ACESSO', sbW / 2, wcOffset + 140);
 
-    // Botões Verticais de Acessibilidade (Ordem: Alcance no topo, Contraste, Libras, Áudio, A+/A-)
-    const sideBtns = [
-      { icon: '♿', label: 'Alcance', active: this.isWheelchair },
+    // 4 Botões Principais de Acessibilidade (Largos e Horizontais, preenchendo a coluna)
+    const mainSideBtns = [
       { icon: '👁️', label: 'Contraste', active: hc },
-      { icon: '🦻', label: 'Libras', active: true },
+      { icon: '🦻', label: 'Libras', active: this.showVLibrasBox },
       { icon: '🔊', label: 'Áudio', active: false },
-      { icon: 'A+', label: 'Maior', active: false },
-      { icon: 'A-', label: 'Padrão', active: false }
+      { icon: '♿', label: 'Alcance', active: this.isWheelchair }
     ];
 
-    sideBtns.forEach((b, idx) => {
-      const by = wcOffset + 158 + idx * 72;
+    mainSideBtns.forEach((b, idx) => {
+      const by = wcOffset + 156 + idx * 64;
       const bw = sbW - 16;
-      const bh = 62;
+      const bh = 54;
       const bx = 8;
 
       ctx.fillStyle = b.active ? (hc ? '#ffff00' : '#ffcd07') : (hc ? '#111827' : 'rgba(255,255,255,0.12)');
@@ -1138,13 +1571,45 @@ class Totem3DViewer {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(bx, by, bw, bh);
 
+      // Ícone à esquerda e texto à direita (layout horizontal)
       ctx.fillStyle = b.active ? '#0c326f' : (hc ? '#ffff00' : '#ffffff');
       ctx.font = '22px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(b.icon, bx + bw / 2, by + 30);
-      ctx.font = '800 11px sans-serif';
-      ctx.fillText(b.label, bx + bw / 2, by + 50);
+      ctx.fillText(b.icon, bx + 22, by + 34);
+
+      ctx.font = '800 14px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(b.label, bx + 42, by + 34);
     });
+
+    // 2 Botões de Fonte (A+ e A-) lado a lado para não esticar a coluna para baixo
+    const fontY = wcOffset + 156 + 4 * 64 + 6;
+    const fontW = (sbW - 22) / 2;
+    const fontH = 48;
+    
+    // A+
+    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.12)';
+    ctx.fillRect(8, fontY, fontW, fontH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.strokeRect(8, fontY, fontW, fontH);
+    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = '900 16px sans-serif';
+    ctx.fillText('A+', 8 + fontW / 2, fontY + 22);
+    ctx.font = '800 10.5px sans-serif';
+    ctx.fillText('Maior', 8 + fontW / 2, fontY + 38);
+
+    // A-
+    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.12)';
+    ctx.fillRect(8 + fontW + 6, fontY, fontW, fontH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.strokeRect(8 + fontW + 6, fontY, fontW, fontH);
+    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = '900 16px sans-serif';
+    ctx.fillText('A-', 8 + fontW + 6 + fontW / 2, fontY + 22);
+    ctx.font = '800 10.5px sans-serif';
+    ctx.fillText('Padrão', 8 + fontW + 6 + fontW / 2, fontY + 38);
 
     // 3. Conteúdo Central de acordo com a aba selecionada
     if (this.screenState === 'bus') {
@@ -1159,89 +1624,146 @@ class Totem3DViewer {
       this.drawHomeScreen(ctx, w, bodyY, hc);
     }
 
-    // 4. QUADRADINHO FIXO DO VLIBRAS NO CANTO INFERIOR DIREITO DA TELA
-    const vBoxW = 142;
-    const vBoxH = 168;
-    const vBoxX = w - vBoxW - 14;
-    const vBoxY = footY - vBoxH - 14;
+    // 4. QUADRADINHO DO VLIBRAS NO CANTO INFERIOR DIREITO DA TELA (APENAS QUANDO SOLICITADO)
+    if (this.showVLibrasBox) {
+      const vBoxW = 150;
+      const vBoxH = 182;
+      const vBoxX = w - vBoxW - 14;
+      const vBoxY = footY - vBoxH - 14;
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(vBoxX, vBoxY, vBoxW, vBoxH);
-    ctx.strokeStyle = hc ? '#ffff00' : '#1351b4';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(vBoxX, vBoxY, vBoxW, vBoxH);
+      // Fundo Branco Puro e borda suave
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(vBoxX, vBoxY, vBoxW, vBoxH);
+      ctx.strokeStyle = this.isInterpretingLibras ? '#0284c7' : (hc ? '#ffff00' : '#cbd5e1');
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(vBoxX, vBoxY, vBoxW, vBoxH);
 
-    // Cabeçalho da caixinha VLibras
-    ctx.fillStyle = hc ? '#000000' : '#1351b4';
-    ctx.fillRect(vBoxX, vBoxY, vBoxW, 26);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('gov.br • VLibras', vBoxX + 8, vBoxY + 18);
-    // Ponto verde ativo
-    ctx.beginPath();
-    ctx.arc(vBoxX + vBoxW - 12, vBoxY + 13, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#4ade80';
-    ctx.fill();
+      // Faixa superior do card
+      ctx.fillStyle = this.isInterpretingLibras ? '#0284c7' : '#f0f7ff';
+      ctx.fillRect(vBoxX + 1, vBoxY + 1, vBoxW - 2, 20);
+      ctx.fillStyle = this.isInterpretingLibras ? '#ffffff' : '#0c326f';
+      ctx.font = 'bold 8.5px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(this.isInterpretingLibras ? 'SINALIZANDO LIBRAS' : 'TRADUTOR DE LIBRAS', vBoxX + 8, vBoxY + 14);
 
-    // Mascote Ícaro (Ilustração vetorial em canvas)
-    const avX = vBoxX + vBoxW / 2;
-    const avY = vBoxY + 76;
-    // Círculo de fundo
-    ctx.beginPath();
-    ctx.arc(avX, avY, 34, 0, Math.PI * 2);
-    ctx.fillStyle = '#e8f0fe';
-    ctx.fill();
-    // Camisa polo azul
-    ctx.beginPath();
-    ctx.arc(avX, avY + 30, 26, Math.PI, 0, false);
-    ctx.fillStyle = '#0c326f';
-    ctx.fill();
-    // Gola amarela
-    ctx.fillStyle = '#ffcd07';
-    ctx.fillRect(avX - 6, avY + 6, 12, 10);
-    // Cabeça
-    ctx.beginPath();
-    ctx.arc(avX, avY - 4, 15, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffd1b3';
-    ctx.fill();
-    // Cabelo castanho
-    ctx.beginPath();
-    ctx.arc(avX, avY - 10, 15, Math.PI * 0.9, Math.PI * 2.1);
-    ctx.fillStyle = '#5c3a21';
-    ctx.fill();
-    // Olhos e sorriso
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(avX - 6, avY - 5, 3, 3);
-    ctx.fillRect(avX + 3, avY - 5, 3, 3);
-    ctx.strokeStyle = '#b91c1c';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(avX, avY + 1, 5, 0, Math.PI);
-    ctx.stroke();
+      // Botão ✕ discreto no topo direito
+      ctx.fillStyle = this.isInterpretingLibras ? '#ffffff' : '#64748b';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('✕', vBoxX + vBoxW - 7, vBoxY + 15);
 
-    // Rodapé da caixinha VLibras
-    ctx.fillStyle = '#f0f7ff';
-    ctx.fillRect(vBoxX, vBoxY + vBoxH - 34, vBoxW, 34);
-    ctx.strokeStyle = '#dbeafe';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(vBoxX, vBoxY + vBoxH - 34);
-    ctx.lineTo(vBoxX + vBoxW, vBoxY + vBoxH - 34);
-    ctx.stroke();
-    ctx.fillStyle = '#0c326f';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Tradutor Oficial', avX, vBoxY + vBoxH - 19);
-    ctx.fillStyle = '#64748b';
-    ctx.font = '9px sans-serif';
-    ctx.fillText('Língua de Sinais', avX, vBoxY + vBoxH - 7);
+      // Mascote Ícaro com braços e mãos sinalizando
+      const avX = vBoxX + vBoxW / 2;
+      const avY = vBoxY + 78;
+      const pose = this.librasPose || 0;
+      const offsetL = this.isInterpretingLibras ? (pose % 2 === 0 ? -8 : 4) : 0;
+      const offsetR = this.isInterpretingLibras ? (pose % 2 === 0 ? 4 : -8) : 0;
+
+      ctx.beginPath();
+      ctx.arc(avX, avY, 38, 0, Math.PI * 2);
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fill();
+
+      // Tronco azul Gov.br
+      ctx.beginPath();
+      ctx.arc(avX, avY + 34, 28, Math.PI, 0, false);
+      ctx.fillStyle = '#0c326f';
+      ctx.fill();
+      ctx.fillStyle = '#ffcd07';
+      ctx.fillRect(avX - 6, avY + 8, 12, 10);
+
+      // Cabeça e cabelo
+      ctx.beginPath();
+      ctx.arc(avX, avY - 6, 15, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd1b3';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(avX, avY - 12, 15, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.fillStyle = '#4a2c18';
+      ctx.fill();
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(avX - 6, avY - 7, 3, 3);
+      ctx.fillRect(avX + 3, avY - 7, 3, 3);
+      ctx.strokeStyle = '#b91c1c';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(avX, avY, 4.5, 0, Math.PI);
+      ctx.stroke();
+
+      // Braço e mão esquerda com dedos sinalizando Libras
+      const handLX = avX - 24;
+      const handLY = avY + 8 + offsetL;
+      ctx.strokeStyle = '#f4b393';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(avX - 22, avY + 26);
+      ctx.lineTo(handLX, handLY);
+      ctx.stroke();
+      ctx.fillStyle = '#ffd1b3';
+      ctx.beginPath();
+      ctx.arc(handLX, handLY, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d99b7c';
+      ctx.lineWidth = 1.5;
+      for (let f = -4; f <= 4; f += 2.5) {
+        ctx.beginPath();
+        ctx.moveTo(handLX + f, handLY - 4);
+        ctx.lineTo(handLX + f, handLY - 11);
+        ctx.stroke();
+      }
+
+      // Braço e mão direita com dedos sinalizando Libras
+      const handRX = avX + 24;
+      const handRY = avY + 8 + offsetR;
+      ctx.strokeStyle = '#f4b393';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(avX + 22, avY + 26);
+      ctx.lineTo(handRX, handRY);
+      ctx.stroke();
+      ctx.fillStyle = '#ffd1b3';
+      ctx.beginPath();
+      ctx.arc(handRX, handRY, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d99b7c';
+      ctx.lineWidth = 1.5;
+      for (let f = -4; f <= 4; f += 2.5) {
+        ctx.beginPath();
+        ctx.moveTo(handRX + f, handRY - 4);
+        ctx.lineTo(handRX + f, handRY - 11);
+        ctx.stroke();
+      }
+
+      // Caixa de Legenda Dinâmica Abaixo do Boneco
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(vBoxX, vBoxY + vBoxH - 42, vBoxW, 42);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(vBoxX, vBoxY + vBoxH - 42, vBoxW, 42);
+
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.arc(vBoxX + 18, vBoxY + vBoxH - 28, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0c326f';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('LIBRAS • AO VIVO', vBoxX + 26, vBoxY + vBoxH - 25);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      const sub = this.vlibrasSub || 'Tradutor de Sinais';
+      const displaySub = sub.length > 20 ? sub.substring(0, 18) + '...' : sub;
+      ctx.fillText(displaySub, avX, vBoxY + vBoxH - 10);
+    }
 
     if (this.screenTexture) this.screenTexture.needsUpdate = true;
   }
 
   drawHomeScreen(ctx, w, startY, hc) {
-    const offX = 94;
+    const offX = 166;
     const contentW = w - offX - 16;
 
     // Banner Defesa Civil Claro
@@ -1312,12 +1834,12 @@ class Totem3DViewer {
       }
     ];
 
+    const cw = Math.floor((contentW - 14) / 2);
     cards.forEach((c, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const cx = offX + col * 310;
+      const cx = offX + col * (cw + 14);
       const cy = startY + 142 + row * 252;
-      const cw = 296;
       const ch = 236;
 
       // Card Background & Sombra Tátil Física
@@ -1423,49 +1945,89 @@ class Totem3DViewer {
   }
 
   drawBusScreen(ctx, w, startY, hc) {
+    const offX = 166;
+    const cw = w - offX - 16;
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 32px sans-serif';
-    ctx.fillText('🚌 TRANSPORTE COLETIVO DE JAÚ (GTFS-RT)', 32, startY + 40);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('TRANSPORTE COLETIVO • ONDE É O PONTO', offX, startY + 40);
 
     const lines = [
-      { badge: 'LINHA 01', name: 'Circular Centro ⇄ Pouso Alegre', eta: '4 min', color: '#168821' },
-      { badge: 'LINHA 04', name: 'Jd. Pedro Ometto ⇄ Terminal', eta: '12 min', color: '#168821' },
-      { badge: 'LINHA 07', name: 'Vila Nova ⇄ Território do Calçado', eta: '21 min', color: '#d97706' },
-      { badge: 'LINHA 11', name: 'Distrito Industrial ⇄ Centro', eta: '7 min', color: '#168821' }
+      { badge: 'LINHA 01', name: 'Circular Centro ⇄ Pouso Alegre', stop: '📍 Ponto: Jardim de Baixo (Centro)', eta: '4 min', color: '#168821' },
+      { badge: 'LINHA 02', name: 'Matriz ⇄ Santa Casa / Vila Netinho', stop: '📍 Ponto: Praça da Matriz (Histórico)', eta: '8 min', color: '#168821' },
+      { badge: 'LINHA 03', name: 'Rodoviária ⇄ Distrito Industrial', stop: '📍 Ponto: Terminal Rodoviário Municipal', eta: '14 min', color: '#d97706' },
+      { badge: 'LINHA 04', name: 'Parque do Rio Jaú ⇄ Jd. Ometto', stop: '📍 Ponto: Parque do Rio Jaú (Ecológico)', eta: '6 min', color: '#168821' }
     ];
 
     lines.forEach((l, i) => {
-      const ly = startY + 80 + i * 155;
+      const ly = startY + 70 + i * 155;
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.fillRect(32, ly, w - 64, 135);
+      ctx.fillRect(offX, ly, cw, 138);
       ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 2;
-      ctx.strokeRect(32, ly, w - 64, 135);
+      ctx.strokeRect(offX, ly, cw, 138);
 
       ctx.fillStyle = hc ? '#000000' : '#0c326f';
-      ctx.fillRect(52, ly + 25, 130, 85);
+      ctx.fillRect(offX + 14, ly + 26, 112, 86);
       ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
-      ctx.font = '800 22px sans-serif';
+      ctx.font = '800 19px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(l.badge, 117, ly + 75);
+      ctx.fillText(l.badge, offX + 70, ly + 75);
 
       ctx.textAlign = 'left';
       ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText(l.name, 205, ly + 55);
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(l.name, offX + 142, ly + 44);
+
+      ctx.fillStyle = hc ? '#ffff00' : '#334155';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText(l.stop, offX + 142, ly + 74);
 
       ctx.fillStyle = hc ? '#ffff00' : l.color;
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText(`● Próximo ônibus: ${l.eta} (GPS Ao Vivo)`, 205, ly + 95);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(`● Próximo: ${l.eta}  •  Escaneie o QR do Ponto ➔`, offX + 142, ly + 106);
+
+      // Mini QR Code visual no lado direito do card indicando onde é o ponto
+      const qrSize = 86;
+      const qrX = offX + cw - qrSize - 16;
+      const qrY = ly + 26;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(qrX, qrY, qrSize, qrSize);
+      ctx.strokeStyle = '#0c326f';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(qrX, qrY, qrSize, qrSize);
+
+      // Cantos de posicionamento do QR Code
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(qrX + 8, qrY + 8, 20, 20);
+      ctx.fillRect(qrX + qrSize - 28, qrY + 8, 20, 20);
+      ctx.fillRect(qrX + 8, qrY + qrSize - 28, 20, 20);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(qrX + 12, qrY + 12, 12, 12);
+      ctx.fillRect(qrX + qrSize - 24, qrY + 12, 12, 12);
+      ctx.fillRect(qrX + 12, qrY + qrSize - 24, 12, 12);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(qrX + 15, qrY + 15, 6, 6);
+      ctx.fillRect(qrX + qrSize - 21, qrY + 15, 6, 6);
+      ctx.fillRect(qrX + 15, qrY + qrSize - 21, 6, 6);
+      // Módulos internos do QR Code
+      ctx.fillRect(qrX + 34, qrY + 12, 8, 8);
+      ctx.fillRect(qrX + 46, qrY + 20, 8, 12);
+      ctx.fillRect(qrX + 34, qrY + 36, 16, 8);
+      ctx.fillRect(qrX + 14, qrY + 36, 12, 8);
+      ctx.fillRect(qrX + 56, qrY + 40, 18, 8);
+      ctx.fillRect(qrX + 36, qrY + 52, 10, 16);
+      ctx.fillRect(qrX + 54, qrY + 58, 16, 14);
     });
   }
 
   drawShoesScreen(ctx, w, startY, hc) {
+    const offX = 166;
+    const cw = w - offX - 16;
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 32px sans-serif';
-    ctx.fillText('👠 CIRCUITO DO CALÇADO FEMININO', 32, startY + 40);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('CIRCUITO DO CALÇADO FEMININO', offX, startY + 40);
 
     const stores = [
       { title: 'Shopping Território do Calçado', addr: 'Av. Hermínio Pires de Oliveira Netto, 400 (+150 lojas)' },
@@ -1474,68 +2036,72 @@ class Totem3DViewer {
     ];
 
     stores.forEach((s, i) => {
-      const sy = startY + 85 + i * 200;
+      const sy = startY + 75 + i * 195;
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.fillRect(32, sy, w - 64, 175);
+      ctx.fillRect(offX, sy, cw, 175);
       ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 3;
-      ctx.strokeRect(32, sy, w - 64, 175);
+      ctx.strokeRect(offX, sy, cw, 175);
 
       ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = '800 26px sans-serif';
-      ctx.fillText(`🛍️ ${s.title}`, 56, sy + 58);
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText(s.title, offX + 20, sy + 55);
 
       ctx.fillStyle = hc ? '#ffff00' : '#475569';
-      ctx.font = '21px sans-serif';
-      ctx.fillText(`📍 ${s.addr}`, 56, sy + 102);
+      ctx.font = '19px sans-serif';
+      ctx.fillText(s.addr, offX + 20, sy + 98);
 
       ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
-      ctx.fillRect(56, sy + 120, 280, 40);
+      ctx.fillRect(offX + 20, sy + 118, 260, 38);
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.font = 'bold 19px sans-serif';
-      ctx.fillText('📲 ROTA VIA QR CODE', 76, sy + 146);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText('ROTA VIA QR CODE', offX + 45, sy + 144);
     });
   }
 
   drawTourismScreen(ctx, w, startY, hc) {
+    const offX = 166;
+    const cw = w - offX - 16;
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 32px sans-serif';
-    ctx.fillText('🏛️ TURISMO, CULTURA E LAZER EM JAÚ', 32, startY + 40);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('TURISMO, CULTURA E LAZER EM JAÚ', offX, startY + 40);
 
     const spots = [
-      { icon: '🌳', title: 'Parque Municipal do Rio Jaú', desc: 'Caminhada, lago, quadras e lazer • 06h às 21h' },
-      { icon: '⛪', title: 'Igreja Matriz N. Sra. do Patrocínio', desc: 'Patrimônio histórico neogótico na Praça da República' },
-      { icon: '🎭', title: 'Teatro Municipal Elza Munerato', desc: 'Espetáculos, cultura e eventos gratuitos' }
+      { title: 'Parque Municipal do Rio Jaú', desc: 'Caminhada, lago, quadras e lazer • 06h às 21h' },
+      { title: 'Igreja Matriz N. Sra. do Patrocínio', desc: 'Patrimônio histórico neogótico na Praça da República' },
+      { title: 'Teatro Municipal Elza Munerato', desc: 'Espetáculos, cultura e eventos gratuitos' }
     ];
 
     spots.forEach((sp, i) => {
-      const sy = startY + 85 + i * 200;
+      const sy = startY + 75 + i * 195;
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.fillRect(32, sy, w - 64, 175);
+      ctx.fillRect(offX, sy, cw, 175);
       ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 3;
-      ctx.strokeRect(32, sy, w - 64, 175);
+      ctx.strokeRect(offX, sy, cw, 175);
 
       ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = '800 26px sans-serif';
-      ctx.fillText(`${sp.icon} ${sp.title}`, 56, sy + 60);
+      ctx.font = '800 24px sans-serif';
+      ctx.fillText(sp.title, offX + 20, sy + 55);
 
       ctx.fillStyle = hc ? '#ffff00' : '#475569';
-      ctx.font = '21px sans-serif';
-      ctx.fillText(sp.desc, 56, sy + 106);
+      ctx.font = '19px sans-serif';
+      ctx.fillText(sp.desc, offX + 20, sy + 100);
 
       ctx.fillStyle = hc ? '#ffff00' : '#168821';
-      ctx.font = 'bold 19px sans-serif';
-      ctx.fillText('📲 Escaneie o QR Code para abrir no Google Maps', 56, sy + 148);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText('Escaneie o QR Code para abrir no Google Maps', offX + 20, sy + 146);
     });
   }
 
   drawServicesScreen(ctx, w, startY, hc) {
+    const offX = 166;
+    const cw = w - offX - 16;
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 32px sans-serif';
-    ctx.fillText('📋 SERVIÇOS PÚBLICOS & EMERGÊNCIA', 32, startY + 40);
+    ctx.font = '800 28px sans-serif';
+    ctx.fillText('SERVIÇOS PÚBLICOS & EMERGÊNCIA', offX, startY + 40);
 
     const phones = [
       { num: '192', label: 'SAMU 24h' },
@@ -1546,26 +2112,27 @@ class Totem3DViewer {
       { num: '180', label: 'APOIO À MULHER' }
     ];
 
+    const cardW = (cw - 20) / 2;
     phones.forEach((p, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      const px = 32 + col * 336;
-      const py = startY + 80 + row * 145;
+      const px = offX + col * (cardW + 20);
+      const py = startY + 75 + row * 145;
 
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
-      ctx.fillRect(px, py, 320, 125);
+      ctx.fillRect(px, py, cardW, 125);
       ctx.strokeStyle = hc ? '#ffff00' : '#dc2626';
       ctx.lineWidth = 3;
-      ctx.strokeRect(px, py, 320, 125);
+      ctx.strokeRect(px, py, cardW, 125);
 
       ctx.textAlign = 'center';
       ctx.fillStyle = hc ? '#ffff00' : '#dc2626';
-      ctx.font = '800 42px sans-serif';
-      ctx.fillText(p.num, px + 160, py + 62);
+      ctx.font = '800 38px sans-serif';
+      ctx.fillText(p.num, px + cardW / 2, py + 58);
 
       ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.font = 'bold 20px sans-serif';
-      ctx.fillText(p.label, px + 160, py + 102);
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(p.label, px + cardW / 2, py + 98);
     });
   }
 
@@ -1648,7 +2215,7 @@ class Totem3DViewer {
         id: 'solar',
         num: '1',
         title: 'Placa Solar 35Wp Embutida (Invisível de Frente)',
-        desc: 'Painel monocristalino de 64×21 cm (35 Wp) embutido na parte plana traseira do topo (atrás da quina frontal arredondada). Alimenta LEDs, sensores PIR, modem 5G e mantém a bateria LiFePO4 de backup 24h (SOS), operando em sistema híbrido com a rede elétrica da praça para a tela 43".',
+        desc: 'Painel monocristalino de 64×21 cm (35 Wp) embutido na parte plana traseira do topo (atrás da quina frontal arredondada). Alimenta LEDs, sensores PIR, telemetria solar e mantém a bateria LiFePO4 de backup 24h (SOS), operando em sistema híbrido com a rede elétrica 220V municipal para a tela 43".',
         pos: new THREE.Vector3(0.0, 2.21, -0.04),
         cam: { theta: 0.18, phi: 0.42, radius: 1.95, targetY: 1.95 }
       },
@@ -1694,14 +2261,114 @@ class Totem3DViewer {
       }
     ];
 
+    // PONTOS TÉCNICOS ESPECÍFICOS DO HARDWARE INTERNO (ABA 3)
+    this.hardwareHotspotsData = [
+      {
+        id: 'hw-ipc',
+        num: '1',
+        tag: 'CÉREBRO COMPUTACIONAL',
+        title: 'Mini-PC Industrial Fanless (Core i5 / IPC)',
+        desc: 'Computador industrial robusto em gabinete de alumínio extrudado preto com dissipação 100% passiva por aletas (sem ventoinha interna que puxa poeira). Equipado com 16GB RAM industrial, SSD NVMe 512GB (-20°C a +70°C), watchdog timer de hardware e sistema operacional Linux Kiosk.',
+        wires: 'Alimentação: 12V DC (5A) com filtro de ferrite toroidal. Vídeo: Saída HDMI 2.1 para tela 43". Dados: 4x USB 3.0 (Touch PCAP, telemetria) e 2x LAN Gigabit.',
+        pos: new THREE.Vector3(0.06, 1.38, 0.03),
+        cam: { theta: Math.PI + 0.15, phi: 1.38, radius: 1.65, targetY: 1.38 }
+      },
+      {
+        id: 'hw-din',
+        num: '2',
+        tag: 'QUADRO ELÉTRICO DIN',
+        title: 'Quadro DIN: Disjuntor 16A, DPS 40kA e DR 30mA',
+        desc: 'Centro de proteção e comando elétrico montado em trilho DIN TS-35. Contém Disjuntor Bipolar 16A Curva C, Protetor de Surtos DPS Classe II (275V/40kA) contra raios/descargas atmosféricas e Interruptor DR de 30mA para proteção contra choque elétrico conforme NR-10 e NBR 5410.',
+        wires: 'Entrada: Cabos AC 220V 2,5mm² (Marrom Fase + Azul Neutro). Saída: Fase e Neutro protegidos para a Fonte SMPS. Terra: Barramento PE.',
+        pos: new THREE.Vector3(-0.11, 1.05, -0.02),
+        cam: { theta: Math.PI - 0.20, phi: 1.42, radius: 1.55, targetY: 1.05 }
+      },
+      {
+        id: 'hw-smps',
+        num: '3',
+        tag: 'CONVERSÃO DE ENERGIA',
+        title: 'Fonte Chaveada Industrial MeanWell 12V 20A (240W)',
+        desc: 'Fonte industrial metálica perfurada tipo gaiola com PFC ativo e 90% de eficiência. Converte 100~240V AC da rede pública em 12V DC contínuo estabilizado com proteção contra sobrecarga, curto-circuito e sobretensão para alimentar o Mini-PC, tela e exaustores.',
+        wires: 'Entrada: 220V AC (L, N, PE) do quadro DIN. Saída: Barramento DC 12V estabilizado (cabos Vermelho + / Preto - 2,5mm² flexível).',
+        pos: new THREE.Vector3(-0.14, 0.76, 0.02),
+        cam: { theta: Math.PI - 0.25, phi: 1.45, radius: 1.55, targetY: 0.76 }
+      },
+      {
+        id: 'hw-screen-backend',
+        num: '4',
+        tag: 'PAINEL TOUCH & DISPLAY',
+        title: 'Placa Scaler AD Board & Controladora Touch PCAP',
+        desc: 'Atrás da moldura frontal: Placa AD Scaler (converte sinal HDMI em sinal LVDS/eDP para o LCD 43" 1500 nits) e Placa Controladora Touch PCAP conectada ao vidro temperado de 8mm antivandalismo com suporte a 10 toques simultâneos com luvas ou sob chuva.',
+        wires: 'Vídeo: Cabo HDMI 2.1 do Mini-PC + Cabos Flat LVDS. Touch: Cabo Flat FPC da tela + Cabo USB blindado para o Mini-PC. Força: 12V DC.',
+        pos: new THREE.Vector3(-0.06, 1.36, 0.12),
+        cam: { theta: 0.35, phi: 1.45, radius: 1.85, targetY: 1.36 }
+      },
+      {
+        id: 'hw-mppt',
+        num: '5',
+        tag: 'SISTEMA SOLAR ESG',
+        title: 'Controlador de Carga Solar MPPT 20A Inteligente',
+        desc: 'Módulo eletrônico de alta eficiência (99%) com algoritmo de rastreamento de máxima potência (MPPT). Gerencia a energia captada pela placa solar fotovoltaica do teto, carrega a bateria LiFePO4 com curva de três estágios (Bulk, Absorption, Float) e faz a gestão híbrida com a rede.',
+        wires: 'Entrada Solar: Cabos solares 4mm² MC4 (Laranja/Vermelho + / Preto -). Bateria: Cabos flexíveis 10mm² para terminais da bateria LiFePO4.',
+        pos: new THREE.Vector3(0.12, 0.76, 0.02),
+        cam: { theta: Math.PI + 0.22, phi: 1.45, radius: 1.55, targetY: 0.76 }
+      },
+      {
+        id: 'hw-battery',
+        num: '6',
+        tag: 'BACKUP SUSTENTÁVEL',
+        title: 'Banco de Baterias LiFePO4 12,8V 40Ah (480 Wh)',
+        desc: 'Bateria de Lítio-Ferro-Fosfato de alta densidade e segurança intrínseca (não inflama) com BMS interno inteligente. Garante mais de 3.500 ciclos de vida útil e autonomia de backup para o Mini-PC, iluminação e controladores caso falte energia na rede 220V do município de Jaú.',
+        wires: 'Conexão: Cabos automotivos 10mm² Vermelho (+) e Preto (-) com fusível de lâmina 30A e terminais olhais M6 estanhados.',
+        pos: new THREE.Vector3(0.0, 0.28, 0.0),
+        cam: { theta: Math.PI, phi: 1.35, radius: 1.65, targetY: 0.28 }
+      },
+      {
+        id: 'hw-modem',
+        num: '7',
+        tag: 'TELEMETRIA SOLAR & ENERGIA',
+        title: 'Módulo de Comunicação Solar & Telemetria MPPT',
+        desc: 'Módulo de comunicação e telemetria inteligente interligando o painel solar fotovoltaico, o banco de bateria de backup e o computador de bordo do totem. Permite leitura contínua da geração solar, nível de carga da bateria e status da rede elétrica 220V sem necessitar de modem de internet nem custos de operadora celular.',
+        wires: 'Comunicação: Cabo blindado de telemetria serial RS485 ligado ao controlador MPPT solar. Alimentação: 12V DC da bateria.',
+        pos: new THREE.Vector3(0.0, 1.75, 0.0),
+        cam: { theta: Math.PI, phi: 1.40, radius: 1.60, targetY: 1.75 }
+      },
+      {
+        id: 'hw-thermal',
+        num: '8',
+        tag: 'GESTÃO TÉRMICA & HVAC',
+        title: 'Sistema de Exaustão Dupla 120mm & Termostato DIN',
+        desc: 'Dois exaustores industriais de alto fluxo com rolamento duplo de esferas (Dual Ball Bearing) nas venezianas superiores traseiras, acionados automaticamente por termostato graduável (ativado se temp > 35°C). Ar fresco entra pela grelha com filtro de poeira G4 na base.',
+        wires: 'Alimentação: 12V DC (1A) ligado aos contatos NA (normalmente abertos) do termostato bimetálico.',
+        pos: new THREE.Vector3(0.0, 1.95, -0.06),
+        cam: { theta: Math.PI, phi: 1.32, radius: 1.65, targetY: 1.95 }
+      },
+      {
+        id: 'hw-grounding',
+        num: '9',
+        tag: 'ATERRAMENTO E FIAÇÃO',
+        title: 'Barramento de Aterramento PE & Canaletas de Cabos',
+        desc: 'Barramento de cobre maciço eletrolítico interligando em estrela todas as partes metálicas (chassi estrutural, porta traseira, suporte da tela, trilhos DIN e fonte) com cordoalha de aterramento verde-amarela de 4mm². Cabos organizados em canaletas perfuradas de PVC cinza.',
+        wires: 'Aterramento equipotencial PE conforme NBR 5410 com impedância menor que 10 ohms medida no chumbador da base.',
+        pos: new THREE.Vector3(-0.08, 0.55, -0.03),
+        cam: { theta: Math.PI - 0.35, phi: 1.42, radius: 1.75, targetY: 0.55 }
+      }
+    ];
+
+    this.renderHotspotPins();
+  }
+
+  renderHotspotPins() {
     const overlayContainer = this.container.querySelector('#totem-3d-hotspots');
     if (!overlayContainer) return;
     overlayContainer.innerHTML = '';
     this.hotspotElements = [];
 
-    this.hotspotsData.forEach(h => {
+    const activeList = this.isHardwareMode ? this.hardwareHotspotsData : this.hotspotsData;
+
+    activeList.forEach(h => {
       const btn = document.createElement('button');
-      btn.className = 'hotspot-pin';
+      btn.className = 'hotspot-pin' + (this.isHardwareMode ? ' pin-hardware' : '');
       btn.setAttribute('data-hotspot', h.id);
       btn.innerHTML = `<span class="pin-num">${h.num}</span><span class="pin-label">${h.title}</span>`;
       btn.addEventListener('click', (e) => {
@@ -1731,9 +2398,24 @@ class Totem3DViewer {
     const card = document.getElementById('totem-3d-info-card');
     const titleEl = document.getElementById('totem-3d-info-title');
     const descEl = document.getElementById('totem-3d-info-desc');
+    const tagEl = document.getElementById('totem-3d-info-tag');
+    const wiresBox = document.getElementById('totem-3d-info-wires');
+    const wiresText = document.getElementById('totem-3d-info-wires-text');
+
     if (card && titleEl && descEl) {
+      if (tagEl) tagEl.textContent = h.tag || (this.isHardwareMode ? 'ESPECIFICAÇÃO DE HARDWARE' : 'ESPECIFICAÇÃO DO DOSSIÊ TÉCNICO');
       titleEl.textContent = `${h.num}. ${h.title}`;
       descEl.textContent = h.desc;
+
+      if (wiresBox && wiresText) {
+        if (h.wires) {
+          wiresBox.classList.remove('hidden');
+          wiresText.textContent = h.wires;
+        } else {
+          wiresBox.classList.add('hidden');
+        }
+      }
+
       card.classList.remove('hidden');
     }
   }
@@ -1954,6 +2636,235 @@ class Totem3DViewer {
         this.hotspotElements.forEach(item => item.el.classList.remove('active'));
       });
     }
+
+    // 9. Controles Específicos da Aba 3 (Hardware & Máquina Aberta)
+    this.setupHardwareControls();
+  }
+
+  // =========================================================================
+  // CONTROLES E MODOS DA ABA 3 (HARDWARE & MÁQUINA ABERTA)
+  // =========================================================================
+  setupHardwareControls() {
+    // 1. Modos de Visão Interna (Porta Aberta 100°, Raio-X Translúcido, Vista Explodida)
+    document.querySelectorAll('[data-hw-view]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-hw-view');
+        this.setHardwareView(mode);
+      });
+    });
+
+    // 2. Destacar Chicote Elétrico (AC 220V e DC 12V)
+    const btnGlowPower = document.getElementById('btn-hw-glow-power');
+    if (btnGlowPower) {
+      btnGlowPower.addEventListener('click', () => this.toggleGlowPower());
+    }
+
+    // 3. Destacar Cabos de Dados (HDMI, USB Touch, Ethernet Cat6)
+    const btnGlowData = document.getElementById('btn-hw-glow-data');
+    if (btnGlowData) {
+      btnGlowData.addEventListener('click', () => this.toggleGlowData());
+    }
+
+    // 4. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 9)
+    const btnHwHotspots = document.getElementById('btn-hw-hotspots');
+    if (btnHwHotspots) {
+      btnHwHotspots.addEventListener('click', () => {
+        this.showHotspots = !this.showHotspots;
+        btnHwHotspots.classList.toggle('active', this.showHotspots);
+        if (!this.showHotspots) {
+          const card = document.getElementById('totem-3d-info-card');
+          if (card) card.classList.add('hidden');
+        }
+      });
+    }
+
+    // 5. Abrir Modal de Diagrama de Fiação Completo
+    const modalSchematics = document.getElementById('modal-hardware-schematics');
+    const openSchematics = () => {
+      if (modalSchematics) {
+        modalSchematics.classList.remove('hidden');
+      }
+    };
+    const closeSchematics = () => {
+      if (modalSchematics) {
+        modalSchematics.classList.add('hidden');
+      }
+    };
+
+    const btnOpenDiagram1 = document.getElementById('btn-open-hw-diagram');
+    const btnOpenDiagram2 = document.getElementById('btn-hw-schematics-modal');
+    if (btnOpenDiagram1) btnOpenDiagram1.addEventListener('click', openSchematics);
+    if (btnOpenDiagram2) btnOpenDiagram2.addEventListener('click', openSchematics);
+
+    const btnCloseDiagram1 = document.getElementById('btn-close-hw-schematics');
+    const btnCloseDiagram2 = document.getElementById('btn-close-hw-schematics-foot');
+    if (btnCloseDiagram1) btnCloseDiagram1.addEventListener('click', closeSchematics);
+    if (btnCloseDiagram2) btnCloseDiagram2.addEventListener('click', closeSchematics);
+
+    if (modalSchematics) {
+      modalSchematics.addEventListener('click', (e) => {
+        if (e.target === modalSchematics) closeSchematics();
+      });
+    }
+
+    // Abas internas do Modal de Hardware (Fiação, Diagrama, BOM, Montagem)
+    document.querySelectorAll('[data-hw-tab]').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        const targetTab = tabBtn.getAttribute('data-hw-tab');
+        document.querySelectorAll('.btn-hw-tab').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+
+        document.querySelectorAll('.hw-tab-pane').forEach(pane => pane.classList.remove('active'));
+        const activePane = document.getElementById(`hw-tab-content-${targetTab}`);
+        if (activePane) activePane.classList.add('active');
+      });
+    });
+  }
+
+  setHardwareMode(active) {
+    this.isHardwareMode = active;
+
+    const extTopbar = document.getElementById('totem-external-topbar');
+    const hwTopbar = document.getElementById('totem-hardware-topbar');
+    const extDock = document.getElementById('totem-external-dock');
+    const hwDock = document.getElementById('totem-hardware-dock');
+
+    if (active) {
+      if (extTopbar) extTopbar.classList.add('hidden');
+      if (hwTopbar) hwTopbar.classList.remove('hidden');
+      if (extDock) extDock.classList.add('hidden');
+      if (hwDock) hwDock.classList.remove('hidden');
+
+      if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
+      this.showHotspots = true;
+      const btnHwHotspots = document.getElementById('btn-hw-hotspots');
+      if (btnHwHotspots) btnHwHotspots.classList.add('active');
+
+      // Aplica o modo de visão atual do hardware (padrão: 'door' - porta aberta 100°)
+      this.setHardwareView(this.hardwareViewMode || 'door');
+    } else {
+      if (extTopbar) extTopbar.classList.remove('hidden');
+      if (hwTopbar) hwTopbar.classList.add('hidden');
+      if (extDock) extDock.classList.remove('hidden');
+      if (hwDock) hwDock.classList.add('hidden');
+
+      // Fecha a porta suavemente e remove transparência
+      this.targetDoorAngle = 0;
+      this.targetExplodeOffset = 0;
+      if (this.dynamicMaterials.body) {
+        this.dynamicMaterials.body.transparent = false;
+        this.dynamicMaterials.body.opacity = 1.0;
+        this.dynamicMaterials.body.needsUpdate = true;
+      }
+      if (this.dynamicMaterials.headerSign) {
+        this.dynamicMaterials.headerSign.transparent = false;
+        this.dynamicMaterials.headerSign.opacity = 1.0;
+        this.dynamicMaterials.headerSign.needsUpdate = true;
+      }
+      if (this.internalHardwareGroup) this.internalHardwareGroup.visible = false;
+
+      // Restaura câmera para visão 3/4 externa
+      this.camState.targetTheta = 0.52;
+      this.camState.targetPhi = 1.32;
+      this.camState.targetRadius = 2.75;
+      this.camState.targetLookY = 1.10;
+    }
+
+    this.renderHotspotPins();
+  }
+
+  setHardwareView(mode) {
+    this.hardwareViewMode = mode;
+    this.autoRotate = false;
+
+    // Reseta transparências prévias
+    if (this.dynamicMaterials.body) {
+      this.dynamicMaterials.body.transparent = false;
+      this.dynamicMaterials.body.opacity = 1.0;
+      this.dynamicMaterials.body.needsUpdate = true;
+    }
+    if (this.dynamicMaterials.headerSign) {
+      this.dynamicMaterials.headerSign.transparent = false;
+      this.dynamicMaterials.headerSign.opacity = 1.0;
+      this.dynamicMaterials.headerSign.needsUpdate = true;
+    }
+    this.targetExplodeOffset = 0;
+
+    if (mode === 'door') {
+      // Porta aberta em 100 graus com visão técnica das costas
+      this.targetDoorAngle = -Math.PI * 0.55;
+      this.camState.targetTheta = Math.PI + 0.30;
+      this.camState.targetPhi = 1.38;
+      this.camState.targetRadius = 2.35;
+      this.camState.targetLookY = 1.15;
+    } else if (mode === 'xray') {
+      // Carcaça translúcida / Raio-X
+      this.targetDoorAngle = 0;
+      if (this.dynamicMaterials.body) {
+        this.dynamicMaterials.body.transparent = true;
+        this.dynamicMaterials.body.opacity = 0.22;
+        this.dynamicMaterials.body.needsUpdate = true;
+      }
+      if (this.dynamicMaterials.headerSign) {
+        this.dynamicMaterials.headerSign.transparent = true;
+        this.dynamicMaterials.headerSign.opacity = 0.25;
+        this.dynamicMaterials.headerSign.needsUpdate = true;
+      }
+      this.camState.targetTheta = 0.75;
+      this.camState.targetPhi = 1.30;
+      this.camState.targetRadius = 2.60;
+      this.camState.targetLookY = 1.10;
+    } else if (mode === 'exploded') {
+      // Vista explodida em camadas
+      this.targetDoorAngle = -Math.PI * 0.40;
+      this.targetExplodeOffset = 0.32;
+      this.camState.targetTheta = 0.95;
+      this.camState.targetPhi = 1.25;
+      this.camState.targetRadius = 3.10;
+      this.camState.targetLookY = 1.10;
+    }
+
+    document.querySelectorAll('[data-hw-view]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-hw-view') === mode);
+    });
+  }
+
+  toggleGlowPower() {
+    this.glowPowerWiring = !this.glowPowerWiring;
+    const intensity = this.glowPowerWiring ? 0.95 : 0.0;
+    if (this.hardwareWiringMaterials.acLive) {
+      this.hardwareWiringMaterials.acLive.emissive = new THREE.Color(this.glowPowerWiring ? 0xd97706 : 0x000000);
+      this.hardwareWiringMaterials.acLive.emissiveIntensity = intensity;
+    }
+    if (this.hardwareWiringMaterials.dc12vPos) {
+      this.hardwareWiringMaterials.dc12vPos.emissive = new THREE.Color(this.glowPowerWiring ? 0xef4444 : 0x000000);
+      this.hardwareWiringMaterials.dc12vPos.emissiveIntensity = intensity;
+    }
+    if (this.hardwareWiringMaterials.solarPos) {
+      this.hardwareWiringMaterials.solarPos.emissive = new THREE.Color(this.glowPowerWiring ? 0xf97316 : 0x000000);
+      this.hardwareWiringMaterials.solarPos.emissiveIntensity = intensity;
+    }
+    const btn = document.getElementById('btn-hw-glow-power');
+    if (btn) btn.classList.toggle('active', this.glowPowerWiring);
+  }
+
+  toggleGlowData() {
+    this.glowDataWiring = !this.glowDataWiring;
+    const intensity = this.glowDataWiring ? 0.95 : 0.0;
+    if (this.hardwareWiringMaterials.hdmi) {
+      this.hardwareWiringMaterials.hdmi.emissive = new THREE.Color(this.glowDataWiring ? 0x2563eb : 0x000000);
+      this.hardwareWiringMaterials.hdmi.emissiveIntensity = intensity;
+    }
+    if (this.hardwareWiringMaterials.usb) {
+      this.hardwareWiringMaterials.usb.emissive = new THREE.Color(this.glowDataWiring ? 0xeab308 : 0x000000);
+      this.hardwareWiringMaterials.usb.emissiveIntensity = intensity;
+    }
+    if (this.hardwareWiringMaterials.ethernet) {
+      this.hardwareWiringMaterials.ethernet.emissive = new THREE.Color(this.glowDataWiring ? 0x22c55e : 0x000000);
+      this.hardwareWiringMaterials.ethernet.emissiveIntensity = intensity;
+    }
+    const btn = document.getElementById('btn-hw-glow-data');
+    if (btn) btn.classList.toggle('active', this.glowDataWiring);
   }
 
   // =========================================================================
@@ -2278,12 +3189,16 @@ class Totem3DViewer {
     }
   }
 
-  // Sincroniza estado com o app 2D (telas, modo vitrine, standby, cadeirante, alto contraste)
+  // Sincroniza estado com o app 2D (telas, modo vitrine, standby, cadeirante, alto contraste, vlibras)
   syncFromApp(stateObj) {
     if (!stateObj) return;
     if (stateObj.screenState !== undefined) this.screenState = stateObj.screenState;
     if (stateObj.isWheelchair !== undefined) this.isWheelchair = stateObj.isWheelchair;
     if (stateObj.isHighContrast !== undefined) this.isHighContrast = stateObj.isHighContrast;
+    if (stateObj.isVLibrasActive !== undefined) this.showVLibrasBox = stateObj.isVLibrasActive;
+    if (stateObj.vlibrasSub !== undefined) this.vlibrasSub = stateObj.vlibrasSub;
+    if (stateObj.isInterpretingLibras !== undefined) this.isInterpretingLibras = stateObj.isInterpretingLibras;
+    if (stateObj.librasPose !== undefined) this.librasPose = stateObj.librasPose;
     this.updateScreenTexture();
   }
 
@@ -2354,13 +3269,30 @@ class Totem3DViewer {
     this.camera.position.y = this.camState.targetY + r * Math.cos(phi);
     this.camera.position.z = r * Math.sin(phi) * Math.cos(theta);
 
+    // Mantém o foco da câmera ESTRITAMENTE travado no centro exato do Totem (eixo X=0, Z=0)
     this.camera.lookAt(0, this.camState.targetY, 0);
 
-    // Atualiza indicador de ângulo em graus (0° a 360°) na UI
+    // Atualiza mostrador numérico de ângulo 360° em tempo real
     const degEl = document.getElementById('totem-3d-angle-deg');
     if (degEl) {
-      const normalizedDeg = Math.round((((theta * 180 / Math.PI) % 360) + 360) % 360);
-      degEl.textContent = `${normalizedDeg}°`;
+      let deg = Math.round((this.camState.theta * 180 / Math.PI) % 360);
+      if (deg < 0) deg += 360;
+      degEl.textContent = `${deg}°`;
+    }
+
+    // Animação suave de abertura/fechamento da porta traseira (Aba 3)
+    if (this.rearDoorHingeGroup) {
+      this.currentDoorAngle += (this.targetDoorAngle - this.currentDoorAngle) * 0.10;
+      this.rearDoorHingeGroup.rotation.y = this.currentDoorAngle;
+    }
+
+    // Animação suave de vista explodida
+    this.currentExplodeOffset += (this.targetExplodeOffset - this.currentExplodeOffset) * 0.10;
+    if (this.mainCabinetMesh) {
+      this.mainCabinetMesh.position.x = 0.346 + this.currentExplodeOffset;
+    }
+    if (this.rearDoorHingeGroup) {
+      this.rearDoorHingeGroup.position.z = -0.178 - this.currentExplodeOffset * 1.5;
     }
 
     this.renderer.render(this.scene, this.camera);

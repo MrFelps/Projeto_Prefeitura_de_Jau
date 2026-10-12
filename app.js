@@ -33,6 +33,8 @@ class TotemApp {
     this.setupClock();
     this.setupNavigation();
     this.setupAccessibility();
+    this.setupModals();
+    this.setupLibrasClickReader();
     this.setupSimulatorControls();
     this.setupEnergyTimer();
     this.setupDOOHCarousel();
@@ -144,24 +146,44 @@ class TotemApp {
     // Botão de Libras
     const btnVLibras = document.getElementById('btn-vlibras');
     const vlibrasBox = document.getElementById('vlibras-kiosk-box');
+    const btnCloseVLibras = document.getElementById('btn-close-vlibras');
     
-    const handleVLibrasToggle = () => {
-      if (btnVLibras) btnVLibras.classList.toggle('active');
+    const setVLibrasVisible = (show) => {
+      this.isVLibrasActive = show;
+      const totemScreen = document.getElementById('totem-screen');
+      if (totemScreen) totemScreen.classList.toggle('libras-active', show);
       if (vlibrasBox) {
-        vlibrasBox.classList.toggle('active');
-        vlibrasBox.style.transform = 'scale(1.08)';
-        setTimeout(() => { if (vlibrasBox) vlibrasBox.style.transform = ''; }, 300);
+        if (show) {
+          vlibrasBox.classList.remove('hidden');
+          this.initVLibras();
+          if (this.playLibrasSequence) {
+            this.playLibrasSequence('Olá! Bem-vindo ao Totem de Jaú. Toque em qualquer texto.');
+          }
+          this.falar('Tradutor de Libras ativado. Toque em qualquer item para ver a tradução em sinais.');
+        } else {
+          vlibrasBox.classList.add('hidden');
+          vlibrasBox.classList.remove('interpreting');
+          clearInterval(this._librasStepInterval);
+          clearTimeout(this._librasTimeout);
+          this.falar('Tradutor de Libras fechado.');
+        }
       }
-      this.initVLibras();
+      if (btnVLibras) btnVLibras.classList.toggle('active', show);
+      if (this.viewer3D) {
+        this.viewer3D.syncFromApp({ isVLibrasActive: show, isInterpretingLibras: false });
+      }
     };
 
     if (btnVLibras) {
-      btnVLibras.addEventListener('click', handleVLibrasToggle);
+      btnVLibras.addEventListener('click', () => {
+        const isCurrentlyHidden = vlibrasBox ? vlibrasBox.classList.contains('hidden') : true;
+        setVLibrasVisible(isCurrentlyHidden);
+      });
     }
-    if (vlibrasBox) {
-      vlibrasBox.addEventListener('click', () => {
-        handleVLibrasToggle();
-        this.falar('VLibras: Intérprete virtual do Governo Federal ativo.');
+    if (btnCloseVLibras) {
+      btnCloseVLibras.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setVLibrasVisible(false);
       });
     }
 
@@ -325,14 +347,22 @@ class TotemApp {
     const btnFloatFullscreen = document.getElementById('btn-float-fullscreen');
 
     // Auto-colapsar em tablets e telas verticais no carregamento inicial
+    // Sincroniza estado de classe no body para ajustes finos de layout
+    const syncPanelBodyClass = () => {
+      const isCollapsed = simulatorPanel ? simulatorPanel.classList.contains('collapsed') : true;
+      document.body.classList.toggle('panel-collapsed', isCollapsed);
+    };
+
     if (window.innerWidth <= 1024 && simulatorPanel) {
       simulatorPanel.classList.add('collapsed');
     }
+    syncPanelBodyClass();
 
     // BOTÃO DE 3 PONTINHOS: Recolhe ou Abre a Aba Lateral
     const toggleSidebar = () => {
       if (!simulatorPanel) return;
       simulatorPanel.classList.toggle('collapsed');
+      syncPanelBodyClass();
       if (this.viewer3D) {
         setTimeout(() => this.viewer3D.handleResize(), 350);
       }
@@ -341,6 +371,7 @@ class TotemApp {
     if (btnTogglePanel) btnTogglePanel.addEventListener('click', toggleSidebar);
     if (btnClosePanel) btnClosePanel.addEventListener('click', () => {
       if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+      syncPanelBodyClass();
       if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 350);
     });
 
@@ -360,68 +391,89 @@ class TotemApp {
       });
     }
 
-    // BOTÃO "📱 VER MENU DO TOTEM": Abre a tela 2D por cima do 3D sem distorção
-    const btnOpenMenuModal = document.getElementById('btn-open-menu-modal');
-    const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
+    // GERENCIAMENTO DAS 3 ABAS PRINCIPAIS DO PROJETO:
+    // Aba 1: 📱 Menu 2D Touch
+    // Aba 2: 🧊 Totem 3D Externo (360°)
+    // Aba 3: 🔌 Hardware & Máquina Aberta 3D (Novo!)
     const menuOverlay = document.getElementById('totem-menu-overlay');
-
-    if (btnOpenMenuModal) {
-      btnOpenMenuModal.addEventListener('click', () => {
-        if (menuOverlay) {
-          menuOverlay.classList.remove('hidden');
-          this.resetInactivityTimer();
-          this.falar('Abrindo menu interativo do totem.');
-        }
-      });
-    }
-
-    if (btnCloseMenuOverlay) {
-      btnCloseMenuOverlay.addEventListener('click', () => {
-        if (menuOverlay) {
-          menuOverlay.classList.add('hidden');
-          if (this.viewer3D) {
-            setTimeout(() => this.viewer3D.handleResize(), 50);
-          }
-        }
-      });
-    }
-
-    // Toggle Moldura 2D vs Tela Cheia vs Visão 3D 360° (pelo painel lateral)
-    const btnToggleFrame = document.getElementById('btn-toggle-frame');
-    const btnFullscreen = document.getElementById('btn-fullscreen');
-    const btnToggle3D = document.getElementById('btn-toggle-3d');
-    const chassis = document.getElementById('totem-chassis');
+    const btnCloseMenuOverlay = document.getElementById('btn-close-menu-overlay');
     const stage3D = document.getElementById('totem-3d-stage');
 
-    const activateMode = (mode) => {
-      [btnToggleFrame, btnFullscreen, btnToggle3D].forEach(b => b && b.classList.remove('active'));
+    const tabButtons = {
+      'menu': [document.getElementById('btn-tab-menu'), document.getElementById('btn-toggle-frame')],
+      '3d-external': [document.getElementById('btn-tab-3d-external'), document.getElementById('btn-toggle-3d')],
+      '3d-hardware': [document.getElementById('btn-tab-3d-hardware'), document.getElementById('btn-toggle-hardware')]
+    };
 
-      if (mode === '3d') {
+    const activateTab = (tabId) => {
+      // Remove classe active de todos os botões de abas
+      Object.values(tabButtons).flat().forEach(btn => btn && btn.classList.remove('active'));
+
+      // Ativa botões da aba selecionada
+      if (tabButtons[tabId]) {
+        tabButtons[tabId].forEach(btn => btn && btn.classList.add('active'));
+      }
+
+      if (tabId === 'menu') {
+        if (menuOverlay) menuOverlay.classList.remove('hidden');
+        this.resetInactivityTimer();
+        this.falar('Abrindo menu interativo do totem.');
+      } else if (tabId === '3d-external') {
         if (menuOverlay) menuOverlay.classList.add('hidden');
         if (stage3D) stage3D.classList.remove('hidden');
-        if (btnToggle3D) btnToggle3D.classList.add('active');
-        // Na visão 3D, recolhe a aba lateral automaticamente no tablet para ver só o totem
-        if (window.innerWidth <= 1024 && simulatorPanel) {
-          simulatorPanel.classList.add('collapsed');
-        }
         if (this.viewer3D) {
+          this.viewer3D.setHardwareMode(false);
           setTimeout(() => this.viewer3D.handleResize(), 100);
         }
-      } else if (mode === 'frame' || mode === 'fullscreen') {
-        // Abre o menu do totem
-        if (menuOverlay) menuOverlay.classList.remove('hidden');
-        if (mode === 'frame') {
-          if (btnToggleFrame) btnToggleFrame.classList.add('active');
-        } else {
-          if (btnFullscreen) btnFullscreen.classList.add('active');
-          if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+        if (window.innerWidth <= 1024 && simulatorPanel) {
+          simulatorPanel.classList.add('collapsed');
+          syncPanelBodyClass();
         }
+      } else if (tabId === '3d-hardware') {
+        if (menuOverlay) menuOverlay.classList.add('hidden');
+        if (stage3D) stage3D.classList.remove('hidden');
+        if (this.viewer3D) {
+          this.viewer3D.setHardwareMode(true);
+          setTimeout(() => this.viewer3D.handleResize(), 100);
+        }
+        if (window.innerWidth <= 1024 && simulatorPanel) {
+          simulatorPanel.classList.add('collapsed');
+          syncPanelBodyClass();
+        }
+        this.falar('Visualizando arquitetura e hardware interno da máquina.');
       }
     };
 
-    if (btnToggleFrame) btnToggleFrame.addEventListener('click', () => activateMode('frame'));
-    if (btnFullscreen) btnFullscreen.addEventListener('click', () => activateMode('fullscreen'));
-    if (btnToggle3D) btnToggle3D.addEventListener('click', () => activateMode('3d'));
+    // Listeners das 3 Abas na Barra Superior
+    const btnTabMenu = document.getElementById('btn-tab-menu');
+    const btnTab3dExt = document.getElementById('btn-tab-3d-external');
+    const btnTab3dHw = document.getElementById('btn-tab-3d-hardware');
+    if (btnTabMenu) btnTabMenu.addEventListener('click', () => activateTab('menu'));
+    if (btnTab3dExt) btnTab3dExt.addEventListener('click', () => activateTab('3d-external'));
+    if (btnTab3dHw) btnTab3dHw.addEventListener('click', () => activateTab('3d-hardware'));
+
+    // Listeners das Abas no Painel Lateral do Simulador
+    const btnToggleFrame = document.getElementById('btn-toggle-frame');
+    const btnToggle3D = document.getElementById('btn-toggle-3d');
+    const btnToggleHw = document.getElementById('btn-toggle-hardware');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+
+    if (btnToggleFrame) btnToggleFrame.addEventListener('click', () => activateTab('menu'));
+    if (btnToggle3D) btnToggle3D.addEventListener('click', () => activateTab('3d-external'));
+    if (btnToggleHw) btnToggleHw.addEventListener('click', () => activateTab('3d-hardware'));
+
+    if (btnCloseMenuOverlay) {
+      btnCloseMenuOverlay.addEventListener('click', () => {
+        activateTab('3d-external');
+      });
+    }
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', () => {
+        activateTab('menu');
+        if (simulatorPanel) simulatorPanel.classList.add('collapsed');
+      });
+    }
 
     // Seletor rápido de telas dentro do Estúdio 3D
     document.querySelectorAll('[data-3d-screen]').forEach(btn => {
@@ -485,11 +537,17 @@ class TotemApp {
     });
   }
 
-  // 8. MODAL DE QR CODE DINÂMICO
-  showBusDetails(title, route, times) {
-    const url = `https://maps.google.com/?q=Jau+Onibus+${encodeURIComponent(title)}`;
-    this.openQRModal(title, `Itinerário: ${route} | Próximas saídas: ${times}`, url);
-    this.falar(`Detalhes da ${title}. Aponte a câmera para levar os horários no celular.`);
+  // 8. MODAL DE QR CODE DINÂMICO (MOSTRA ONDE É O PONTO NO MAPA)
+  showBusDetails(title, route, times, mapUrl) {
+    const url = mapUrl || `https://maps.google.com/?q=Ponto+de+Onibus+Jau+${encodeURIComponent(title)}`;
+    this.openQRModal(title, `📍 ${route} | Horários: ${times}`, url);
+    this.falar(`Localização do ponto: ${title}. Aponte a câmera para ver no mapa onde é o ponto e os horários.`);
+  }
+
+  showPointLocationQR(title, addressDesc, mapUrl) {
+    const url = mapUrl || 'https://maps.google.com/?q=Praca+da+Republica+Jau+SP';
+    this.openQRModal(title, `📍 Localização exata do ponto: ${addressDesc}`, url);
+    this.falar(`${title}. Escaneie o QR Code para ver no celular onde é o ponto.`);
   }
 
   showStoreQR(name, address, mapUrl) {
@@ -530,13 +588,243 @@ class TotemApp {
     this.openModal('modal-qr');
   }
 
+  showEsgModal() {
+    this.openModal('modal-esg-advantages');
+    this.falar('Vantagens ambientais e compromisso ESG do Totem Inteligente de Jaú. Sistema paperless, energia solar limpa e inclusão social.');
+  }
+
+  closeEsgModal() {
+    const modalEsg = document.getElementById('modal-esg-advantages');
+    if (modalEsg) modalEsg.classList.add('hidden');
+    this.resetInactivityTimer();
+  }
+
+  // 8. MODAL DE QR CODE DINÂMICO E FECHAMENTO INTELIGENTE
+  setupModals() {
+    // 1. Fechar Modal de QR Code ao clicar no fundo escuro (backdrop)
+    const modalQR = document.getElementById('modal-qr');
+    if (modalQR) {
+      const qrCard = modalQR.querySelector('.modal-card');
+      if (qrCard) qrCard.addEventListener('click', (e) => e.stopPropagation());
+
+      ['click', 'touchend'].forEach(evt => {
+        modalQR.addEventListener(evt, (e) => {
+          if (e.target === modalQR) {
+            this.closeModal();
+          }
+        });
+      });
+    }
+
+    // 2. Fechar Modal de Vantagens ESG ao clicar no backdrop
+    const modalEsg = document.getElementById('modal-esg-advantages');
+    if (modalEsg) {
+      const esgCard = modalEsg.querySelector('.modal-card-esg');
+      if (esgCard) esgCard.addEventListener('click', (e) => e.stopPropagation());
+
+      ['click', 'touchend'].forEach(evt => {
+        modalEsg.addEventListener(evt, (e) => {
+          if (e.target === modalEsg) {
+            this.closeEsgModal();
+          }
+        });
+      });
+    }
+
+    // 3. Fechar Tela de Contatos de Socorro ao clicar fora do painel central
+    const modalContacts = document.getElementById('modal-contacts');
+    if (modalContacts) {
+      const contactsPanel = modalContacts.querySelector('.contacts-central-panel');
+      if (contactsPanel) contactsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+      ['click', 'touchend'].forEach(evt => {
+        modalContacts.addEventListener(evt, (e) => {
+          if (e.target === modalContacts || e.target.classList.contains('frosted-side')) {
+            this.closeModal();
+          }
+        });
+      });
+    }
+
+    // 4. Suporte universal a tecla Esc para fechar qualquer modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal();
+        this.closeEsgModal();
+      }
+    });
+  }
+
+  // 9. LEITOR INTERATIVO DE LIBRAS: ONDE CLICAR OU SELECIONAR, O BONECO INTERPRETA PALAVRA POR PALAVRA
+  setupLibrasClickReader() {
+    const totemScreen = document.getElementById('totem-screen');
+    if (!totemScreen) return;
+
+    this._lastLibrasText = 'Olá! Bem-vindo ao Totem de Jaú.';
+
+    this.playLibrasSequence = (rawText, targetEl) => {
+      if (!rawText) return;
+      const clean = rawText.trim().replace(/\s+/g, ' ');
+      if (!clean || clean.length < 2) return;
+
+      this._lastLibrasText = clean;
+
+      const subText = document.getElementById('vlibras-subtitle-text');
+      const vlibrasBox = document.getElementById('vlibras-kiosk-box');
+      const signBadge = document.getElementById('vlibras-sign-badge');
+      const statusTag = document.getElementById('vlibras-status-tag');
+
+      // Formata a legenda (exibe texto resumido legível)
+      const preview = clean.length > 64 ? clean.substring(0, 61) + '...' : clean;
+
+      // Extrai palavras significativas (sinais da frase em Libras)
+      const rawWords = preview
+        .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 2);
+      const signWords = rawWords.length > 0 ? rawWords.slice(0, 10) : [preview];
+
+      // Efeito de destaque visual no elemento clicado
+      if (targetEl) {
+        document.querySelectorAll('.libras-inspecting').forEach(el => el.classList.remove('libras-inspecting'));
+        targetEl.classList.add('libras-inspecting');
+        setTimeout(() => targetEl.classList.remove('libras-inspecting'), 2200);
+      }
+
+      clearInterval(this._librasStepInterval);
+      clearTimeout(this._librasTimeout);
+
+      if (vlibrasBox) {
+        vlibrasBox.classList.add('interpreting');
+      }
+      if (statusTag) {
+        statusTag.textContent = 'SINALIZANDO...';
+      }
+
+      let step = 0;
+      const totalSteps = signWords.length;
+
+      const renderSignStep = () => {
+        if (step >= totalSteps) {
+          clearInterval(this._librasStepInterval);
+          if (vlibrasBox) {
+            vlibrasBox.classList.remove('interpreting');
+            vlibrasBox.removeAttribute('data-pose');
+          }
+          if (signBadge) {
+            signBadge.textContent = '🤟 TRADUÇÃO CONCLUÍDA';
+          }
+          if (statusTag) {
+            statusTag.textContent = 'LIBRAS • AO VIVO';
+          }
+          if (subText) {
+            subText.textContent = preview;
+          }
+          if (this.viewer3D) {
+            this.viewer3D.syncFromApp({ vlibrasSub: preview, isInterpretingLibras: false, librasPose: 0 });
+          }
+          return;
+        }
+
+        const currentWord = signWords[step];
+        const poseIndex = step % 4;
+
+        if (vlibrasBox) {
+          vlibrasBox.setAttribute('data-pose', String(poseIndex));
+        }
+        if (signBadge) {
+          signBadge.textContent = `🤟 SINAL [${step + 1}/${totalSteps}]: ${currentWord.toUpperCase()}`;
+        }
+
+        // Destaca a palavra atual na legenda
+        if (subText) {
+          subText.innerHTML = signWords
+            .map((w, idx) => idx === step ? `<span class="libras-word-active">${w}</span>` : w)
+            .join(' ');
+        }
+
+        // Sincroniza pose do boneco com o Totem 3D
+        if (this.viewer3D) {
+          this.viewer3D.syncFromApp({
+            vlibrasSub: `${currentWord.toUpperCase()} (${step + 1}/${totalSteps})`,
+            isInterpretingLibras: true,
+            librasPose: poseIndex
+          });
+        }
+
+        step++;
+      };
+
+      // Executa o primeiro sinal imediatamente e avança palavra por palavra
+      renderSignStep();
+      this._librasStepInterval = setInterval(renderSignStep, 680);
+
+      // Se síntese de voz também estiver ativa, vocaliza
+      if (this.isVoiceActive) {
+        this.falar(preview);
+      }
+    };
+
+    // Botão de repetir sinais ou clique no palco do boneco
+    const btnReplay = document.getElementById('btn-replay-libras');
+    const avatarStage = document.querySelector('.vlibras-avatar-stage');
+    if (btnReplay) {
+      btnReplay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playLibrasSequence(this._lastLibrasText);
+      });
+    }
+    if (avatarStage) {
+      avatarStage.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playLibrasSequence(this._lastLibrasText);
+      });
+    }
+
+    // Suporte a seleção de texto com o mouse/toque
+    document.addEventListener('mouseup', () => {
+      if (!this.isVLibrasActive) return;
+      const sel = window.getSelection ? window.getSelection().toString().trim() : '';
+      if (sel && sel.length >= 2) {
+        this.playLibrasSequence(sel);
+      }
+    });
+
+    totemScreen.addEventListener('click', (e) => {
+      if (!this.isVLibrasActive) return;
+
+      // Ignora cliques dentro da própria caixinha do VLibras ou nos botões de controle
+      if (e.target.closest('#vlibras-kiosk-box') || 
+          e.target.closest('#btn-vlibras') || 
+          e.target.closest('.modal-close') || 
+          e.target.closest('.btn-close-contacts')) {
+        return;
+      }
+
+      // Procura o elemento mais significativo com texto
+      const candidate = e.target.closest(
+        '.module-card, .bus-item, .store-card, .tour-card, .phone-btn, .contact-card, .filter-tab, .quick-service-pill, ' +
+        '.featured-strip, .alert-banner, .brand-title, .brand-sub, .temp, .date, .time, .dooh-carousel, ' +
+        'h1, h2, h3, h4, p, button, .screen-subhead'
+      ) || e.target;
+
+      if (candidate && candidate.innerText) {
+        this.playLibrasSequence(candidate.innerText, candidate);
+      }
+    }, true);
+  }
+
   openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.classList.remove('hidden');
   }
 
   closeModal() {
-    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
+    const modalQR = document.getElementById('modal-qr');
+    if (modalQR) modalQR.classList.add('hidden');
+    const modalContacts = document.getElementById('modal-contacts');
+    if (modalContacts) modalContacts.classList.add('hidden');
+    document.querySelectorAll('.modal-backdrop, .contacts-screen-backdrop').forEach(m => m.classList.add('hidden'));
     this.resetInactivityTimer();
   }
 }
