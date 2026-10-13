@@ -572,130 +572,73 @@ body:not(.panel-collapsed) .tablet-top-actions {
   overflow: hidden;
 }
 
-/* CABEÇALHO OFICIAL GOV.BR (COMPACTO COM LATERAIS MENORES) */
+/* CABEÇALHO 100% INFORMATIVO (SEM BOTÕES NO ALTO - LEITURA RÁPIDA NA PRAÇA) */
 .totem-header {
-  padding: 6px 12px 8px;
+  padding: 6px 14px 8px;
   flex-shrink: 0;
   background: var(--gov-white-pure);
-  border-bottom: 3px solid var(--gov-green); /* Filete Verde Gov */
+  border-bottom: 3px solid var(--gov-green);
   box-shadow: 0 2px 8px rgba(0, 51, 102, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   z-index: 10;
 }
 
-/* BARRA GOV.BR INSTITUCIONAL */
 .gov-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--gov-gray-border);
-  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
 }
 
-.gov-brand-flag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.gov-text-logo {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--gov-blue-dark);
-  letter-spacing: -0.5px;
-}
-
-.gov-dot {
-  color: var(--gov-gold-dark);
-}
-
-.gov-sep {
-  color: var(--gov-gray-border);
-  font-weight: 300;
-  font-size: 13px;
-}
-
-.gov-city-badge {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--gov-text-muted);
-}
-
-.gov-portal-tag {
-  font-size: 9px;
-  font-weight: 800;
-  color: var(--gov-blue);
-  background: #e9f2ff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.gov-top-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.btn-top-esg {
+.gov-location-indicator {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 9.5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gov-text-muted);
+}
+
+.gov-location-indicator strong {
+  color: var(--gov-blue-dark);
   font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
-  border: 1px solid #22c55e;
-  padding: 3px 9px;
-  border-radius: 6px;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);
-  transition: all 0.2s ease;
 }
 
-.btn-top-esg:hover {
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.45);
-}
-
-.btn-top-esg svg {
-  fill: #86efac;
-  flex-shrink: 0;
-}
-
-.btn-top-point-qr {
-  font-size: 9.5px;
+.gov-solar-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
   font-weight: 800;
-  color: #ffffff;
-  background: #0c326f;
-  border: 1px solid #1351b4;
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  transition: all 0.15s ease;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
-.btn-top-point-qr:hover {
-  background: #1351b4;
-  transform: scale(1.03);
+.solar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 6px #16a34a;
 }
 
-.header-brand {
+.header-main-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .logo-box {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .city-crest {
@@ -712,10 +655,11 @@ body:not(.panel-collapsed) .tablet-top-actions {
 }
 
 .brand-title {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 15.5px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
   color: var(--gov-blue-dark);
+  line-height: 1.15;
 }
 
 .brand-sub {
@@ -725,28 +669,35 @@ body:not(.panel-collapsed) .tablet-top-actions {
   display: block;
 }
 
-.header-info {
+.header-telemetry {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   background: var(--gov-white-ice);
-  padding: 8px 14px;
+  padding: 5px 12px;
   border-radius: 8px;
   border: 1px solid var(--gov-gray-border);
+}
+
+.header-divider {
+  width: 1px;
+  height: 26px;
+  background: #cbd5e1;
 }
 
 .weather-widget {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .weather-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #d97706;
   flex-shrink: 0;
 }
 
@@ -754,13 +705,14 @@ body:not(.panel-collapsed) .tablet-top-actions {
   font-weight: 800;
   font-size: 14px;
   color: var(--gov-blue-dark);
+  line-height: 1.1;
 }
 
 .city-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--gov-text-muted);
   display: block;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .clock-widget {
@@ -769,16 +721,17 @@ body:not(.panel-collapsed) .tablet-top-actions {
 
 .clock-widget .time {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--gov-blue);
   display: block;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
 .clock-widget .date {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--gov-text-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* LAYOUT CENTRAL DO TOTEM: MENU LATERAL DE ACESSIBILIDADE + CONTEÚDO */
@@ -792,64 +745,87 @@ body:not(.panel-collapsed) .tablet-top-actions {
   background: var(--gov-white-ice);
 }
 
-/* MENU LATERAL DE ACESSIBILIDADE OFICIAL (ABNT NBR 9050 / GOV.BR) */
-/* Coluna ampliada para 168px para dar mais presença e espaço horizontal aos botões */
+/* MENU LATERAL DE ACESSIBILIDADE: COMPACTO E COM CONTROLES NA METADE INFERIOR (ALCANCE NBR 9050) */
 .kiosk-access-sidebar {
-  width: 168px;
+  width: 126px;
   background: var(--gov-blue-dark);
   border-right: 3px solid var(--gov-gold);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  padding: 14px 10px;
-  gap: 10px;
+  padding: 10px 9px;
   flex-shrink: 0;
   z-index: 30;
-  box-shadow: 4px 0 18px rgba(12, 50, 111, 0.28);
+  box-shadow: 4px 0 18px rgba(12, 50, 111, 0.25);
   user-select: none;
   -webkit-user-select: none;
   transition: transform 0.4s ease;
   box-sizing: border-box;
 }
 
+.sidebar-top-notice {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .sidebar-pill-tag {
   width: 100%;
   background: var(--gov-gold);
   color: var(--gov-blue-dark);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 900;
-  padding: 5px 0;
+  padding: 4px 0;
   border-radius: 6px;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   text-align: center;
-  margin-bottom: 2px;
   box-sizing: border-box;
 }
 
-/* Os 4 botões de acessibilidade ocupam 100% da largura da coluna, sem esticar para baixo */
+.sidebar-ergo-hint {
+  font-size: 9px;
+  font-weight: 700;
+  color: #93c5fd;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Agrupa todos os botões clicáveis na metade inferior da tela para alcance imediato */
+.sidebar-controls-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: auto;
+}
+
 .btn-sidebar-access {
   width: 100%;
-  height: 54px;
-  min-height: 54px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1.5px solid rgba(255, 255, 255, 0.30);
+  height: 84px;
+  min-height: 72px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 2px solid rgba(255, 255, 255, 0.32);
   color: #ffffff;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 0 14px;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .btn-sidebar-access .sb-icon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -858,17 +834,17 @@ body:not(.panel-collapsed) .tablet-top-actions {
 }
 
 .btn-sidebar-access .sb-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: block;
   flex-shrink: 0;
 }
 
 .btn-sidebar-access .sb-txt {
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 800;
   letter-spacing: -0.2px;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -876,7 +852,7 @@ body:not(.panel-collapsed) .tablet-top-actions {
   background: var(--gov-gold);
   color: var(--gov-blue-dark);
   border-color: var(--gov-gold-dark);
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .btn-sidebar-access.active {
@@ -884,47 +860,50 @@ body:not(.panel-collapsed) .tablet-top-actions {
   color: var(--gov-blue-dark);
   border-color: var(--gov-gold-dark);
   font-weight: 900;
-  box-shadow: 0 0 12px rgba(255, 205, 7, 0.65);
+  box-shadow: 0 0 14px rgba(255, 205, 7, 0.65);
 }
 
-.sb-divider {
-  width: 100%;
-  height: 1.5px;
-  background: rgba(255, 255, 255, 0.22);
-  margin: 2px 0;
-}
-
-/* Grupo dos 2 botões de fonte (A+ e A-) lado a lado para economizar altura */
+/* Grupo dos 2 botões de fonte (A+ Maior e A- Normal) */
 .sidebar-font-group {
   width: 100%;
   display: flex;
-  gap: 8px;
+  gap: 5px;
   justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .btn-sidebar-access.btn-font-mini {
   flex: 1;
   width: auto;
-  height: 50px;
-  min-height: 50px;
-  padding: 4px;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  padding: 2px 3px;
+  border-radius: 8px;
+  border-width: 1.5px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
+  box-shadow: none;
 }
 
-.btn-sidebar-access.btn-font-mini .font-ctrl-txt {
-  font-size: 16px;
+.btn-sidebar-access.btn-font-mini .sb-icon.font-ctrl-txt {
+  width: auto;
+  height: auto;
+  font-size: 13px;
   font-weight: 900;
   line-height: 1;
 }
 
 .btn-sidebar-access.btn-font-mini .sb-txt {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 9.5px;
+  font-weight: 700;
   text-align: center;
+  letter-spacing: -0.3px;
 }
 
 /* Prevenção universal de distorção de SVG em todo o totem */

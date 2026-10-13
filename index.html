@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261012_v5">
+  <link rel="stylesheet" href="style.css?v=20261012_v7">
   <style>
     /* Garantir zero aba lateral e 100% da tela ocupada pelo fundo 3D */
     html, body {
@@ -223,11 +223,13 @@
         <div id="screen-sleep-overlay" class="sleep-overlay hidden">
           <div class="sleep-radar"></div>
           <div class="sleep-content">
-            <span class="sleep-icon">🌙</span>
-            <h2>MODO ECONOMIA DE ENERGIA (ESG)</h2>
-            <p>Horário Noturno: Backlight Reduzido a 10% (Consumo: 15W)</p>
+            <span class="sleep-icon">
+              <svg viewBox="0 0 24 24" width="44" height="44" fill="#38bdf8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </span>
+            <h2>ECONOMIA NOTURNA ATIVA</h2>
+            <p>Brilho reduzido automaticamente (15W)</p>
             <div class="wake-hint">
-              <span class="pulse-dot"></span> Aproxime-se ou toque na tela para ativar
+              <span class="pulse-dot"></span> Toque na tela para usar
             </div>
           </div>
         </div>
@@ -235,65 +237,70 @@
         <!-- OVERLAY: MODO VITRINE DINÂMICA (OCIOSO APÓS 45s) -->
         <div id="screen-idle-overlay" class="idle-overlay hidden">
           <div class="idle-slide">
-            <div class="idle-badge">Jaú Conectada • Cidade Inteligente</div>
-            <h1 id="idle-title">Bem-vindo à Capital do Calçado Feminino</h1>
-            <p id="idle-desc">Toque em qualquer lugar da tela para consultar ônibus, lojas e turismo.</p>
+            <div class="idle-badge">Estância Turística de Jaú</div>
+            <h1 id="idle-title">Ônibus, Comércio, Turismo e Serviços</h1>
+            <p id="idle-desc">Consulte horários, distâncias a pé e leve mapas direto no celular.</p>
             <div class="idle-touch-cta">
               <span class="touch-ripple"></span>
-              <span class="touch-icon">👆</span>
-              <strong>TOQUE PARA COMEÇAR</strong>
+              <span class="touch-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
+              </span>
+              <strong>TOQUE NA TELA PARA COMEÇAR</strong>
             </div>
           </div>
         </div>
 
-        <!-- BARRA SUPERIOR: HEADER PERMANENTE DO MUNICÍPIO -->
+        <!-- BARRA SUPERIOR: 100% INFORMATIVA (SEM BOTÕES DE TOQUE NO ALTO - ERGONOMIA NBR 9050) -->
         <header id="totem-header" class="totem-header">
-          <!-- BARRA INSTITUCIONAL MUNICIPAL (SEM SÍMBOLO GOV) -->
           <div class="gov-top-bar">
-            <div class="gov-brand-flag">
-              <span class="gov-city-badge">Município da Estância Turística de Jaú • SP</span>
+            <div class="gov-location-indicator">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="#168821"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+              <span>Você está em: <strong>Praça da República (Jardim de Baixo)</strong></span>
             </div>
-            <div class="gov-top-actions">
-              <button class="btn-top-esg" onclick="app.showEsgModal()" title="Vantagens Ambientais & ESG do Totem">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 17 8zm0 0c5 0 6-5 6-5s-5 0-8 3c-1.5 1.5-2.2 3.2-2.5 4.8 2.6-1.5 4.5-2.8 4.5-2.8z"/></svg>
-                <span>Totem Sustentável • ESG</span>
-              </button>
-              <button class="btn-top-point-qr" onclick="app.showPointLocationQR('Ponto Atual: Jardim de Baixo (Centro)', 'Praça da República (Jardim de Baixo), Centro - Jaú/SP (Ponto Central de Embarque)', 'https://maps.google.com/?q=Praca+da+Republica+Jau+SP')" title="Ver QR Code de onde é o ponto">
-                📍 QR Code: Onde é o Ponto
-              </button>
+            <div class="gov-solar-status">
+              <span class="solar-dot"></span>
+              <span>Energia Solar Ativa</span>
             </div>
           </div>
 
-          <div class="header-brand">
+          <div class="header-main-row">
             <div class="logo-box">
-              <span class="city-crest" aria-label="Brasão de Jaú">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                  <path d="M12 2L4 5v6.5c0 5.25 3.4 10.15 8 11.5 4.6-1.35 8-6.25 8-11.5V5l-8-3zm0 3.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4 11.8c-1.2.8-2.6 1.3-4 1.6-1.4-.3-2.8-.8-4-1.6V15c0-1.8 3-2.8 4-2.8s4 1 4 2.8v2.3z"/>
+              <span class="city-crest" aria-label="Brasão Oficial de Jaú">
+                <svg viewBox="0 0 36 40" width="28" height="30" fill="none">
+                  <!-- Coroa Mural Prateada/Dourada -->
+                  <path d="M6 4h4v3h3V4h4v3h3V4h4v3h3V4h3v6H6V4z" fill="#ffcd07"/>
+                  <!-- Escudo Clássico Municipal -->
+                  <path d="M5 11h26v13c0 8.5-5.8 13.5-13 15-7.2-1.5-13-6.5-13-15V11z" fill="#0c326f" stroke="#ffcd07" stroke-width="2"/>
+                  <!-- Faixa Ondulada do Rio Jaú -->
+                  <path d="M7 22c4-2 7 2 11 0s7 2 11 0v4c-4 2-7-2-11 0s-7-2-11 0v-4z" fill="#38bdf8"/>
+                  <!-- Estrela da Estância Turística -->
+                  <polygon points="18,13 19.3,16 22.5,16.3 20,18.4 20.8,21.5 18,19.8 15.2,21.5 16,18.4 13.5,16.3 16.7,16" fill="#ffcd07"/>
                 </svg>
               </span>
               <div>
                 <h1 class="brand-title">PREFEITURA DE JAÚ</h1>
-                <span class="brand-sub">Estância Turística • Cidade Conectada</span>
+                <span class="brand-sub">Terminal de Utilidade Pública</span>
               </div>
             </div>
-          </div>
 
-          <div class="header-info">
-            <div class="weather-widget">
-              <span class="weather-icon" aria-label="Tempo Solar">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                  <circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/>
-                  <path d="M12 1v3m0 16v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M1 12h3m16 0h3M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12"/>
-                </svg>
-              </span>
-              <div>
-                <span class="temp">28°C</span>
-                <span class="city-label">Jaú / SP</span>
+            <div class="header-telemetry">
+              <div class="weather-widget">
+                <span class="weather-icon" aria-label="Clima">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/>
+                    <path d="M12 1v3m0 16v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M1 12h3m16 0h3M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12"/>
+                  </svg>
+                </span>
+                <div>
+                  <span class="temp">28°C</span>
+                  <span class="city-label">Sol</span>
+                </div>
               </div>
-            </div>
-            <div class="clock-widget">
-              <span id="clock-time" class="time">14:32</span>
-              <span id="clock-date" class="date">Sex, 10 de Outubro</span>
+              <div class="header-divider"></div>
+              <div class="clock-widget">
+                <span id="clock-time" class="time">14:32</span>
+                <span id="clock-date" class="date">Seg, 12 de Outubro</span>
+              </div>
             </div>
           </div>
         </header>
@@ -301,104 +308,97 @@
         <!-- LAYOUT CENTRAL DO TOTEM (MENU LATERAL DE ACESSIBILIDADE + CONTEÚDO TOUCH) -->
         <div class="totem-middle-layout">
 
-          <!-- MENU LATERAL DE ACESSIBILIDADE OFICIAL (ABNT NBR 9050 / GOV.BR) -->
-          <aside class="kiosk-access-sidebar" role="toolbar" aria-label="Menu Lateral de Acessibilidade">
-            <div class="sidebar-pill-tag">ACESSO</div>
+          <!-- MENU LATERAL DE ACESSIBILIDADE: BOTÕES NA METADE INFERIOR PARA ALCANCE DE CADEIRANTE -->
+          <aside class="kiosk-access-sidebar" role="toolbar" aria-label="Acessibilidade">
+            <div class="sidebar-top-notice">
+              <span class="sidebar-pill-tag">ACESSO</span>
+              <span class="sidebar-ergo-hint">Zona de alcance NBR 9050</span>
+            </div>
 
-            <!-- 1. CONTRASTE (ALTO CONTRASTE PRETO E AMARELO) - NO TOPO -->
-            <button id="btn-contrast" class="btn-sidebar-access" title="Modo Alto Contraste" aria-label="Alto Contraste">
-              <span class="sb-icon">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/>
-                  <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor"/>
-                </svg>
-              </span>
-              <span class="sb-txt">Contraste</span>
-            </button>
-
-            <!-- 2. LIBRAS (SÍMBOLO INTERNACIONAL OFICIAL DE LÍNGUA DE SINAIS / WFD) -->
-            <button id="btn-vlibras" class="btn-sidebar-access" title="Tradutor de Libras (VLibras)" aria-label="Libras">
-              <span class="sb-icon">
-                <svg viewBox="0 0 640 512" width="25" height="25" fill="currentColor">
-                  <path d="M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8 15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7-65.4 22.8-82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"/>
-                </svg>
-              </span>
-              <span class="sb-txt">Libras</span>
-            </button>
-
-            <!-- 3. ÁUDIO (ALTO-FALANTE COM ONDAS CONCÊNTRICAS PADRÃO MATERIAL/LUCIDE) -->
-            <button id="btn-voice" class="btn-sidebar-access" title="Ativar Leitura em Voz Alta" aria-label="Leitura por Voz">
-              <span class="sb-icon">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                </svg>
-              </span>
-              <span class="sb-txt">Áudio</span>
-            </button>
-
-            <!-- 4. ALCANCE (SÍMBOLO INTERNACIONAL DE ACESSO ISO 7001 / ABNT NBR 9050) -->
-            <button id="btn-wheelchair" class="btn-sidebar-access" title="Modo Cadeirante / Baixa Estatura (Alcance NBR 9050)" aria-label="Modo Cadeirante">
-              <span class="sb-icon">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="4" r="2.1"/>
-                  <path d="M19 13v-2c-1.54.02-3.09-.75-4.07-1.83l-1.29-1.43c-.17-.19-.38-.34-.61-.45H13c-.35-.2-.75-.3-1.19-.26-.64.05-1.2.4-1.51.93L8.4 12.87C8.14 13.31 8 13.82 8 14.33V19h2v-4.67l1.45-2.58 2.05 3.25H19v-2h-3.92l-1.4-2.22 1.34 1.48c.84.93 2.05 1.63 3.48 1.74zM10 18c-2.21 0-4-1.79-4-4s1.79-4 4-4c.73 0 1.41.2 2 .55V8.29C11.39 8.1 10.71 8 10 8c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.97 0 5.43-2.16 5.9-5h-2.05c-.44 1.72-2 3-3.85 3z"/>
-                </svg>
-              </span>
-              <span class="sb-txt">Alcance</span>
-            </button>
-
-            <div class="sb-divider"></div>
-
-            <!-- CONTROLES DE TAMANHO DE FONTE (A+ / A-) EM LINHA HORIZONTAL COMPACTA -->
-            <div class="sidebar-font-group">
-              <button id="btn-font-plus" class="btn-sidebar-access btn-font-mini" title="Aumentar Tamanho da Letra" aria-label="Aumentar Letra">
-                <span class="sb-icon font-ctrl-txt">A+</span>
-                <span class="sb-txt">Maior</span>
+            <div class="sidebar-controls-bottom">
+              <!-- 1. ALCANCE / BAIXAR TELA (NO TOPO DO BLOCO INFERIOR PARA FÁCIL ACESSO) -->
+              <button id="btn-wheelchair" class="btn-sidebar-access" title="Baixar tela para cadeirante ou baixa estatura" aria-label="Baixar Tela">
+                <span class="sb-icon">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+                    <circle cx="12" cy="4" r="2.1"/>
+                    <path d="M19 13v-2c-1.54.02-3.09-.75-4.07-1.83l-1.29-1.43c-.17-.19-.38-.34-.61-.45H13c-.35-.2-.75-.3-1.19-.26-.64.05-1.2.4-1.51.93L8.4 12.87C8.14 13.31 8 13.82 8 14.33V19h2v-4.67l1.45-2.58 2.05 3.25H19v-2h-3.92l-1.4-2.22 1.34 1.48c.84.93 2.05 1.63 3.48 1.74zM10 18c-2.21 0-4-1.79-4-4s1.79-4 4-4c.73 0 1.41.2 2 .55V8.29C11.39 8.1 10.71 8 10 8c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.97 0 5.43-2.16 5.9-5h-2.05c-.44 1.72-2 3-3.85 3z"/>
+                  </svg>
+                </span>
+                <span class="sb-txt">Baixar Tela</span>
               </button>
-              <button id="btn-font-reset" class="btn-sidebar-access btn-font-mini" title="Tamanho Padrão da Letra" aria-label="Fonte Padrão">
-                <span class="sb-icon font-ctrl-txt">A-</span>
-                <span class="sb-txt">Padrão</span>
+
+              <!-- 2. LIBRAS -->
+              <button id="btn-vlibras" class="btn-sidebar-access" title="Tradutor de Libras" aria-label="Libras">
+                <span class="sb-icon">
+                  <svg viewBox="0 0 640 512" width="30" height="30" fill="currentColor">
+                    <path d="M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8-15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7 65.4 22.8 82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"/>
+                  </svg>
+                </span>
+                <span class="sb-txt">Libras</span>
               </button>
+
+              <!-- 3. ALTO CONTRASTE -->
+              <button id="btn-contrast" class="btn-sidebar-access" title="Alto Contraste" aria-label="Alto Contraste">
+                <span class="sb-icon">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/>
+                    <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor"/>
+                  </svg>
+                </span>
+                <span class="sb-txt">Contraste</span>
+              </button>
+
+              <!-- 4. TAMANHO DA LETRA (A+ / A-) -->
+              <div class="sidebar-font-group">
+                <button id="btn-font-plus" class="btn-sidebar-access btn-font-mini" title="Aumentar Letra" aria-label="Aumentar Letra">
+                  <span class="sb-icon font-ctrl-txt">A+</span>
+                  <span class="sb-txt">Maior</span>
+                </button>
+                <button id="btn-font-reset" class="btn-sidebar-access btn-font-mini" title="Letra Padrão" aria-label="Letra Padrão">
+                  <span class="sb-icon font-ctrl-txt">A-</span>
+                  <span class="sb-txt">Normal</span>
+                </button>
+              </div>
             </div>
           </aside>
 
           <!-- CONTAINER PRINCIPAL DINÂMICO (ÁREA DE NAVEGAÇÃO) -->
           <section id="totem-main-content" class="totem-body">
 
-          <!-- 1. TELA PRINCIPAL (HOME) -->
+          <!-- 1. TELA PRINCIPAL (HOME) - LEITURA DE 3 SEGUNDOS PARA QUEM PASSA NA PRAÇA -->
           <div id="view-home" class="view-screen active">
-            <!-- ALERTA MUNICIPAL / DEFESA CIVIL -->
+            <!-- AVISO RÁPIDO DE 1 LINHA -->
             <div class="alert-banner">
-              <span class="alert-tag">DEFESA CIVIL JAÚ</span>
-              <p class="alert-text">Previsão de tempo estável na região central. Campanha de vacinação ativa até 17h nos postos.</p>
+              <span class="alert-tag">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                AVISO MUNICIPAL
+              </span>
+              <p class="alert-text">Vacinação aberta até 17h nos postos • Tempo estável no Centro</p>
             </div>
 
-            <!-- CHAMADA PRINCIPAL -->
+            <!-- PERGUNTA DIRETA (SEM INSTRUÇÃO ÓBVIA DE IA) -->
             <div class="welcome-box">
-              <h2>Como podemos ajudar você hoje?</h2>
-              <p>Selecione um serviço tocando em uma das opções abaixo:</p>
+              <h2>O que você procura agora?</h2>
             </div>
 
-            <!-- GRADE DOS 4 PILARES ESTRATÉGICOS -->
+            <!-- GRADE DOS 4 SERVIÇOS COM DADO VIVO NA CAPA -->
             <div class="modules-grid">
               <!-- Módulo 1: Ônibus -->
               <button class="module-card card-bus" data-view="view-bus">
                 <div class="card-top-row">
-                  <div class="card-icon-badge" aria-label="Mobilidade Urbana">
+                  <div class="card-icon-badge" aria-label="Ônibus">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                       <path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-10.5-6V6h12v5H6z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">TEMPO REAL</span>
+                  <span class="card-tag live-pill">PRÓXIMO: 4 MIN</span>
                 </div>
                 <div class="card-content">
-                  <h3>Ônibus & Mobilidade</h3>
-                  <p>Linhas municipais, horários e itinerários das linhas urbanas.</p>
+                  <h3>Ônibus e Horários</h3>
+                  <p>Veja qual linha passa neste ponto e os próximos horários.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Consultar Linhas</span>
+                  <span class="card-action-text">Ver 4 linhas</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
@@ -406,40 +406,41 @@
               <!-- Módulo 2: Calçado & Comércio -->
               <button class="module-card card-shoes" data-view="view-shoes">
                 <div class="card-top-row">
-                  <div class="card-icon-badge" aria-label="Calçado Feminino">
+                  <div class="card-icon-badge" aria-label="Polo do Calçado">
                     <svg viewBox="0 0 512 512" width="28" height="28" fill="currentColor">
                       <path d="M507.2 193.9c-11.5 54.6-38.9 124.7-45.2 269.3h-33.4c0 0 0-175.9-42.4-233.1v-36.2l121 0z"/>
                       <path d="M507.2 193.9c3.3-15.5 4.8-27.2 4.8-42.2 0-67.7-34.2-103-34.2-103C300.9 131.1 251.2 205.7 195.4 304.4c-17.1 30.3-102.5-2.7-150 25.1C19.1 345 0 374.7 0 434.4c0 0 76.2 28.9 159.8 28.9s101.3-19.2 131-86.2C362.1 215.9 423.4 193.9 507.2 193.9z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">POLO CALÇADISTA</span>
+                  <span class="card-tag">A 3 MIN A PÉ</span>
                 </div>
                 <div class="card-content">
-                  <h3>Circuito do Calçado</h3>
-                  <p>Capital do Calçado Feminino: lojas de fábrica, catálogo e rotas.</p>
+                  <h3>Polo do Calçado</h3>
+                  <p>Rua Major Prado, Shopping do Calçado e lojas de fábrica.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Ver Lojas & Rotas</span>
+                  <span class="card-action-text">Como chegar</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
 
-              <!-- Módulo 3: Turismo & Cultura -->
+              <!-- Módulo 3: Turismo & Lazer -->
               <button class="module-card card-tourism" data-view="view-tourism">
                 <div class="card-top-row">
-                  <div class="card-icon-badge" aria-label="Turismo e Cultura">
+                  <div class="card-icon-badge" aria-label="Turismo e Lazer">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                      <path d="M12 2L1 7.5V9h22V7.5L12 2zm-7 9v8h2.5v-8H5zm5.5 0v8H13v-8h-2.5zm5.5 0v8h2.5v-8H16zM2 20v2h20v-2H2z"/>
+                      <path d="M12 2 C8.5 2 6 4.5 6 7.5 C4.5 8 3.5 9.5 3.5 11.5 C3.5 14 5.5 16 8 16 L16 16 C18.5 16 20.5 14 20.5 11.5 C20.5 9.5 19.5 8 18 7.5 C18 4.5 15.5 2 12 2 Z"/>
+                      <path d="M11 16 L11 21 L13 21 L13 16 Z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">ESTÂNCIA TURÍSTICA</span>
+                  <span class="card-tag">LAZER GRÁTIS</span>
                 </div>
                 <div class="card-content">
-                  <h3>Turismo & Lazer</h3>
-                  <p>Parque do Rio Jaú, patrimônio histórico e agenda de eventos.</p>
+                  <h3>Turismo e Parques</h3>
+                  <p>Igreja Matriz a 150m, Parque do Rio Jaú e Teatro Municipal.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Explorar Jaú</span>
+                  <span class="card-action-text">Ver locais</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
@@ -447,60 +448,50 @@
               <!-- Módulo 4: Serviços ao Cidadão -->
               <button class="module-card card-services" data-view="view-services">
                 <div class="card-top-row">
-                  <div class="card-icon-badge" aria-label="Serviços ao Cidadão">
+                  <div class="card-icon-badge" aria-label="Serviços e Ouvidoria">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                       <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">AUTOATENDIMENTO</span>
+                  <span class="card-tag">DIRETO NO CELULAR</span>
                 </div>
                 <div class="card-content">
-                  <h3>Serviços ao Cidadão</h3>
-                  <p>Telefones úteis, Ouvidoria, Farmácia Municipal e solicitações.</p>
+                  <h3>Ouvidoria e Serviços</h3>
+                  <p>Ouvidoria 156, Farmácia 24h, mapa deste ponto e telefones.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Acessar Serviços</span>
+                  <span class="card-action-text">Abrir serviços</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
             </div>
 
-            <!-- FAIXA DE UTILIDADE PÚBLICA & CANAIS RÁPIDOS DE JAÚ -->
+            <!-- ACESSO RÁPIDO DE 1 TOQUE (AGORA SÃO BOTÕES REAIS CLICÁVEIS) -->
             <div class="city-quick-bar">
-              <div class="quick-service-pill">
+              <button type="button" class="quick-service-pill" onclick="app.openModal('modal-contacts')">
                 <span class="q-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="#dc2626"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z"/></svg>
                 </span>
                 <span class="q-txt">SAMU <strong>192</strong></span>
-              </div>
-              <div class="quick-service-pill">
+              </button>
+              <button type="button" class="quick-service-pill" onclick="app.openModal('modal-contacts')">
                 <span class="q-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#1351b4"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 4.5l1.6 3.2 3.5.5-2.5 2.5.6 3.5-3.2-1.7-3.2 1.7.6-3.5-2.5-2.5 3.5-.5 1.6-3.2z"/></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#1351b4"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
                 </span>
                 <span class="q-txt">Guarda <strong>153</strong></span>
-              </div>
-              <div class="quick-service-pill">
+              </button>
+              <button type="button" class="quick-service-pill" onclick="app.showGenericQR('Ouvidoria 156 — Prefeitura de Jaú', 'https://www.jau.sp.gov.br/ouvidoria')">
                 <span class="q-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="#d97706"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2a7 7 0 0 1 14 0v2h-4v8h4c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/></svg>
                 </span>
                 <span class="q-txt">Ouvidoria <strong>156</strong></span>
-              </div>
-              <div class="quick-service-pill">
+              </button>
+              <button type="button" class="quick-service-pill" onclick="app.showStoreQR('Farmácia Municipal de Jaú', 'Rua Riachuelo, 480 - Centro (A 4 min a pé daqui)', 'https://maps.google.com/?q=Farmacia+Municipal+Jau+SP')">
                 <span class="q-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="#168821"><path d="M10.5 2h3v8.5H22v3h-8.5V22h-3v-8.5H2v-3h8.5V2z"/></svg>
                 </span>
                 <span class="q-txt">Farmácia <strong>24h</strong></span>
-              </div>
-            </div>
-
-            <!-- BANNER DE DESTAQUE LOCAL -->
-            <div class="featured-strip">
-              <div class="strip-icon">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#168821"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 17 8zm0 0c5 0 6-5 6-5s-5 0-8 3c-1.5 1.5-2.2 3.2-2.5 4.8 2.6-1.5 4.5-2.8 4.5-2.8z"/></svg>
-              </div>
-              <div class="strip-text">
-                <strong>Projeto Jaú Conectada (100% Paperless ESG):</strong> Toque em qualquer serviço para enviar a rota com horários direto ao seu celular via QR Code.
-              </div>
+              </button>
             </div>
           </div>
 
@@ -509,143 +500,160 @@
             <div class="screen-subhead">
               <button class="btn-back" data-view="view-home">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                Voltar ao Início
+                Voltar
               </button>
               <h2>
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="vertical-align:-3px; margin-right:8px;"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
-                Transporte Coletivo de Jaú
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
+                Ônibus e Próximos Horários
               </h2>
             </div>
 
             <div class="bus-filters">
-              <button class="filter-tab active" data-filter="all">Todas as Linhas</button>
-              <button class="filter-tab" data-filter="centro">Região Central</button>
-              <button class="filter-tab" data-filter="bairros">Bairros</button>
+              <button class="filter-tab active" data-filter="all">Todas (4)</button>
+              <button class="filter-tab" data-filter="centro">Passam no Centro</button>
+              <button class="filter-tab" data-filter="bairros">Bairros / Distrito</button>
             </div>
 
             <div class="bus-list">
               <!-- Linha 1: Jardim de Baixo -->
-              <div class="bus-item" data-category="centro">
-                <div class="bus-badge">Linha 01</div>
-                <div class="bus-info">
-                  <h4>Circular Centro ⇄ Pouso Alegre</h4>
-                  <p>📍 <strong>Onde é o Ponto:</strong> Jardim de Baixo (Praça da República - Centro) • Ponto Central</p>
-                  <span class="bus-status live">● Próximo ônibus: <strong>4 min</strong></span>
+              <div class="bus-item bus-item-here" data-category="centro">
+                <div class="bus-eta-box live">
+                  <span class="eta-num">4</span>
+                  <span class="eta-unit">min</span>
                 </div>
-                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 01 - Ponto Jardim de Baixo', 'Ponto de Embarque: Jardim de Baixo (Praça da República) ➜ Centro ➜ Pouso Alegre', '06:00, 06:40, 07:20, 08:00, 08:40, 09:20, 10:00', 'https://maps.google.com/?q=Praca+da+Republica+Jau+SP')">📍 QR Code do Ponto</button>
+                <div class="bus-info">
+                  <div class="bus-title-row">
+                    <span class="bus-line-tag">LINHA 01</span>
+                    <span class="bus-here-badge">PASSA NESTE PONTO</span>
+                  </div>
+                  <h4>Circular Centro ⇄ Pouso Alegre</h4>
+                  <p class="bus-times-inline">Saídas: <strong>14:40 • 15:20 • 16:00 • 16:40</strong></p>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 01 — Jardim de Baixo', 'Embarque neste ponto (Praça da República) ➜ Centro ➜ Pouso Alegre', '14:40, 15:20, 16:00, 16:40, 17:20', 'https://maps.google.com/?q=Praca+da+Republica+Jau+SP')">Mapa QR</button>
               </div>
 
               <!-- Linha 2: Praça da Matriz -->
               <div class="bus-item" data-category="centro">
-                <div class="bus-badge">Linha 02</div>
+                <div class="bus-eta-box live">
+                  <span class="eta-num">8</span>
+                  <span class="eta-unit">min</span>
+                </div>
                 <div class="bus-info">
+                  <div class="bus-title-row">
+                    <span class="bus-line-tag">LINHA 02</span>
+                    <span class="bus-stop-note">Ponto Matriz (a 150m daqui)</span>
+                  </div>
                   <h4>Matriz ⇄ Santa Casa / Vila Netinho</h4>
-                  <p>📍 <strong>Onde é o Ponto:</strong> Praça da Matriz (Praça N. Sra. do Patrocínio - Centro Histórico)</p>
-                  <span class="bus-status live">● Próximo ônibus: <strong>8 min</strong></span>
+                  <p class="bus-times-inline">Saídas: <strong>14:45 • 15:30 • 16:15 • 17:00</strong></p>
                 </div>
-                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 02 - Ponto Praça da Matriz', 'Ponto de Embarque: Praça da Matriz (Centro Histórico) ➜ Santa Casa ➜ Vila Netinho', '06:15, 07:00, 07:45, 08:30, 09:15, 10:00', 'https://maps.google.com/?q=Igreja+Matriz+Jau+SP')">📍 QR Code do Ponto</button>
-              </div>
-
-              <!-- Linha 3: Rodoviária Municipal -->
-              <div class="bus-item" data-category="bairros">
-                <div class="bus-badge">Linha 03</div>
-                <div class="bus-info">
-                  <h4>Rodoviária Municipal ⇄ Distrito Industrial</h4>
-                  <p>📍 <strong>Onde é o Ponto:</strong> Rodoviária (Terminal Rodoviário Municipal de Jaú)</p>
-                  <span class="bus-status waiting">● Próximo ônibus: <strong>14 min</strong></span>
-                </div>
-                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 03 - Ponto Rodoviária', 'Ponto de Embarque: Terminal Rodoviário Municipal ➜ Av. Dr. Quinzinho ➜ Distrito Industrial', '06:30, 07:15, 08:00, 08:45, 16:30, 17:15', 'https://maps.google.com/?q=Terminal+Rodoviario+Jau+SP')">📍 QR Code do Ponto</button>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 02 — Praça da Matriz', 'Embarque: Praça da Matriz (a 2 min a pé) ➜ Santa Casa ➜ Vila Netinho', '14:45, 15:30, 16:15, 17:00, 17:45', 'https://maps.google.com/?q=Igreja+Matriz+Jau+SP')">Mapa QR</button>
               </div>
 
               <!-- Linha 4: Parque do Rio Jaú -->
               <div class="bus-item" data-category="bairros">
-                <div class="bus-badge">Linha 04</div>
-                <div class="bus-info">
-                  <h4>Parque do Rio Jaú ⇄ Jardim Pedro Ometto</h4>
-                  <p>📍 <strong>Onde é o Ponto:</strong> Parque do Rio Jaú (Av. Doutor Quinzinho - Pista Ecológica)</p>
-                  <span class="bus-status live">● Próximo ônibus: <strong>6 min</strong></span>
+                <div class="bus-eta-box live">
+                  <span class="eta-num">6</span>
+                  <span class="eta-unit">min</span>
                 </div>
-                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 04 - Ponto Parque do Rio Jaú', 'Ponto de Embarque: Parque do Rio Jaú (Parque Ecológico) ➜ Av. Quinzinho ➜ Jd. Pedro Ometto', '06:10, 06:50, 07:30, 08:10, 08:50, 09:30', 'https://maps.google.com/?q=Parque+do+Rio+Jau+SP')">📍 QR Code do Ponto</button>
+                <div class="bus-info">
+                  <div class="bus-title-row">
+                    <span class="bus-line-tag">LINHA 04</span>
+                    <span class="bus-stop-note">Av. Dr. Quinzinho</span>
+                  </div>
+                  <h4>Parque do Rio Jaú ⇄ Jd. Pedro Ometto</h4>
+                  <p class="bus-times-inline">Saídas: <strong>14:42 • 15:25 • 16:10 • 16:50</strong></p>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 04 — Parque do Rio Jaú', 'Embarque: Av. Dr. Quinzinho ➜ Parque do Rio Jaú ➜ Jd. Pedro Ometto', '14:42, 15:25, 16:10, 16:50, 17:30', 'https://maps.google.com/?q=Parque+do+Rio+Jau+SP')">Mapa QR</button>
+              </div>
+
+              <!-- Linha 3: Rodoviária Municipal -->
+              <div class="bus-item" data-category="bairros">
+                <div class="bus-eta-box waiting">
+                  <span class="eta-num">14</span>
+                  <span class="eta-unit">min</span>
+                </div>
+                <div class="bus-info">
+                  <div class="bus-title-row">
+                    <span class="bus-line-tag">LINHA 03</span>
+                    <span class="bus-stop-note">Terminal Rodoviário</span>
+                  </div>
+                  <h4>Rodoviária ⇄ Distrito Industrial</h4>
+                  <p class="bus-times-inline">Saídas: <strong>14:50 • 15:35 • 16:30 • 17:15</strong></p>
+                </div>
+                <button class="btn-bus-action" onclick="app.showBusDetails('Linha 03 — Terminal Rodoviário', 'Embarque: Rodoviária Municipal ➜ Shopping do Calçado ➜ Distrito Industrial', '14:50, 15:35, 16:30, 17:15, 18:00', 'https://maps.google.com/?q=Terminal+Rodoviario+Jau+SP')">Mapa QR</button>
               </div>
             </div>
           </div>
 
-          <!-- 3. TELA: MÓDULO CIRCUITO DO CALÇADO & COMÉRCIO -->
+          <!-- 3. TELA: POLO DO CALÇADO (SEM PLACEHOLDER FALSO DE FOTO, COM DISTÂNCIA REAL) -->
           <div id="view-shoes" class="view-screen">
             <div class="screen-subhead">
               <button class="btn-back" data-view="view-home">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                Voltar ao Início
+                Voltar
               </button>
               <h2>
-                <svg viewBox="0 0 512 512" width="24" height="24" fill="currentColor" style="vertical-align:-3px; margin-right:8px;">
+                <svg viewBox="0 0 512 512" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;">
                   <path d="M507.2 193.9c-11.5 54.6-38.9 124.7-45.2 269.3h-33.4c0 0 0-175.9-42.4-233.1v-36.2l121 0z"/>
                   <path d="M507.2 193.9c3.3-15.5 4.8-27.2 4.8-42.2 0-67.7-34.2-103-34.2-103C300.9 131.1 251.2 205.7 195.4 304.4c-17.1 30.3-102.5-2.7-150 25.1C19.1 345 0 374.7 0 434.4c0 0 76.2 28.9 159.8 28.9s101.3-19.2 131-86.2C362.1 215.9 423.4 193.9 507.2 193.9z"/>
                 </svg>
-                Capital do Calçado Feminino
+                Onde Comprar Calçados em Jaú
               </h2>
             </div>
 
-            <div class="shoes-intro">
-              <p>Jaú é o maior polo de produção de calçados femininos da América Latina. Encontre lojas de fábrica, vitrines e polos de compras:</p>
-            </div>
-
-            <div class="shoes-grid">
-              <div class="store-card">
-                <div class="store-img-placeholder">
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3h-6c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>
-                  Território do Calçado
+            <div class="tour-list">
+              <!-- Local 1: Rua Major Prado (Mais perto a pé da praça) -->
+              <div class="tour-card">
+                <div class="tour-icon icon-shoes-box" aria-label="Comércio Centro">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
                 </div>
-                <div class="store-body">
-                  <h4>Shopping Território do Calçado</h4>
-                  <p class="store-addr">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#c0392b" style="vertical-align:-2px; margin-right:4px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                    Av. Hermínio Pires de Oliveira Netto, 400
-                  </p>
-                  <p class="store-desc">Mais de 150 lojas com calçados femininos direto de fábrica, bolsas e praça de alimentação.</p>
-                  <button class="btn-store-qr" onclick="app.showStoreQR('Shopping Território do Calçado', 'Av. Hermínio Pires de Oliveira Netto, 400 - Jaú/SP', 'https://maps.google.com/?q=Territorio+do+Calcado+Jau')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                <div class="tour-content">
+                  <div class="place-meta-row">
+                    <span class="distance-pill walk">A 3 min a pé daqui (250m)</span>
+                    <span class="open-status">Seg a Sáb • 09h às 18h</span>
+                  </div>
+                  <h4>Rua Major Prado (Comércio Central)</h4>
+                  <p>Dezenas de lojas de calçados, bolsas e moda feminina a duas quadras desta praça.</p>
+                  <button class="btn-tour-action" onclick="app.showStoreQR('Rua Major Prado — Centro', 'A 250m da Praça da República (3 min a pé)', 'https://maps.google.com/?q=Rua+Major+Prado+Jau')">
                     Abrir Rota no Celular
                   </button>
                 </div>
               </div>
 
-              <div class="store-card">
-                <div class="store-img-placeholder">
-                  <svg viewBox="0 0 512 512" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;">
+              <!-- Local 2: Espaço Noivas e Festa -->
+              <div class="tour-card">
+                <div class="tour-icon icon-shoes-box" aria-label="Calçados de Festa">
+                  <svg viewBox="0 0 512 512" width="28" height="28" fill="currentColor">
                     <path d="M507.2 193.9c-11.5 54.6-38.9 124.7-45.2 269.3h-33.4c0 0 0-175.9-42.4-233.1v-36.2l121 0z"/>
                     <path d="M507.2 193.9c3.3-15.5 4.8-27.2 4.8-42.2 0-67.7-34.2-103-34.2-103C300.9 131.1 251.2 205.7 195.4 304.4c-17.1 30.3-102.5-2.7-150 25.1C19.1 345 0 374.7 0 434.4c0 0 76.2 28.9 159.8 28.9s101.3-19.2 131-86.2C362.1 215.9 423.4 193.9 507.2 193.9z"/>
                   </svg>
-                  Circuito Rua Major Prado
                 </div>
-                <div class="store-body">
-                  <h4>Polo Comercial Major Prado</h4>
-                  <p class="store-addr">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#c0392b" style="vertical-align:-2px; margin-right:4px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                    Rua Major Prado - Centro
-                  </p>
-                  <p class="store-desc">Comércio tradicional jauense com dezenas de sapatarias, moda feminina e vestuário.</p>
-                  <button class="btn-store-qr" onclick="app.showStoreQR('Rua Major Prado (Polo Comercial)', 'Rua Major Prado, Centro - Jaú/SP', 'https://maps.google.com/?q=Rua+Major+Prado+Jau')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                <div class="tour-content">
+                  <div class="place-meta-row">
+                    <span class="distance-pill walk">A 5 min a pé daqui (400m)</span>
+                    <span class="open-status">Rua Amaral Gurgel, 210</span>
+                  </div>
+                  <h4>Polo Noivas e Calçados de Festa</h4>
+                  <p>Lojas especializadas em calçados sociais, noivas, formaturas e sob medida.</p>
+                  <button class="btn-tour-action" onclick="app.showStoreQR('Polo Noivas e Festa', 'Rua Amaral Gurgel, 210 - Centro (5 min a pé)', 'https://maps.google.com/?q=Rua+Amaral+Gurgel+210+Jau')">
                     Abrir Rota no Celular
                   </button>
                 </div>
               </div>
 
-              <div class="store-card">
-                <div class="store-img-placeholder">
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M12 2l2.4 7.2h7.6l-6.1 4.5 2.3 7.3-6.2-4.5-6.2 4.5 2.3-7.3-6.1-4.5h7.6z"/></svg>
-                  Calçados de Festa & Noivas
+              <!-- Local 3: Shopping Território do Calçado -->
+              <div class="tour-card">
+                <div class="tour-icon icon-shoes-box" aria-label="Shopping do Calçado">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3h-6c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>
                 </div>
-                <div class="store-body">
-                  <h4>Espaço Noivas e Festa Jaú</h4>
-                  <p class="store-addr">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="#c0392b" style="vertical-align:-2px; margin-right:4px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                    Rua Amaral Gurgel, 210
-                  </p>
-                  <p class="store-desc">Calçados sob medida para casamentos, formaturas e eventos finos.</p>
-                  <button class="btn-store-qr" onclick="app.showStoreQR('Espaço Noivas e Festa Jaú', 'Rua Amaral Gurgel, 210 - Jaú/SP', 'https://maps.google.com/?q=Jaú+Calcados')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                <div class="tour-content">
+                  <div class="place-meta-row">
+                    <span class="distance-pill drive">8 min de carro • Linha 03</span>
+                    <span class="open-status">Seg a Sáb • 09h às 20h</span>
+                  </div>
+                  <h4>Shopping Território do Calçado</h4>
+                  <p>Mais de 150 lojas de fábrica, estacionamento gratuito e praça de alimentação.</p>
+                  <button class="btn-tour-action" onclick="app.showStoreQR('Shopping Território do Calçado', 'Av. Hermínio Pires de Oliveira Netto, 400 (8 min de carro)', 'https://maps.google.com/?q=Territorio+do+Calcado+Jau')">
                     Abrir Rota no Celular
                   </button>
                 </div>
@@ -653,42 +661,24 @@
             </div>
           </div>
 
-          <!-- 4. TELA: TURISMO & CULTURA -->
+          <!-- 4. TELA: TURISMO & LAZER (ÍCONES ÚNICOS E DISTÂNCIA A PARTIR DA PRAÇA) -->
           <div id="view-tourism" class="view-screen">
             <div class="screen-subhead">
               <button class="btn-back" data-view="view-home">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                Voltar ao Início
+                Voltar
               </button>
               <h2>
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="vertical-align:-3px; margin-right:8px;"><path d="M12 2 L2 7 L22 7 Z"/><rect x="2" y="8" width="20" height="2" rx="0.5"/><rect x="4" y="11" width="2.5" height="9"/><rect x="9" y="11" width="2.5" height="9"/><rect x="14" y="11" width="2.5" height="9"/><rect x="19" y="11" width="2.5" height="9"/><rect x="1" y="21" width="22" height="2" rx="0.5"/></svg>
-                Rota Cultural & Turística de Jaú
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M12 2 C8.5 2 6 4.5 6 7.5 C4.5 8 3.5 9.5 3.5 11.5 C3.5 14 5.5 16 8 16 L16 16 C18.5 16 20.5 14 20.5 11.5 C20.5 9.5 19.5 8 18 7.5 C18 4.5 15.5 2 12 2 Z"/><path d="M11 16 L11 21 L13 21 L13 16 Z"/></svg>
+                Passeios e Lazer em Jaú
               </h2>
             </div>
 
             <div class="tour-list">
+              <!-- Turismo 1: Igreja Matriz (Ao lado do ponto atual) -->
               <div class="tour-card">
-                <div class="tour-icon" aria-label="Parque do Rio Jaú">
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                    <path d="M12 2 C8.5 2 6 4.5 6 7.5 C4.5 8 3.5 9.5 3.5 11.5 C3.5 14 5.5 16 8 16 L16 16 C18.5 16 20.5 14 20.5 11.5 C20.5 9.5 19.5 8 18 7.5 C18 4.5 15.5 2 12 2 Z"/>
-                    <path d="M11 16 L11 20 L13 20 L13 16 Z"/>
-                    <path d="M2 21 C4.5 19.5 7.5 22.5 10 21 C12.5 19.5 15.5 22.5 18 21 C19.5 20 21 21 22 21" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                  </svg>
-                </div>
-                <div class="tour-content">
-                  <h4>Parque Municipal do Rio Jaú</h4>
-                  <p>Área verde para caminhada, pistas esportivas, lago, pedalinho e quiosques. Ideal para famílias e esportes.</p>
-                  <span class="tour-time">Aberto diariamente das 06h às 21h • Entrada Gratuita</span>
-                  <button class="btn-tour-action" onclick="app.showTourQR('Parque do Rio Jaú', 'Av. Dr. Quinzinho - Jaú/SP', 'https://maps.google.com/?q=Parque+do+Rio+Jau')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                    Ver Como Chegar
-                  </button>
-                </div>
-              </div>
-
-              <div class="tour-card">
-                <div class="tour-icon" aria-label="Igreja Matriz de Jaú">
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                <div class="tour-icon icon-tour-box" aria-label="Igreja Matriz de Jaú">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
                     <path d="M11.5 1h1v1.5h1.5v1h-1.5v1.5h-1V3.5h-1.5v-1h1.5z"/>
                     <path d="M12 5.5 L8.5 10 L8.5 22 L15.5 22 L15.5 10 Z"/>
                     <path d="M4 13 L8.5 10 L8.5 22 L4 22 Z"/>
@@ -698,35 +688,56 @@
                   </svg>
                 </div>
                 <div class="tour-content">
-                  <h4>Igreja Matriz Nossa Senhora do Patrocínio</h4>
-                  <p>Patrimônio histórico e arquitetônico imponente erguido em estilo neogótico no coração da cidade.</p>
-                  <span class="tour-time">Praça da República, s/n - Centro</span>
-                  <button class="btn-tour-action" onclick="app.showTourQR('Igreja Matriz de Jaú', 'Praça da República - Centro, Jaú/SP', 'https://maps.google.com/?q=Igreja+Matriz+Jau')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                    Ver Como Chegar
+                  <div class="place-meta-row">
+                    <span class="distance-pill walk">A 2 min a pé daqui (150m)</span>
+                    <span class="open-status">Entrada Gratuita</span>
+                  </div>
+                  <h4>Igreja Matriz N. Sra. do Patrocínio</h4>
+                  <p>Igreja histórica na praça superior, vitrais clássicos e jardins arborizados.</p>
+                  <button class="btn-tour-action" onclick="app.showTourQR('Igreja Matriz de Jaú', 'Praça N. Sra. do Patrocínio - Centro (a 150m daqui)', 'https://maps.google.com/?q=Igreja+Matriz+Jau')">
+                    Ver Mapa no Celular
                   </button>
                 </div>
               </div>
 
+              <!-- Turismo 2: Parque do Rio Jaú -->
               <div class="tour-card">
-                <div class="tour-icon" aria-label="Teatro Municipal">
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                    <path d="M12 2 L2 7 L22 7 Z"/>
-                    <rect x="2" y="8" width="20" height="2" rx="0.5"/>
-                    <rect x="4" y="11" width="2.5" height="9"/>
-                    <rect x="9" y="11" width="2.5" height="9"/>
-                    <rect x="14" y="11" width="2.5" height="9"/>
-                    <rect x="19" y="11" width="2.5" height="9"/>
-                    <rect x="1" y="21" width="22" height="2" rx="0.5"/>
+                <div class="tour-icon icon-tour-box" aria-label="Parque do Rio Jaú">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+                    <path d="M12 2 C8.5 2 6 4.5 6 7.5 C4.5 8 3.5 9.5 3.5 11.5 C3.5 14 5.5 16 8 16 L16 16 C18.5 16 20.5 14 20.5 11.5 C20.5 9.5 19.5 8 18 7.5 C18 4.5 15.5 2 12 2 Z"/>
+                    <path d="M11 16 L11 20 L13 20 L13 16 Z"/>
+                    <path d="M2 21 C4.5 19.5 7.5 22.5 10 21 C12.5 19.5 15.5 22.5 18 21 C19.5 20 21 21 22 21" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
                   </svg>
                 </div>
                 <div class="tour-content">
+                  <div class="place-meta-row">
+                    <span class="distance-pill drive">6 min de carro • Linha 04</span>
+                    <span class="open-status">06h às 21h • Grátis</span>
+                  </div>
+                  <h4>Parque Municipal do Rio Jaú</h4>
+                  <p>Pista de caminhada, lago, quiosques, quadras e área de lazer para famílias.</p>
+                  <button class="btn-tour-action" onclick="app.showTourQR('Parque do Rio Jaú', 'Av. Dr. Quinzinho (Acesso pela Linha 04)', 'https://maps.google.com/?q=Parque+do+Rio+Jau')">
+                    Ver Mapa no Celular
+                  </button>
+                </div>
+              </div>
+
+              <!-- Turismo 3: Teatro Municipal (Ícone de Teatro/Cultura sem repetir templo grego) -->
+              <div class="tour-card">
+                <div class="tour-icon icon-tour-box" aria-label="Teatro Municipal">
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+                    <path d="M2 4v6c0 4.97 3.58 9 8 9s8-4.03 8-9V4H2zm5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm6 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-3 8c-2.21 0-4-1.34-4-3h8c0 1.66-1.79 3-4 3zm12-7h-2v2c0 5.55-3.84 10.22-9 11.45.95.35 1.96.55 3 .55 4.42 0 8-4.03 8-9V9z"/>
+                  </svg>
+                </div>
+                <div class="tour-content">
+                  <div class="place-meta-row">
+                    <span class="distance-pill drive">5 min de carro (1,4 km)</span>
+                    <span class="open-status">Rua Paissandu, 1562</span>
+                  </div>
                   <h4>Teatro Municipal Elza Munerato</h4>
-                  <p>Espaço para peças de teatro, apresentações de dança e festivais culturais da Secretaria de Cultura.</p>
-                  <span class="tour-time">Consulte a programação semanal no totem</span>
+                  <p>Espetáculos gratuitos e pagos de teatro, música e dança da Secretaria de Cultura.</p>
                   <button class="btn-tour-action" onclick="app.showTourQR('Teatro Municipal Elza Munerato', 'Rua Paissandu, 1562 - Jaú/SP', 'https://maps.google.com/?q=Teatro+Municipal+Jau')">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px; margin-right:6px;"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
-                    Ver Programação
+                    Ver Mapa e Agenda
                   </button>
                 </div>
               </div>
@@ -738,65 +749,69 @@
             <div class="screen-subhead">
               <button class="btn-back" data-view="view-home">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                Voltar ao Início
+                Voltar
               </button>
               <h2>
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="vertical-align:-3px; margin-right:8px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                Serviços ao Cidadão
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                Ouvidoria, Utilidades e Emergência
               </h2>
             </div>
 
             <div class="services-columns">
-              <!-- Coluna Telefones Úteis -->
+              <!-- Coluna Ouvidoria & Localização Rápida -->
               <div class="service-box">
-                <h3>
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#c0392b" style="vertical-align:-3px; margin-right:6px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                  Telefones de Emergência
-                </h3>
-                <div class="phone-grid">
-                  <div class="phone-btn" onclick="app.falar('SAMU, ligue um nove dois')">
-                    <span class="p-num">192</span>
-                    <span class="p-label">SAMU</span>
+                <h3>Atendimento Direto no Celular (QR Code)</h3>
+                <div class="ouvidoria-card">
+                  <div class="ouvidoria-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#1351b4"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2a7 7 0 0 1 14 0v2h-4v8h4c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/></svg>
                   </div>
-                  <div class="phone-btn" onclick="app.falar('Bombeiros, ligue um nove três')">
-                    <span class="p-num">193</span>
-                    <span class="p-label">Bombeiros</span>
+                  <div>
+                    <strong>Ouvidoria Municipal 156</strong>
+                    <p>Solicite tapa-buraco, iluminação ou limpeza sem fila.</p>
                   </div>
-                  <div class="phone-btn" onclick="app.falar('Guarda Municipal de Jaú, ligue um cinco três')">
-                    <span class="p-num">153</span>
-                    <span class="p-label">Guarda Municipal</span>
+                  <button class="btn-ouvidoria" onclick="app.showGenericQR('Ouvidoria 156 — Prefeitura de Jaú', 'https://www.jau.sp.gov.br/ouvidoria')">Abrir QR</button>
+                </div>
+
+                <div class="ouvidoria-card" style="margin-top:8px;">
+                  <div class="ouvidoria-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#168821"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
                   </div>
-                  <div class="phone-btn" onclick="app.falar('Polícia Militar, ligue um nove zero')">
-                    <span class="p-num">190</span>
-                    <span class="p-label">Polícia Militar</span>
+                  <div>
+                    <strong>Localização Deste Ponto (Praça da República)</strong>
+                    <p>Salve no celular onde você está agora para compartilhar ou voltar.</p>
                   </div>
-                  <div class="phone-btn" onclick="app.falar('Defesa Civil, ligue um nove nove')">
-                    <span class="p-num">199</span>
-                    <span class="p-label">Defesa Civil</span>
-                  </div>
-                  <div class="phone-btn" onclick="app.falar('Poupatempo Jaú')">
-                    <span class="p-num">0800</span>
-                    <span class="p-label">Poupatempo</span>
-                  </div>
+                  <button class="btn-ouvidoria" onclick="app.showPointLocationQR('Você está em: Praça da República', 'Jardim de Baixo — Centro de Jaú/SP', 'https://maps.google.com/?q=Praca+da+Republica+Jau+SP')">Abrir QR</button>
                 </div>
               </div>
 
-              <!-- Coluna Ouvidoria & Serviços -->
+              <!-- Coluna Telefones Úteis -->
               <div class="service-box">
-                <h3>
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#1351b4" style="vertical-align:-3px; margin-right:6px;"><path d="M12 2L2 7v2h20V7L12 2zm-8 8v8h3v-8H4zm6 0v8h3v-8h-3zm6 0v8h3v-8h-3zM2 20v2h20v-2H2z"/></svg>
-                  Ouvidoria e Zeladoria Urbana
-                </h3>
-                <p>Abra solicitações de iluminação pública, tapa-buraco ou limpeza de calçadas diretamente pelo celular:</p>
-                <div class="ouvidoria-card">
-                  <div class="ouvidoria-icon">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#1351b4"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                <h3>Telefones de Emergência (Ligação Gratuita)</h3>
+                <div class="phone-grid">
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">192</span>
+                    <span class="p-label">SAMU</span>
                   </div>
-                  <div>
-                    <strong>Ouvidoria Geral da Prefeitura</strong>
-                    <p>Escaneie o código para registrar protocolo sem filas.</p>
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">193</span>
+                    <span class="p-label">Bombeiros</span>
                   </div>
-                  <button class="btn-ouvidoria" onclick="app.showGenericQR('Ouvidoria de Jaú', 'https://www.jau.sp.gov.br/ouvidoria')">Gerar QR Code</button>
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">153</span>
+                    <span class="p-label">Guarda Municipal</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">190</span>
+                    <span class="p-label">Polícia Militar</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">199</span>
+                    <span class="p-label">Defesa Civil</span>
+                  </div>
+                  <div class="phone-btn" onclick="app.openModal('modal-contacts')">
+                    <span class="p-num">180 / 100</span>
+                    <span class="p-label">Proteção Social</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -937,32 +952,38 @@
 
         </div> <!-- /.totem-middle-layout -->
 
-        <!-- RODAPÉ PERMANENTE -->
+        <!-- RODAPÉ PERMANENTE (NA ZONA DE ALCANCE INFERIOR) -->
         <footer id="totem-footer" class="totem-footer">
-          <!-- Botão Home permanente -->
+          <!-- Botão Home permanente com SVG limpo -->
           <button id="btn-home-footer" class="btn-footer-home" data-view="view-home" aria-label="Voltar para Início">
-            <span>🏠</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span>INÍCIO</span>
           </button>
 
-          <!-- Banner Rotativo DOOH (Publicidade Sustentável ESG) -->
+          <!-- Banner Rotativo de Avisos Locais -->
           <div class="dooh-carousel">
             <div id="dooh-ad" class="dooh-ad-item">
-              <span class="dooh-badge">ANÚNCIO PARCEIRO</span>
-              <span id="dooh-text">Calçados Jaú: Visite a maior feira da região neste fim de semana!</span>
+              <span class="dooh-badge">AVISO LOCAL</span>
+              <span id="dooh-text">Shopping Território do Calçado: mais de 150 lojas abertas até 20h.</span>
             </div>
           </div>
 
-          <!-- BOTÃO ISOLADO NO CANTO INFERIOR: CONTATOS DE ACIONAMENTO DE SOCORRO -->
-          <button id="btn-emergency-contacts" class="btn-footer-emergency-corner" aria-label="Contatos de Acionamento de Socorro">
+          <!-- Botão de Sustentabilidade e Transparência (acessível embaixo, não no topo alto) -->
+          <button type="button" class="btn-footer-esg" onclick="app.showEsgModal()" title="Sustentabilidade e Transparência deste Totem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 17 8zm0 0c5 0 6-5 6-5s-5 0-8 3c-1.5 1.5-2.2 3.2-2.5 4.8 2.6-1.5 4.5-2.8 4.5-2.8z"/></svg>
+            <span>ESG</span>
+          </button>
+
+          <!-- BOTÃO DE EMERGÊNCIA DIRETO E CURTO -->
+          <button id="btn-emergency-contacts" class="btn-footer-emergency-corner" aria-label="Telefones de Emergência e Ajuda">
             <span class="em-icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
             </span>
-            <span class="em-label">Contatos de Acionamento de Socorro</span>
+            <span class="em-label">EMERGÊNCIA<br><small>192 • 153 • 190</small></span>
           </button>
         </footer>
 
-        <!-- MODAL GENÉRICO DE DETALHES COM QR CODE DINÂMICO -->
+        <!-- MODAL DE QR CODE DINÂMICO -->
         <div id="modal-qr" class="modal-backdrop hidden">
           <div class="modal-card">
             <button class="modal-close" onclick="app.closeModal()">✕</button>
@@ -972,133 +993,142 @@
               </span>
               <h3 id="modal-title">Levar no Celular</h3>
             </div>
-            <p id="modal-desc">Aponte a câmera do seu smartphone para o QR Code abaixo:</p>
+            <p id="modal-desc">Aponte a câmera do celular para abrir o mapa e os horários:</p>
             <div id="qrcode-container" class="qrcode-wrapper"></div>
             <div class="modal-footer-note">
               <span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="#168821" style="vertical-align:-2px; margin-right:4px;"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 17 8zm0 0c5 0 6-5 6-5s-5 0-8 3c-1.5 1.5-2.2 3.2-2.5 4.8 2.6-1.5 4.5-2.8 4.5-2.8z"/></svg>
-                <strong>ESG Paperless:</strong> Sem emissão de papel ou lixo urbano.
+                <strong>Zero Papel:</strong> rota enviada direto para o seu celular.
               </span>
             </div>
           </div>
         </div>
 
-        <!-- MODAL COMPLETO DE VANTAGENS AMBIENTAIS & DIRETRIZES ESG (LEGISLAÇÃO & AUTOPROPAGANDA) -->
+        <!-- MODAL DE SUSTENTABILIDADE & TRANSPARÊNCIA PÚBLICA (SEM EMOJIS DUPLOS E COM LEITURA DIRETA) -->
         <div id="modal-esg-advantages" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="esg-modal-title">
           <div class="modal-card modal-card-esg">
-            <button class="modal-close esg-close-btn" onclick="app.closeEsgModal()" aria-label="Fechar Vantagens ESG">✕</button>
+            <button class="modal-close esg-close-btn" onclick="app.closeEsgModal()" aria-label="Fechar">✕</button>
             <div class="esg-modal-header">
               <div class="esg-badge-top">
-                <span class="esg-leaf-icon">🍃</span>
-                <span class="esg-subtag">MOBILIÁRIO URBANO SUSTENTÁVEL • JAÚ VERDE</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="#86efac"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 17 8zm0 0c5 0 6-5 6-5s-5 0-8 3c-1.5 1.5-2.2 3.2-2.5 4.8 2.6-1.5 4.5-2.8 4.5-2.8z"/></svg>
+                <span class="esg-subtag">SUSTENTABILIDADE E TRANSPARÊNCIA • JAÚ</span>
               </div>
-              <h3 id="esg-modal-title">Vantagens Ambientais & Compromisso ESG do Totem</h3>
-              <p>Tecnologia 100% Limpa, Paperless, Inclusão Social e Eficiência para a Estância Turística de Jaú</p>
+              <h3 id="esg-modal-title">Como este Totem funciona e economiza recursos</h3>
+              <p>Energia solar própria, zero impressão de papel e respeito à sua privacidade</p>
             </div>
 
             <div class="esg-modal-body">
-              <!-- PILAR E: AMBIENTAL (ENVIRONMENTAL) -->
+              <!-- PILAR E: AMBIENTAL -->
               <div class="esg-pillar-box pillar-env">
                 <div class="pillar-header">
-                  <span class="pillar-tag tag-green">E • AMBIENTAL (ENVIRONMENTAL)</span>
-                  <h4>Preservação Ecológica & Eficiência Energética Limpa</h4>
+                  <span class="pillar-tag tag-green">AMBIENTAL</span>
+                  <h4>Energia Limpa e Zero Lixo nas Praças</h4>
                 </div>
                 <div class="esg-cards-grid">
                   <div class="esg-feature-card">
-                    <div class="feat-icon">📄🚫</div>
-                    <h5>100% Paperless (Zero Papel)</h5>
-                    <p>Elimina milhares de folhetos, panfletos de eventos, tabelas de ônibus e guias impressos que viravam lixo nas ruas de Jaú. O cidadão transfere rotas diretamente para o celular via QR Code.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#168821"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                    </div>
+                    <h5>Zero Papel (QR Code)</h5>
+                    <p>Substitui panfletos e tabelas impressas por mapas no celular (Lei nº 12.305/2010).</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">☀️⚡</div>
-                    <h5>Energia Solar Fotovoltaica Híbrida</h5>
-                    <p>Painel fotovoltaico de alta eficiência no topo integrado com bateria de backup LiFePO4 e ligação 220V municipal auxiliar, gerando eletricidade limpa e reduzindo a pegada de carbono.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#d97706"><circle cx="12" cy="12" r="5"/><path d="M12 1v3m0 16v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M1 12h3m16 0h3M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12" stroke="#d97706" stroke-width="2"/></svg>
+                    </div>
+                    <h5>Teto Solar + Bateria</h5>
+                    <p>Painel de 35Wp e bateria LiFePO4 (480 Wh), com redução para 15W de madrugada.</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">💡♻️</div>
-                    <h5>Componentes 100% Recicláveis</h5>
-                    <p>Chassi em aço galvanizado e ACM com durabilidade de mais de 10 anos, iluminação LED de baixíssimo consumo e sensor de presença que apaga a tela em horários ociosos.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#0284c7"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
+                    </div>
+                    <h5>Aço 100% Reciclável</h5>
+                    <p>Estrutura em aço galvanizado (IP65 / IK10) com vida útil superior a 10 anos.</p>
                   </div>
-                </div>
-
-                <div class="esg-laws-box">
-                  <strong>📜 Legislação Ambiental Atendida Rigorosamente:</strong>
-                  <ul>
-                    <li><strong>Lei Federal nº 12.305/2010 (PNRS - Política Nacional de Resíduos Sólidos):</strong> Redução drástica na geração de resíduos sólidos municipais através do sistema paperless.</li>
-                    <li><strong>Lei Federal nº 12.187/2009 (PNMC - Política Nacional sobre Mudança do Clima):</strong> Fomento a energias renováveis e descarbonização de serviços públicos.</li>
-                    <li><strong>Norma ABNT NBR ISO 14001:</strong> Diretrizes internacionais de sustentabilidade e ciclo de vida do produto.</li>
-                  </ul>
                 </div>
               </div>
 
-              <!-- PILAR S: SOCIAL (SOCIAL RESPONSIBILITY) -->
+              <!-- PILAR S: SOCIAL -->
               <div class="esg-pillar-box pillar-soc">
                 <div class="pillar-header">
-                  <span class="pillar-tag tag-blue">S • SOCIAL (RESPONSABILIDADE SOCIAL)</span>
-                  <h4>Cidadania, Inclusão Universal & Acessibilidade Plena</h4>
+                  <span class="pillar-tag tag-blue">SOCIAL</span>
+                  <h4>Acessibilidade sem Poluição Sonora</h4>
                 </div>
                 <div class="esg-cards-grid">
                   <div class="esg-feature-card">
-                    <div class="feat-icon">🤟🌐</div>
-                    <h5>Intérprete de Libras Articulado</h5>
-                    <p>Avatar 3D com braços e mãos de 5 dedos que traduz palavra por palavra textos de interesse público para cidadãos surdos e com deficiência auditiva.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#1351b4"><circle cx="12" cy="4" r="2.2"/><path d="M19 13v-2c-1.54.02-3.09-.75-4.07-1.83l-1.29-1.43c-.17-.19-.38-.34-.61-.45H13c-.35-.2-.75-.3-1.19-.26-.64.05-1.2.4-1.51.93L8.4 12.87C8.14 13.31 8 13.82 8 14.33V19h2v-4.67l1.45-2.58 2.05 3.25H19v-2h-3.92l-1.4-2.22 1.34 1.48c.84.93 2.05 1.63 3.48 1.74z"/></svg>
+                    </div>
+                    <h5>Alcance NBR 9050</h5>
+                    <p>Botões na metade inferior da tela e modo de rebaixamento para cadeirantes.</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">🔊👁️</div>
-                    <h5>Leitor de Tela por Áudio & Alto Contraste</h5>
-                    <p>Sintetizador vocal e modo de alto contraste amarelo e preto de alta visibilidade para idosos e pessoas com deficiência visual.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#1351b4"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    </div>
+                    <h5>Libras e Alto Contraste</h5>
+                    <p>Tradutor de Libras interativo, alto contraste e fonte ampliada (sem som na rua).</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">♿📐</div>
-                    <h5>Alcance Cadeirante (ABNT NBR 9050)</h5>
-                    <p>Modo Cadeirante com rebaixamento da interface para a faixa de alcance ergonômico de 0,80m a 1,20m do solo (Lei Federal nº 13.146/2015).</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#dc2626"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    <h5>Rede de Proteção</h5>
+                    <p>Acesso rápido aos canais gratuitos 180 (Mulher), 100, 188 (CVV) e Plantão Social.</p>
                   </div>
                 </div>
               </div>
 
-              <!-- PILAR G: GOVERNANÇA (GOVERNANCE) -->
+              <!-- PILAR G: GOVERNANÇA E TRANSPARÊNCIA -->
               <div class="esg-pillar-box pillar-gov">
                 <div class="pillar-header">
-                  <span class="pillar-tag tag-purple">G • GOVERNANÇA (TRANSPARÊNCIA PÚBLICA)</span>
-                  <h4>Proteção de Dados, Eficiência & Economia aos Cofres Públicos</h4>
+                  <span class="pillar-tag tag-purple">TRANSPARÊNCIA</span>
+                  <h4>Proteção de Dados e Prestação de Contas</h4>
                 </div>
                 <div class="esg-cards-grid">
                   <div class="esg-feature-card">
-                    <div class="feat-icon">🛡️🔒</div>
-                    <h5>Conformidade Integral com a LGPD</h5>
-                    <p>Terminal estritamente informativo sem coleta nem armazenamento de dados pessoais ou sensíveis dos cidadãos (Lei Federal nº 13.709/2018).</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#6d28d9"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    </div>
+                    <h5>100% Seguro (LGPD)</h5>
+                    <p>Não pede CPF, cadastro nem armazena imagens dos cidadãos (Lei nº 13.709/2018).</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">💰📉</div>
-                    <h5>Economia de Gastos Públicos</h5>
-                    <p>Dispensa contratos caros de operadoras e modems por ser autônomo, além de eliminar despesas recorrentes de reimpressão gráfica na cidade.</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#6d28d9"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                    </div>
+                    <h5>Transparência Pública</h5>
+                    <p>Fabricação regional (Jaú/Bauru) nos termos da Lei nº 14.133/2021 (4 pontos no município).</p>
                   </div>
                   <div class="esg-feature-card">
-                    <div class="feat-icon">🎯🇺🇳</div>
-                    <h5>ODS da ONU Cumpridos</h5>
-                    <p>Atende diretamente ODS 7 (Energia Limpa), ODS 9 (Indústria e Inovação), ODS 11 (Cidades Sustentáveis) e ODS 12 (Consumo Responsável).</p>
+                    <div class="feat-icon">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#6d28d9"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                    <h5>Metas ODS da ONU</h5>
+                    <p>Alinhado às metas globais ODS 7 (Energia Limpa), 9, 11 (Cidades) e 12.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="esg-modal-footer">
-              <span class="esg-foot-brand">🌱 <strong>Prefeitura de Jaú:</strong> Cidade Inteligente com Responsabilidade Ambiental e Social.</span>
-              <button class="btn-esg-confirm" onclick="app.closeEsgModal()">Entendido</button>
+              <span class="esg-foot-brand"><strong>Prefeitura de Jaú • Totemize:</strong> Mobilidade e informação pública sustentável.</span>
+              <button class="btn-esg-confirm" onclick="app.closeEsgModal()">Fechar</button>
             </div>
           </div>
         </div>
 
-        <!-- TELA COM LATERAIS FOSCAS: CONTATOS DE ACIONAMENTO DE SOCORRO -->
+        <!-- TELA DE TELEFONES DE EMERGÊNCIA E PROTEÇÃO SOCIAL (DIRETA E RÁPIDA DE LER) -->
         <div id="modal-contacts" class="contacts-screen-backdrop hidden">
           <div class="frosted-side frosted-left"></div>
           
           <div class="contacts-central-panel">
             <div class="contacts-panel-head">
               <div class="head-title-wrap">
-                <span class="badge-auto">Sistema Autoindependente</span>
-                <h2>Contatos de Acionamento de Socorro</h2>
-                <p>Lista direta de canais de atendimento e utilidade pública municipal</p>
+                <span class="badge-auto">Ligação Gratuita do seu Celular</span>
+                <h2>Telefones de Emergência e Ajuda</h2>
+                <p>Disque qualquer número abaixo no seu telefone (atendimento 24h)</p>
               </div>
               <button class="btn-close-contacts" onclick="app.closeModal()">✕ Fechar</button>
             </div>
@@ -1107,8 +1137,8 @@
               <!-- BLOCO 1: EMERGÊNCIA E SEGURANÇA PÚBLICA -->
               <div class="contacts-section">
                 <div class="section-title-strip emergency-strip">
-                  <span class="strip-badge">EMERGÊNCIA E SEGURANÇA PÚBLICA</span>
-                  <small>Linhas de atendimento imediato</small>
+                  <span class="strip-badge">URGÊNCIA E SOCORRO IMEDIATO</span>
+                  <small>Atendimento 24 horas</small>
                 </div>
                 
                 <div class="contacts-cards-grid">
@@ -1116,11 +1146,10 @@
                     <div class="c-badge">192</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>SAMU</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <strong>SAMU (Ambulância)</strong>
+                        <span class="tag-24h">24H • GRATUITO</span>
                       </div>
-                      <span class="c-desc">Atendimento pré-hospitalar móvel de urgência médica e traumas graves.</span>
-                      <small class="c-cost">Ligação gratuita</small>
+                      <span class="c-desc">Socorro médico de urgência, mal súbito e acidentes graves.</span>
                     </div>
                   </div>
 
@@ -1129,10 +1158,9 @@
                     <div class="c-info">
                       <div class="c-head-line">
                         <strong>Corpo de Bombeiros</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <span class="tag-24h">24H • GRATUITO</span>
                       </div>
-                      <span class="c-desc">Resgates, salvamentos, acidentes de trânsito e combate a incêndios.</span>
-                      <small class="c-cost">Ligação gratuita</small>
+                      <span class="c-desc">Incêndios, resgates, quedas e acidentes de trânsito.</span>
                     </div>
                   </div>
 
@@ -1141,10 +1169,9 @@
                     <div class="c-info">
                       <div class="c-head-line">
                         <strong>Polícia Militar</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <span class="tag-24h">24H • GRATUITO</span>
                       </div>
-                      <span class="c-desc">Atendimento a ocorrências criminais em andamento e segurança pública.</span>
-                      <small class="c-cost">Ligação gratuita</small>
+                      <span class="c-desc">Crimes em andamento, assaltos e risco imediato à segurança.</span>
                     </div>
                   </div>
 
@@ -1153,10 +1180,9 @@
                     <div class="c-info">
                       <div class="c-head-line">
                         <strong>Guarda Civil Municipal de Jaú</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <span class="tag-24h">24H • GRATUITO</span>
                       </div>
-                      <span class="c-desc">Patrulhamento preventivo, proteção de espaços públicos e apoio à população.</span>
-                      <small class="c-cost">Ligação gratuita</small>
+                      <span class="c-desc">Apoio nas praças, patrulhamento municipal e auxílio ao cidadão.</span>
                     </div>
                   </div>
                 </div>
@@ -1165,8 +1191,8 @@
               <!-- BLOCO 2: PROTEÇÃO SOCIAL E DIREITOS HUMANOS -->
               <div class="contacts-section">
                 <div class="section-title-strip social-strip">
-                  <span class="strip-badge">PROTEÇÃO SOCIAL E DIREITOS HUMANOS</span>
-                  <small>Canais oficiais de acolhimento e denúncia</small>
+                  <span class="strip-badge">PROTEÇÃO SOCIAL E ACOLHIMENTO</span>
+                  <small>Sigilo garantido</small>
                 </div>
 
                 <div class="contacts-cards-grid">
@@ -1175,10 +1201,9 @@
                     <div class="c-info">
                       <div class="c-head-line">
                         <strong>Central de Atendimento à Mulher</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <span class="tag-24h">24H • ANÔNIMO</span>
                       </div>
-                      <span class="c-desc">Orientação e denúncias de violência doméstica, ameaça e feminicídio.</span>
-                      <small class="c-cost">Ligação gratuita • Atendimento anônimo</small>
+                      <span class="c-desc">Denúncia e ajuda contra violência doméstica e ameaças.</span>
                     </div>
                   </div>
 
@@ -1186,23 +1211,10 @@
                     <div class="c-badge-social">100</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>Disque Direitos Humanos (Igualdade Racial)</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <strong>Direitos Humanos, Criança, Idoso e Igualdade Racial</strong>
+                        <span class="tag-24h">24H • ANÔNIMO</span>
                       </div>
-                      <span class="c-desc">Registro de denúncias de racismo, injúria racial e discriminação étnico-racial.</span>
-                      <small class="c-cost">Ligação gratuita • Ouvidoria Nacional</small>
-                    </div>
-                  </div>
-
-                  <div class="contact-card social-card">
-                    <div class="c-badge-social">100</div>
-                    <div class="c-info">
-                      <div class="c-head-line">
-                        <strong>Proteção à Criança e ao Adolescente</strong>
-                        <span class="tag-24h">24 HORAS</span>
-                      </div>
-                      <span class="c-desc">Denúncias de violência, negligência, trabalho infantil e abuso sexual de menores.</span>
-                      <small class="c-cost">Ligação gratuita • Articulado ao Conselho Tutelar</small>
+                      <span class="c-desc">Denúncias de racismo, abuso infantil, violência contra idosos ou PcD.</span>
                     </div>
                   </div>
 
@@ -1210,24 +1222,22 @@
                     <div class="c-badge-social">188</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>Centro de Valorização da Vida (CVV)</strong>
-                        <span class="tag-24h">24 HORAS</span>
+                        <strong>CVV — Apoio Emocional e Vida</strong>
+                        <span class="tag-24h">24H • SIGILOSO</span>
                       </div>
-                      <span class="c-desc">Apoio emocional confidencial e prevenção ao suicídio para pessoas em sofrimento mental.</span>
-                      <small class="c-cost">Ligação gratuita • Atendimento sob sigilo total</small>
+                      <span class="c-desc">Conversa de acolhimento emocional e prevenção ao suicídio.</span>
                     </div>
                   </div>
 
                   <div class="contact-card admin-card">
-                    <div class="c-badge-admin">MUNICIPAL</div>
+                    <div class="c-badge-admin">JAÚ</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>Plantão Social • Secretaria de Assistência Social de Jaú</strong>
-                        <span class="tag-office">08h às 17h</span>
+                        <strong>Plantão Social • Assistência Social de Jaú</strong>
+                        <span class="tag-office">Seg a Sex • 08h às 17h</span>
                       </div>
                       <span class="phone-highlight">(14) 3602-5777</span>
-                      <span class="c-desc">Acolhimento e encaminhamento de pessoas em situação de vulnerabilidade e rua em Jaú.</span>
-                      <small class="c-cost">Segunda a sexta-feira • Expediente municipal</small>
+                      <span class="c-desc">Acolhimento a pessoas em vulnerabilidade ou situação de rua.</span>
                     </div>
                   </div>
                 </div>
@@ -1235,7 +1245,7 @@
             </div>
 
             <div class="contacts-panel-foot">
-              <span class="foot-note">ℹ️ Terminal informativo autônomo. Para efetuar ligações, utilize o seu aparelho telefônico com os números indicados acima.</span>
+              <span class="foot-note">Você está na <strong>Praça da República (Jardim de Baixo — Centro de Jaú)</strong>. Informe este local ao pedir socorro.</span>
             </div>
           </div>
 
@@ -1466,6 +1476,7 @@
         <!-- ABAS INTERNAS DO MODAL DE PARTE TÉCNICA -->
         <div class="hw-modal-tabs">
           <button class="btn-hw-tab active" data-hw-tab="overview">📄 Texto Técnico Geral & Especificações</button>
+          <button class="btn-hw-tab" data-hw-tab="risks">⚠️ Análise da Estrutura & Possibilidades de Erro</button>
           <button class="btn-hw-tab" data-hw-tab="wiring">🔌 Tabela de Fiação ("Qual fio conecta onde")</button>
           <button class="btn-hw-tab" data-hw-tab="diagram">📐 Diagrama de Blocos & Fluxo de Energia</button>
           <button class="btn-hw-tab" data-hw-tab="bom">📦 Memorial de Componentes (BOM)</button>
@@ -1475,15 +1486,15 @@
         <!-- ABA 0 (PADRÃO): TEXTO TÉCNICO GERAL & ESPECIFICAÇÕES DO PROJETO -->
         <div id="hw-tab-content-overview" class="hw-tab-pane active">
           <div class="hw-pane-intro">
-            <h4>📄 Memorial Descritivo: Carcaça, Tampão Traseiro de Acesso e Computador Acoplado vs Separado</h4>
-            <p>Documento técnico consolidado detalhando como a carcaça metálica e a porta traseira ("tampão") são construídas para manutenção e comparando a compra de uma <strong>Tela Touch já com Computador Acoplado (All-in-One / Slot OPS)</strong> versus <strong>Mini-PC Separado</strong>.</p>
+            <h4>📄 Memorial Descritivo: Carcaça Limpa ("Só Tela"), Tampão Traseiro e Computador Acoplado vs Separado</h4>
+            <p>Documento técnico consolidado detalhando a estrutura frontal limpa (sem saída de som / sem mosca de som), como a carcaça metálica e o tampão traseiro são construídos para manutenção, e comparando a <strong>Tela Touch já com Computador Acoplado (All-in-One / Slot OPS)</strong> versus <strong>Mini-PC Separado</strong>.</p>
           </div>
 
           <div class="tech-text-dossier">
             <div class="tech-text-section">
-              <h5>1. Como é a Carcaça Oca e o Tampão Traseiro de Acesso ("Porta de Manutenção")</h5>
+              <h5>1. Como é a Carcaça Oca, a Frente "Só Tela" (Sem Mosca de Som) e o Tampão Traseiro</h5>
               <p>
-                A <strong>Carcaça do Totem</strong> é construída como um gabinete monobloco <strong>oco por dentro</strong> em <strong>chapa de aço carbono galvanizado dobrado de 2,5 mm de espessura</strong> (dimensões externas de <strong>2,20m de altura × 0,70m de largura × 0,35m de profundidade</strong>), com paredes laterais dobradas de 4,2 cm de aba estrutural, chapéu superior curvo na frente e pedestal inferior chumbado ao solo.
+                A <strong>Carcaça do Totem</strong> é construída como um gabinete monobloco <strong>oco por dentro</strong> em <strong>chapa de aço carbono galvanizado dobrado de 2,5 mm de espessura</strong> (dimensões externas de <strong>2,20m de altura × 0,70m de largura × 0,35m de profundidade</strong>). A face frontal foi projetada com engenharia <strong>100% Limpa ("Só Tela")</strong>: possui exclusivamente a placa superior institucional de Jaú e a janela do monitor touch de 43", <strong>eliminando completamente a "mosca de som" (furos de alto-falante), tomadas USB externas e botões físicos salientes</strong> — o que impede infiltração de água pela frente e elimina pontos de vandalismo.
               </p>
               <p>
                 Nas costas da máquina fica o <strong>Tampão Traseiro de Acesso Técnico (Porta Traseira de 0,60m × 1,80m)</strong> por onde a equipe abre o totem para acessar os componentes internos:
@@ -1518,12 +1529,12 @@
             </div>
 
             <div class="tech-text-section">
-              <h5>3. Interface Visual, Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
+              <h5>3. Interface Visual 100% Silenciosa ("Só Tela"), Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
               <p>
                 Na face frontal, o equipamento integra um <strong>Display LCD Industrial de 43 polegadas em orientação vertical (9:16)</strong> com resolução Full HD (1920 × 1080px) e <strong>backlight de ultra alto brilho de 1.500 nits</strong>, garantindo leitura nítida mesmo sob incidência direta de luz solar ao meio-dia. O painel é protegido por um vidro temperado laminado de <strong>8 mm</strong> com película antirreflexo e camada sensível ao toque <strong>PCAP (Capacitiva Projetada) de 10 toques simultâneos</strong>.
               </p>
               <p>
-                Em conformidade rigorosa com a norma brasileira de acessibilidade <strong>ABNT NBR 9050</strong>, o centro operacional dos controles interativos está posicionado na faixa ergonômica entre <strong>0,80m e 1,20m de altura em relação ao piso</strong>. O sistema conta ainda com o <strong>Modo Cadeirante</strong> (que rebaixa toda a interface gráfica para a metade inferior da tela), <strong>Alto Contraste</strong>, <strong>Leitor de Voz (TTS)</strong>, <strong>Fonte Ampliada</strong> e tradução simultânea em <strong>LIBRAS (VLibras)</strong>.
+                Em conformidade rigorosa com a norma brasileira de acessibilidade <strong>ABNT NBR 9050</strong>, o centro operacional dos controles interativos está posicionado na faixa ergonômica entre <strong>0,80m e 1,20m de altura em relação ao piso</strong>. Na barra lateral azul escura da tela ficam os <strong>3 grandes botões quadrados de acessibilidade</strong> (<strong>Alto Contraste</strong>, <strong>Intérprete de LIBRAS VLibras</strong> e <strong>Alcance Cadeirante</strong>, que rebaixa toda a interface gráfica para a metade inferior da tela) e, no canto inferior da mesma barra azul, os controles compactos de <strong>Fonte Maior (A+) e Padrão (A-)</strong> — operando com zero poluição sonora na praça.
               </p>
             </div>
 
@@ -1533,8 +1544,96 @@
                 No topo traseiro plano do totem (atrás da quina frontal arredondada, invisível para quem olha de frente) está embutido um <strong>Painel Solar Fotovoltaico Monocristalino de 35Wp (64 × 21 cm)</strong>. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que mantém carregado o banco de baterias estacionárias de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na zona fria da base inferior.
               </p>
               <p>
-                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e o botão físico de socorro (SAMU 192, Bombeiros 193, GCM 153 e Polícia 190) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão.
+                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e os canais de emergência na tela (SAMU 192, Bombeiros 193, GCM 153 e Polícia 190) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA NOVA: ANÁLISE COMPLETA DA ESTRUTURA & POSSIBILIDADES DE ERRO (FMEA) -->
+        <div id="hw-tab-content-risks" class="hw-tab-pane">
+          <div class="hw-pane-intro">
+            <h4>⚠️ Análise Completa da Estrutura da Máquina & Prevenção de Falhas (FMEA)</h4>
+            <p>Diagnóstico de engenharia avaliando a estrutura limpa ("Só Tela", sem saída de som), todos os pontos críticos que poderiam apresentar falha em ambiente externo e como cada risco foi eliminado no projeto:</p>
+          </div>
+
+          <div class="tech-text-dossier" style="margin-bottom: 16px;">
+            <div class="tech-text-section" style="border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.08); padding: 14px; border-radius: 8px;">
+              <h5>✅ Por que tirar a "Mosca de Som" (Saída de Áudio), USB Externo e Botões Físicos foi uma decisão certeira de engenharia?</h5>
+              <ul style="margin: 8px 0 4px 20px; line-height: 1.65;">
+                <li><strong>1. Eliminação Total de Infiltração Frontal (Vedação IP65 Real):</strong> Qualquer "mosca de som" (furação tipo colmeia na chapa frontal) é uma porta de entrada direta para água de chuva com vento e jatos de mangueira durante a lavagem da praça pública. Sem saída de som, a frente da máquina é 100% cega e estanque (apenas chapa contínua + vidro laminado 8mm colado com fita estrutural VHB 3M e selante PU marítimo).</li>
+                <li><strong>2. Eliminação de Pontos de Vandalismo Crítico:</strong> Em mobiliário urbano público, grelhas furadas ("mosca de som") e portas USB externas são os alvos nº 1 de vandalismo (entupimento com chiclete, introdução de arames/palitos, líquidos ou curto-circuito intencional nas portas 5V).</li>
+                <li><strong>3. Menos Peças que Dão Defeito (Alta Confiabilidade MTBF):</strong> Alto-falantes expostos à variação térmica e umidade rasgam a membrana ou oxidam a bobina em poucos meses; amplificadores de áudio consomem energia da bateria solar e geram calor extra dentro do gabinete.</li>
+                <li><strong>4. Custo de Fabricação e Corte a Laser CNC Mais Limpo:</strong> Na planificação da chapa frontal, eliminam-se dezenas de microfuros de punção/laser, restando apenas o recorte retangular central da tela de 43" (55 × 96 cm) e os 4 furos de fixação da placa superior de Jaú.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bom-grid">
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E1</span>
+                <h5>Risco 1: Superaquecimento Interno e "Mancha Preta" na Tela LCD</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Sob sol de 38°C ao meio-dia em Jaú, o gabinete metálico fechado + o monitor de 1.500 nits podem passar de 65°C internos, causando manchas escuras no cristal líquido (<em>LCD blackening</em>), perda de vida útil da bateria e travamento térmico do PC.</li>
+                <li><strong>Solução na Estrutura:</strong> Divisão interna em <strong>3 zonas térmicas independentes</strong> com <strong>chapa defletora</strong> isolando a bateria LiFePO4 na base fria (a 15 cm do chão); <strong>manta térmica aluminizada</strong> sob o teto solar; e <strong>2 exaustores IP54 (rolamento duplo Ball Bearing)</strong> no topo traseiro acionados por termostato a 35°C criando efeito chaminé.</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E2</span>
+                <h5>Risco 2: Entrada de Água pela Porta Traseira ("Tampão") ou Condensação</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Chuva de vento infiltrar pela fresta do tampão traseiro ou pelas venezianas de ventilação, ou a umidade da madrugada condensar gotas de água nas placas eletrônicas.</li>
+                <li><strong>Solução na Estrutura:</strong> Tampão traseiro embutido com <strong>perfil de borracha automotiva EPDM perimetral comprimida</strong> + <strong>calha pingadeira superior</strong>; venezianas traseiras estampadas a <strong>45° para baixo (tipo louver) com manta hidrofóbica G4</strong>; prensa-cabo <strong>IP68</strong> no teto solar; e <strong>resistor anticondensação de 30W</strong> controlado por higrostato.</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E3</span>
+                <h5>Risco 3: Mau Contato de Cabos (HDMI/USB) ou Travamento do Sistema</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Vibração de trânsito pesado soltar o cabo HDMI (tela preta) ou cabo USB (touch para de responder), ou o sistema operacional congelar de madrugada sem ninguém para reiniciar.</li>
+                <li><strong>Solução na Estrutura:</strong> Adoção da <strong>Tela Touch com Computador Acoplado (Slot OPS / All-in-One)</strong>, que elimina cabos HDMI e USB soltos usando conector industrial direto de 80 pinos parafusado na própria tela; refrigeração <strong>100% Fanless</strong> (sem ventoinha no PC para não entupir de poeira); e <strong>Watchdog Timer em hardware</strong> que reinicia a máquina sozinho se o software travar por 10 segundos.</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E4</span>
+                <h5>Risco 4: "Toque Fantasma" (Ghost Touch) por Chuva e Reflexo Solar</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Gotas de chuva escorrendo pelo vidro acionarem botões sozinhos na tela capacitiva, ou o reflexo do sol impedir que idosos enxerguem as informações.</li>
+                <li><strong>Solução na Estrutura:</strong> Controladora Touch <strong>PCAP Industrial com algoritmo Water-Rejection (Rejeição de Água)</strong> calibrada para vidro de 8mm (ignora gotas e escorrimento de água); vidro com <strong>tratamento químico Antirreflexo (AR)</strong> + brilho de <strong>1.500 nits</strong> + <strong>Modo Alto Contraste Amarelo/Preto</strong> em botão quadrado grande na barra lateral.</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E5</span>
+                <h5>Risco 5: Surto Elétrico / Raio na Praça ou Choque Elétrico</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Descarga atmosférica (raio) na rede de iluminação da praça queimar o monitor/PC, ou falha de isolação energizar a carcaça metálica.</li>
+                <li><strong>Solução na Estrutura:</strong> Quadro DIN com <strong>DPS Classe II 40kA</strong> (desvia surtos de raio para a terra), <strong>DR 30mA</strong> (desarma em milissegundos se houver fuga de corrente), <strong>cordoalha de aterramento equipotencial PE</strong> interligando carcaça + tampão traseiro, e operação interna toda em <strong>baixa tensão segura (12V/24V DC)</strong> com no-break <strong>LiFePO4</strong> (química incombustível).</li>
+              </ul>
+            </div>
+
+            <div class="bom-card">
+              <div class="bom-header">
+                <span class="bom-num" style="background:#dc2626;">E6</span>
+                <h5>Risco 6: Arrombamento do Tampão Traseiro, Impacto ou Tombamento</h5>
+              </div>
+              <ul>
+                <li><strong>O que pode dar erro:</strong> Tentativa de abrir o tampão traseiro com alavanca (pé-de-cabra), pedrada na tela ou tentativa de derrubar o totem.</li>
+                <li><strong>Solução na Estrutura:</strong> Tampão traseiro sem frestas externas de alavanca, travado por <strong>2 fechaduras tubulares de alta segurança + 3 dobradiças reforçadas + 3 costelas ômega internas anti-torção</strong>; vidro frontal laminado temperado de <strong>8 mm grau IK10</strong>; e flange de base chumbada por dentro com <strong>6 Parabolts M16 (Ø 16mm)</strong> no concreto.</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -1597,9 +1696,9 @@
                   <td>Distribuição principal de energia DC de baixa tensão.</td>
                 </tr>
                 <tr class="row-dc">
-                  <td><strong>💻 Mini-PC Industrial</strong></td>
-                  <td>Bloco DC 12V</td>
-                  <td>Jack DC Rosqueável IPC</td>
+                  <td><strong>💻 PC Acoplado (OPS) / Mini-PC</strong></td>
+                  <td>Bloco DC 12V / Slot OPS</td>
+                  <td>Barramento OPS / Jack DC IPC</td>
                   <td><span class="wire-color red"></span> Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
                   <td>1,5 mm² com ferrite</td>
                   <td>12V DC / 5A (60W)</td>
@@ -1615,12 +1714,12 @@
                   <td>Alimentação do backlight LED de alto brilho (1500 nits).</td>
                 </tr>
                 <tr class="row-solar">
-                  <td><strong>☀️ Painel Solar 120W</strong></td>
-                  <td>Módulo Fotovoltaico Teto</td>
+                  <td><strong>☀️ Painel Solar 35Wp</strong></td>
+                  <td>Módulo Fotovoltaico Teto (64×21cm)</td>
                   <td>Entrada PV do MPPT 20A</td>
                   <td><span class="wire-color orange"></span> Laranja/Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
                   <td>4,0 mm² Solar Dupla Capa</td>
-                  <td>18.5V Vmp / 6.5A</td>
+                  <td>18.5V Vmp / 1.9A</td>
                   <td>Geração solar com conectores MC4 e proteção anti-UV.</td>
                 </tr>
                 <tr class="row-solar">
@@ -1633,27 +1732,27 @@
                   <td>No-break sustentável ESG com fusível lâmina de 30A.</td>
                 </tr>
                 <tr class="row-data">
-                  <td><strong>🔵 Sinal de Vídeo 4K</strong></td>
-                  <td>Saída HDMI do Mini-PC</td>
-                  <td>Entrada HDMI Placa Scaler</td>
+                  <td><strong>🔵 Sinal de Vídeo Full HD</strong></td>
+                  <td>Conector OPS 80p / HDMI</td>
+                  <td>Entrada Digital Placa Scaler</td>
                   <td><span class="wire-color darkblue"></span> Azul Escuro Blindado</td>
-                  <td>Cabo HDMI 2.1 Blindado</td>
+                  <td>Barramento OPS / HDMI 2.1</td>
                   <td>TMDS Digital 1080p@60Hz</td>
-                  <td>Transmissão de imagem com malha de aterramento.</td>
+                  <td>Transmissão de imagem direta sem perda de sinal.</td>
                 </tr>
                 <tr class="row-data">
                   <td><strong>🟡 Dados Touchscreen</strong></td>
                   <td>Placa Controladora PCAP</td>
-                  <td>Porta USB 2.0 Mini-PC</td>
+                  <td>Barramento OPS / Porta USB</td>
                   <td><span class="wire-color yellow"></span> Amarelo / Dourado</td>
                   <td>USB 2.0 Blindado</td>
                   <td>5V DC + Dados D+/D-</td>
-                  <td>Transmissão de toques simultâneos (10 pontos).</td>
+                  <td>Transmissão de toques simultâneos (10 pontos c/ rejeição de água).</td>
                 </tr>
                 <tr class="row-data">
                   <td><strong>🟢 Telemetria Solar & Bateria</strong></td>
                   <td>Controlador Solar MPPT</td>
-                  <td>Porta RS485 / Serial Mini-PC</td>
+                  <td>Porta RS485 / Serial PC</td>
                   <td><span class="wire-color green"></span> Verde Blindado</td>
                   <td>Cabo RS485 Blindado Industrial</td>
                   <td>Modbus RTU / Telemetria 9600bps</td>
@@ -1662,7 +1761,7 @@
                 <tr class="row-pe">
                   <td><strong>🛡️ Aterramento PE</strong></td>
                   <td>Barramento de Cobre PE</td>
-                  <td>Carcaça, Porta e Suporte</td>
+                  <td>Carcaça, Tampão e Suporte</td>
                   <td><span class="wire-color greenyellow"></span> Verde com Amarelo</td>
                   <td>4,0 mm² + Cordoalha</td>
                   <td>0V Referencial</td>
@@ -1710,7 +1809,7 @@
               <div class="diagram-node node-dc">
                 <div class="node-badge">BARRAMENTO DC</div>
                 <h5>Linha Estabilizada 12V</h5>
-                <p>Alimenta Mini-PC, Tela e Exaustão</p>
+                <p>Alimenta Tela All-in-One/PC e Exaustão</p>
               </div>
             </div>
 
@@ -1718,8 +1817,8 @@
             <div class="diagram-solar-row">
               <div class="solar-node">
                 <span class="s-icon">☀️</span>
-                <strong>Painel Solar 120W (Teto)</strong>
-                <small>18.5V Vmp (Cabos 4mm² MC4)</small>
+                <strong>Painel Solar 35Wp (Teto)</strong>
+                <small>64×21cm • 18.5V Vmp (Cabos 4mm² MC4)</small>
               </div>
               <div class="solar-arrow">➔</div>
               <div class="solar-node highlight">
@@ -1739,12 +1838,12 @@
             <div class="diagram-data-row">
               <div class="data-box">
                 <span class="d-badge">NÚCLEO</span>
-                <h6>Mini-PC Industrial Fanless</h6>
-                <p>Core i5 / 16GB / SSD 512GB Industrial</p>
+                <h6>PC Acoplado (Slot OPS) ou Mini-PC</h6>
+                <p>Core i5 / 16GB / SSD 512GB Fanless</p>
               </div>
               <div class="data-links">
-                <div class="d-link"><span class="link-tag blue">HDMI 2.1</span> ➔ Placa Scaler AD ➔ LCD 43" (1500 nits)</div>
-                <div class="d-link"><span class="link-tag yellow">USB 2.0</span> ➔ Controladora Touch PCAP (10 toques)</div>
+                <div class="d-link"><span class="link-tag blue">OPS 80p / HDMI</span> ➔ Placa Scaler AD ➔ LCD 43" (1500 nits)</div>
+                <div class="d-link"><span class="link-tag yellow">USB Touch Intern.</span> ➔ Controladora Touch PCAP (10 toques)</div>
                 <div class="d-link"><span class="link-tag green">RS485 Telemetria</span> ➔ Controlador Solar MPPT & Bateria</div>
               </div>
             </div>
@@ -1762,13 +1861,13 @@
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">01</span>
-                <h5>Mini-PC Industrial Fanless (IPC)</h5>
+                <h5>Módulo PC Acoplado (OPS) ou Mini-PC Fanless</h5>
               </div>
               <ul>
+                <li><strong>Formato:</strong> Gaveta Intel OPS acoplada atrás da tela (zero cabos) ou Mini-PC no trilho</li>
                 <li><strong>CPU:</strong> Intel Core i5 11ª Ger / Rockchip RK3588 (Baixo consumo 15W)</li>
-                <li><strong>Memória:</strong> 16 GB DDR4 Industrial (-20°C a +70°C)</li>
-                <li><strong>Armazenamento:</strong> SSD NVMe 512 GB Industrial Grade</li>
-                <li><strong>Gabinete:</strong> Alumínio extrudado com aletas passivas (IP40, sem ventoinha interna)</li>
+                <li><strong>Memória & SSD:</strong> 16 GB DDR4 + SSD NVMe 512 GB Industrial (-20°C a +70°C)</li>
+                <li><strong>Gabinete:</strong> Alumínio extrudado com aletas passivas (sem ventoinha interna)</li>
                 <li><strong>Watchdog:</strong> Temporizador em hardware com auto-reboot automático</li>
               </ul>
             </div>
@@ -1776,14 +1875,14 @@
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">02</span>
-                <h5>Display LCD 43" Ultra Alto Brilho</h5>
+                <h5>Display LCD 43" Ultra Alto Brilho ("Só Tela")</h5>
               </div>
               <ul>
                 <li><strong>Brilho:</strong> 1500 nits (Legível sob luz solar direta plena ao meio-dia)</li>
                 <li><strong>Resolução:</strong> 1920 × 1080 Full HD (Proporção 9:16 Vertical)</li>
-                <li><strong>Vidro Frontal:</strong> Temperado de 8mm com tratamento anti-reflexo (AR) e IK10</li>
-                <li><strong>Tecnologia Touch:</strong> Capacitivo Projetado (PCAP) multi-touch de 10 toques</li>
-                <li><strong>Vida Útil:</strong> 50.000 horas de operação contínua</li>
+                <li><strong>Vidro Frontal:</strong> Temperado laminado de 8mm anti-reflexo (AR) e grau IK10</li>
+                <li><strong>Tecnologia Touch:</strong> Capacitivo Projetado (PCAP) 10 toques c/ Water-Rejection</li>
+                <li><strong>Construção:</strong> Frente limpa sem furos de alto-falante ("sem mosca de som")</li>
               </ul>
             </div>
 
@@ -1807,9 +1906,9 @@
                 <h5>Sistema Solar & Backup ESG</h5>
               </div>
               <ul>
-                <li><strong>Painel Fotovoltaico:</strong> 120Wp Monocristalino embutido no teto</li>
+                <li><strong>Painel Fotovoltaico:</strong> 35Wp Monocristalino (64×21 cm) embutido no topo plano</li>
                 <li><strong>Controlador:</strong> MPPT 20A inteligente com display digital e eficiência de 99%</li>
-                <li><strong>Bateria:</strong> LiFePO4 (Lítio-Ferro-Fosfato) 12,8V 40Ah (480 Wh)</li>
+                <li><strong>Bateria:</strong> LiFePO4 (Lítio-Ferro-Fosfato) 12,8V 40Ah (480 Wh) na zona fria</li>
                 <li><strong>Ciclos:</strong> +3.500 ciclos (Vida útil estimada: 8 a 10 anos)</li>
                 <li><strong>BMS Integrado:</strong> Proteção contra sobrecarga, curto e sub-tensão</li>
               </ul>
@@ -1823,7 +1922,7 @@
               <ul>
                 <li><strong>Exaustão:</strong> 2x Microventiladores industriais 120mm com rolamento duplo</li>
                 <li><strong>Termostato:</strong> Bimetálico ajustável em trilho DIN (ativado em >35°C)</li>
-                <li><strong>Filtro de Ar:</strong> Grelha inferior com manta lavável classe G4</li>
+                <li><strong>Filtro de Ar:</strong> Grelha inferior traseira com manta hidrofóbica lavável G4</li>
                 <li><strong>Aquecedor:</strong> Resistor cerâmico 30W anticondensação para madrugadas frias</li>
               </ul>
             </div>
@@ -1831,14 +1930,14 @@
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">06</span>
-                <h5>Chassi & Mecânica Antivandalismo</h5>
+                <h5>Carcaça Oca & Tampão Traseiro Antivandalismo</h5>
               </div>
               <ul>
-                <li><strong>Material:</strong> Chapa de aço carbono 2,0mm eletrogalvanizada anticorrosiva</li>
+                <li><strong>Material:</strong> Chapa de aço carbono 2,5mm eletrogalvanizada anticorrosiva</li>
                 <li><strong>Pintura:</strong> Eletrostática a pó poliéster para área externa (resistente a UV)</li>
                 <li><strong>Vedação:</strong> Borracha perimetral dupla em EPDM para grau IP65</li>
-                <li><strong>Fechadura:</strong> Dupla tubular antivandalismo com chave de segredo mestre</li>
-                <li><strong>Amortecedor:</strong> Pistão a gás para sustentação da porta traseira aberta</li>
+                <li><strong>Tampão Traseiro:</strong> 3 dobradiças reforçadas + 2 fechaduras tubulares + 3 costelas ômega</li>
+                <li><strong>Amortecedor:</strong> Pistão a gás para sustentação do tampão traseiro aberto a 105°</li>
               </ul>
             </div>
           </div>
@@ -1855,16 +1954,16 @@
             <div class="step-item">
               <span class="step-badge">Etapa 1</span>
               <div>
-                <h5>Fixação Mecânica do Chassi e Base</h5>
-                <p>Solda estrutural dos perfis internos de reforço, tratamento galvânico anticorrosivo e teste de estanqueidade das borrachas EPDM da porta.</p>
+                <h5>Fixação Mecânica da Carcaça Oca e Tampão Traseiro</h5>
+                <p>Corte a laser CNC e dobra das chapas de 2,5mm (frente limpa só com o recorte da tela 43"), solda das 3 dobradiças do tampão traseiro e aplicação da borracha EPDM IP65.</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 2</span>
               <div>
-                <h5>Instalação do Vidro Temperado e Painel LCD 43"</h5>
-                <p>Aplicação da fita de adesão estrutural VHB, posicionamento do sensor touch PCAP de 8mm e montagem do monitor no suporte VESA interno.</p>
+                <h5>Instalação do Vidro Temperado 8mm e Display Touch 43"</h5>
+                <p>Aplicação da fita de adesão estrutural VHB 3M + selante PU marítimo, posicionamento do vidro laminado 8mm IK10 e montagem do monitor Touch 43" no chassi VESA interno.</p>
               </div>
             </div>
 
@@ -1879,16 +1978,16 @@
             <div class="step-item">
               <span class="step-badge">Etapa 4</span>
               <div>
-                <h5>Instalação do Mini-PC, Placas de Controle e Cabos de Dados</h5>
-                <p>Fixação do IPC no rack traseiro, conexão dos cabos blindados HDMI, USB Touch e telemetria solar RS485 com anéis de ferrite supressores de ruído EMI.</p>
+                <h5>Encaixe do Computador Acoplado (OPS) ou Mini-PC</h5>
+                <p>Deslizamento do módulo PC OPS no slot traseiro da própria tela touch (ou fixação do Mini-PC no rack) e conexão da telemetria solar RS485.</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 5</span>
               <div>
-                <h5>Integração do Painel Solar, MPPT e Bateria LiFePO4</h5>
-                <p>Conexão dos conectores solares MC4 no teto, parametrização do controlador de carga MPPT e teste de autonomia da bateria no-break.</p>
+                <h5>Integração do Painel Solar 35Wp, MPPT e Bateria LiFePO4</h5>
+                <p>Conexão dos conectores solares MC4 no teto plano, parametrização do controlador de carga MPPT e teste de autonomia da bateria no-break na zona fria.</p>
               </div>
             </div>
 
@@ -2026,51 +2125,30 @@
                 <rect x="160" y="240" width="12" height="450" fill="#cbd5e1" stroke="#64748b" stroke-width="1"/>
                 <text x="166" y="465" text-anchor="middle" transform="rotate(-90 166,465)" font-size="11" font-weight="800" fill="#334155">LATERAL ESQUERDA (0,35m x 2,20m) — DOBRA 90°</text>
 
-                <!-- 3. Face Frontal com Todas as Furações -->
+                <!-- 3. Face Frontal Limpa ("É Só Tela" — Sem Mosca de Som / Sem Furos Extras) -->
                 <rect x="210" y="190" width="175" height="550" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
-                <rect x="225" y="236" width="145" height="14" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
-                <circle cx="297" cy="243" r="5" fill="#dc2626"/>
-                <rect x="312" y="239" width="10" height="8" fill="#dc2626"/>
-                <text x="297" y="232" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">[F1] FURO CÂMERA Ø22mm + PIR</text>
 
-                <rect x="225" y="256" width="145" height="52" fill="#e2e8f0" stroke="#1351b4" stroke-width="1.8"/>
-                <circle cx="231" cy="262" r="2.5" fill="#dc2626"/><circle cx="364" cy="262" r="2.5" fill="#dc2626"/>
-                <circle cx="231" cy="302" r="2.5" fill="#dc2626"/><circle cx="364" cy="302" r="2.5" fill="#dc2626"/>
-                <text x="297" y="280" text-anchor="middle" font-size="11" font-weight="800" fill="#0c326f">PLACA JAÚ TOPO</text>
-                <text x="297" y="294" text-anchor="middle" font-size="7.5" fill="#dc2626">[F2] 4 Furos Ø5mm (58x22cm)</text>
+                <rect x="225" y="232" width="145" height="54" fill="#e2e8f0" stroke="#1351b4" stroke-width="1.8"/>
+                <circle cx="231" cy="238" r="2.5" fill="#dc2626"/><circle cx="364" cy="238" r="2.5" fill="#dc2626"/>
+                <circle cx="231" cy="280" r="2.5" fill="#dc2626"/><circle cx="364" cy="280" r="2.5" fill="#dc2626"/>
+                <text x="297" y="256" text-anchor="middle" font-size="11" font-weight="800" fill="#0c326f">PLACA JAÚ TOPO</text>
+                <text x="297" y="271" text-anchor="middle" font-size="7.5" fill="#dc2626">[F1] 4 Furos Ø5mm (58x22cm)</text>
 
-                <!-- F3: Recorte da Tela 43" -->
-                <rect x="228" y="322" width="139" height="240" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.5"/>
-                <line x1="228" y1="322" x2="367" y2="562" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
-                <line x1="367" y1="322" x2="228" y2="562" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
-                <rect x="240" y="408" width="115" height="68" fill="#ffffff" stroke="#dc2626" stroke-width="1.5" rx="4"/>
-                <text x="297" y="428" text-anchor="middle" font-size="10" font-weight="800" fill="#dc2626">[F3] RECORTE VAZADO</text>
-                <text x="297" y="442" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f172a">TELA TOUCH 43" VERTICAL</text>
-                <text x="297" y="456" text-anchor="middle" font-size="8" fill="#475569">Real: 55,0 x 96,0 cm</text>
-                <text x="297" y="468" text-anchor="middle" font-size="8" font-weight="700" fill="#0284c7">Papel (1:10): 5,5 x 9,6 cm</text>
+                <!-- F2: Recorte Único da Tela 43" Vertical -->
+                <rect x="226" y="302" width="143" height="295" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="226" y1="302" x2="369" y2="597" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="369" y1="302" x2="226" y2="597" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,4"/>
+                <rect x="236" y="410" width="123" height="76" fill="#ffffff" stroke="#dc2626" stroke-width="1.5" rx="4"/>
+                <text x="297" y="430" text-anchor="middle" font-size="10" font-weight="800" fill="#dc2626">[F2] RECORTE VAZADO</text>
+                <text x="297" y="445" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0f172a">TELA TOUCH 43" VERTICAL</text>
+                <text x="297" y="460" text-anchor="middle" font-size="8" fill="#475569">Real: 55,0 x 96,0 cm</text>
+                <text x="297" y="473" text-anchor="middle" font-size="8" font-weight="700" fill="#0284c7">Papel (1:10): 5,5 x 9,6 cm</text>
 
-                <!-- F4 & F5: Som, USB e Botão SOS -->
-                <rect x="225" y="576" width="88" height="46" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
-                <g fill="#dc2626">
-                  <circle cx="235" cy="592" r="1.6"/><circle cx="242" cy="592" r="1.6"/><circle cx="249" cy="592" r="1.6"/><circle cx="256" cy="592" r="1.6"/><circle cx="263" cy="592" r="1.6"/>
-                  <circle cx="235" cy="599" r="1.6"/><circle cx="242" cy="599" r="1.6"/><circle cx="249" cy="599" r="1.6"/><circle cx="256" cy="599" r="1.6"/><circle cx="263" cy="599" r="1.6"/>
-                  <circle cx="235" cy="606" r="1.6"/><circle cx="242" cy="606" r="1.6"/><circle cx="249" cy="606" r="1.6"/><circle cx="256" cy="606" r="1.6"/><circle cx="263" cy="606" r="1.6"/>
-                </g>
-                <rect x="278" y="590" width="10" height="18" fill="#dc2626"/>
-                <rect x="294" y="590" width="10" height="18" fill="#dc2626"/>
-                <text x="269" y="585" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">[F4] SOM + 2x USB</text>
-
-                <rect x="319" y="576" width="51" height="46" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
-                <circle cx="344" cy="601" r="10" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
-                <circle cx="344" cy="601" r="3" fill="#dc2626"/>
-                <text x="344" y="586" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">[F5] SOS Ø38mm</text>
-
-                <!-- F6: Placa Jaú Base -->
-                <rect x="225" y="632" width="145" height="48" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
-                <circle cx="231" cy="638" r="2.5" fill="#dc2626"/><circle cx="364" cy="638" r="2.5" fill="#dc2626"/>
-                <circle cx="231" cy="674" r="2.5" fill="#dc2626"/><circle cx="364" cy="674" r="2.5" fill="#dc2626"/>
-                <text x="297" y="655" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">PLACA PREFEITURA DE JAÚ</text>
-                <text x="297" y="667" text-anchor="middle" font-size="7" fill="#dc2626">[F6] 4 Rebites Ø5mm</text>
+                <!-- Base Frontal 100% Cega e Estanque (Sem Mosca de Som / Sem USB / Sem Furos) -->
+                <rect x="226" y="614" width="143" height="86" fill="#eef2f6" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" rx="4"/>
+                <text x="297" y="646" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">CHAPA FRONTAL CEGA (IP65)</text>
+                <text x="297" y="660" text-anchor="middle" font-size="7.2" font-weight="700" fill="#15803d">✓ Sem Mosca de Som (Zero Furos)</text>
+                <text x="297" y="673" text-anchor="middle" font-size="7.2" font-weight="700" fill="#15803d">✓ Sem USB / Botões Externos</text>
                 <text x="297" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">FACE FRONTAL (0,70m x 2,20m)</text>
 
                 <!-- 4. Lateral Direita -->
@@ -2087,21 +2165,21 @@
                   <rect x="505" y="254" width="110" height="4" rx="1"/><rect x="505" y="263" width="110" height="4" rx="1"/>
                   <rect x="505" y="272" width="110" height="4" rx="1"/>
                 </g>
-                <text x="560" y="232" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F7] RASGOS EXAUSTÃO AR QUENTE</text>
+                <text x="560" y="232" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F3] RASGOS EXAUSTÃO AR QUENTE</text>
                 <circle cx="497" cy="365" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
                 <circle cx="497" cy="540" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
-                <text x="560" y="368" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F8] FECHADURA SUP. Ø19mm</text>
-                <text x="560" y="543" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F8] FECHADURA INF. Ø19mm</text>
+                <text x="560" y="368" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F4] FECHADURA SUP. Ø19mm</text>
+                <text x="560" y="543" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F4] FECHADURA INF. Ø19mm</text>
                 <rect x="505" y="395" width="112" height="115" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
-                <text x="561" y="438" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">PORTA TRASEIRA</text>
-                <text x="561" y="452" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">ACESSO TÉCNICO</text>
-                <text x="561" y="466" text-anchor="middle" font-size="7.2" fill="#475569">Recorte: 62 x 182 cm</text>
+                <text x="561" y="438" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">TAMPÃO TRASEIRO</text>
+                <text x="561" y="452" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">PORTA DE MANUTENÇÃO</text>
+                <text x="561" y="466" text-anchor="middle" font-size="7.2" fill="#475569">Recorte: 60 x 180 cm</text>
                 <g fill="#dc2626">
                   <rect x="505" y="610" width="110" height="4" rx="1"/><rect x="505" y="619" width="110" height="4" rx="1"/>
                   <rect x="505" y="628" width="110" height="4" rx="1"/><rect x="505" y="637" width="110" height="4" rx="1"/>
                 </g>
-                <text x="560" y="655" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F9] ENTRADA AR FRIO (BASE)</text>
-                <text x="560" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">COSTA / FERRO TRASEIRO (0,70m x 2,20m)</text>
+                <text x="560" y="655" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F5] ENTRADA AR FRIO (BASE)</text>
+                <text x="560" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">COSTA / TAMPÃO TRASEIRO (0,70m x 2,20m)</text>
 
                 <!-- 6. Base Flangeada -->
                 <rect x="210" y="740" width="175" height="88" fill="#cbd5e1" stroke="#0f172a" stroke-width="2.5"/>
@@ -2111,7 +2189,7 @@
                 </g>
                 <circle cx="297" cy="784" r="14" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.2"/>
                 <text x="297" y="787" text-anchor="middle" font-size="7.5" font-weight="800" fill="#dc2626">Ø50mm</text>
-                <text x="297" y="770" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">BASE CHUMBADA + [F10] 6 FUROS Ø16mm</text>
+                <text x="297" y="770" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">BASE CHUMBADA + [F6] 6 FUROS Ø16mm</text>
 
                 <!-- Linhas Azuis de Dobra a 90° -->
                 <line x1="210" y1="190" x2="210" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
@@ -2139,7 +2217,7 @@
                 </div>
                 <ul>
                   <li><strong>Linha Contínua Preta (───):</strong> Onde recortar o contorno externo com tesoura/estilete (no papel) ou corte a laser CNC (na chapa de aço).</li>
-                  <li><strong>Linha Tracejada Azul (- - -):</strong> Onde vincar e <strong>dobrar a 90°</strong> para fechar as 4 faces do "quadradão" e a base.</li>
+                  <li><strong>Linha Tracejada Azul (- - -):</strong> Onde vincar e <strong>dobrar a 90°</strong> para fechar as 4 faces da carcaça oca e a base.</li>
                   <li><strong>Linha Pontilhada Laranja (· · ·):</strong> A faixa de <strong>11 cm (1,1 cm no papel)</strong> da <strong>quina superior frontal arredondada</strong>, indicando onde curvar suavemente antes da parte plana de <strong>24 cm (2,4 cm no papel)</strong> onde fica o painel solar.</li>
                   <li><strong>Abas Numeradas (Aba 1 a Aba 7):</strong> Abas hachuradas para passar cola (na maquete de papel) ou solda MIG (na fabricação em metal).</li>
                 </ul>
@@ -2148,16 +2226,14 @@
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num" style="background:#dc2626;">F</span>
-                  <h5>Onde Furar e Recortar (F1 a F11)</h5>
+                  <h5>Onde Furar e Recortar (Frente Limpa "Só Tela" — Sem Mosca de Som)</h5>
                 </div>
                 <ul>
-                  <li><strong>[F1] Topo Frontal (Y=198,5cm):</strong> Furo da lente da Câmera IP (Ø 22 mm) + recorte do Sensor PIR (24 × 16 mm).</li>
-                  <li><strong>[F2] e [F6] Placas de Jaú:</strong> 4 furos de rebite (Ø 5 mm) para fixar as Placas de Jaú (superior 58×22cm e inferior 46,4×14,5cm).</li>
-                  <li><strong>[F3] Tela Touch 43" Vertical:</strong> Grande recorte central vazado de <strong>55 × 96 cm reais</strong> (<strong>5,5 × 9,6 cm no papel</strong>).</li>
-                  <li><strong>[F4] Áudio e USB:</strong> 40 microfuros (Ø 4 mm) da grelha de som + 2 recortes retangulares (28 × 44 mm) das tomadas USB.</li>
-                  <li><strong>[F5] Botão Físico SOS:</strong> Furo circular (Ø 38 mm) do Botão de Socorro no canto direito inferior.</li>
-                  <li><strong>[F7], [F8] e [F9] Costa de Ferro:</strong> Recorte da porta traseira (62 × 182 cm), 2 furos (Ø 19 mm) das fechaduras tubulares e rasgos das venezianas de ventilação superior e inferior.</li>
-                  <li><strong>[F10] e [F11] Base:</strong> 6 furos (Ø 16 mm) dos chumbadores Parabolt no chão + 1 furo central (Ø 50 mm) para entrada subterrânea do cabo 220V e fibra óptica.</li>
+                  <li><strong>[F1] Placa Superior de Jaú:</strong> 4 furos de fixação (Ø 5 mm) para a Placa de Identificação de Jaú no topo (58 × 22 cm).</li>
+                  <li><strong>[F2] Tela Touch 43" Vertical (Único Recorte Frontal):</strong> Grande recorte central vazado de <strong>55 × 96 cm reais</strong> (<strong>5,5 × 9,6 cm no papel</strong>).</li>
+                  <li><strong>✓ Frente Inferior 100% Cega (IP65):</strong> Como a máquina não tem saída de som, <strong>não há "mosca de som" (furos de alto-falante), nem portas USB ou botões físicos na chapa frontal</strong>, eliminando infiltrações e vandalismo.</li>
+                  <li><strong>[F3], [F4] e [F5] Costa / Tampão Traseiro:</strong> Recorte do tampão traseiro de acesso (60 × 180 cm), 2 furos (Ø 19 mm) das fechaduras tubulares e rasgos das venezianas traseiras superior e inferior.</li>
+                  <li><strong>[F6] e [F7] Base:</strong> 6 furos (Ø 16 mm) dos chumbadores Parabolt no chão + 1 furo central (Ø 50 mm) para entrada subterrânea do cabo 220V e dados.</li>
                 </ul>
               </div>
             </div>
@@ -2170,7 +2246,7 @@
         <div id="est-tab-content-est-internal" class="est-tab-pane hw-tab-pane">
           <div class="hw-pane-intro">
             <h4>⚙️ Prancha 02/03 — Raio-X da Estrutura Interna ("O que vai lá dentro")</h4>
-            <p>Desenhos técnicos em corte (<strong>Corte A-A Frontal</strong> e <strong>Corte B-B Lateral</strong>) mostrando o esqueleto interno em Metalon 40×40mm e onde cada peça é fixada e furada por dentro:</p>
+            <p>Desenhos técnicos em corte (<strong>Corte A-A Frontal</strong> e <strong>Corte B-B Lateral</strong>) mostrando a carcaça oca, o esqueleto interno e a estrutura sem alto-falantes ("Só Tela"):</p>
           </div>
 
           <div style="display:grid; grid-template-columns: 1.35fr 1fr; gap:16px; align-items:start;">
@@ -2191,13 +2267,11 @@
 
                 <!-- Zona 1: Topo -->
                 <rect x="105" y="78" width="260" height="82" fill="#dbeafe" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,2"/>
-                <circle cx="165" cy="118" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="165" cy="118" r="8" fill="#38bdf8"/>
-                <circle cx="305" cy="118" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="305" cy="118" r="8" fill="#38bdf8"/>
-                <rect x="210" y="92" width="50" height="36" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
-                <circle cx="235" cy="110" r="7" fill="#38bdf8"/>
-                <text x="235" y="152" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[1] 2x COOLERS EXAUSTORES + CÂMERA IP + PIR</text>
+                <circle cx="165" cy="115" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="165" cy="115" r="8" fill="#38bdf8"/>
+                <circle cx="305" cy="115" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="305" cy="115" r="8" fill="#38bdf8"/>
+                <text x="235" y="152" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[1] 2x COOLERS EXAUSTORES IP54 + MANTA TÉRMICA</text>
 
-                <!-- Zona 2: Corpo Central -->
+                <!-- Zona 2: Corpo Central (Tela 43" + PC Acoplado OPS ou Mini-PC) -->
                 <rect x="115" y="192" width="240" height="328" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
                 <rect x="145" y="230" width="180" height="250" fill="none" stroke="#475569" stroke-width="4" stroke-dasharray="10,4"/>
                 <circle cx="165" cy="255" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
@@ -2207,41 +2281,35 @@
                 <text x="235" y="214" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">[2] DISPLAY INDUSTRIAL 43" FULL HD (1500 NITS)</text>
                 <text x="235" y="227" text-anchor="middle" font-size="8" font-weight="700" fill="#dc2626">Fixado em Chassi VESA Interno (4 Parafusos M8)</text>
 
-                <rect x="155" y="280" width="95" height="75" fill="#0f172a" stroke="#10b981" stroke-width="2" rx="4"/>
-                <text x="202" y="308" text-anchor="middle" font-size="8.5" font-weight="800" fill="#10b981">[3] MINI-PC FANLESS</text>
-                <text x="202" y="322" text-anchor="middle" font-size="7.2" fill="#e2e8f0">Core i5 • SSD 256GB</text>
+                <rect x="152" y="280" width="166" height="82" fill="#0f172a" stroke="#10b981" stroke-width="2" rx="4"/>
+                <text x="235" y="306" text-anchor="middle" font-size="8.5" font-weight="800" fill="#10b981">[3] PC ACOPLADO (SLOT OPS) OU MINI-PC</text>
+                <text x="235" y="322" text-anchor="middle" font-size="7.5" fill="#e2e8f0">Encaixado direto atrás da Tela Touch (Zero Cabos)</text>
+                <text x="235" y="336" text-anchor="middle" font-size="7.2" fill="#38bdf8">Core i5 Fanless • SSD 512GB • Watchdog Auto-Reboot</text>
 
-                <rect x="262" y="280" width="65" height="75" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8" rx="4"/>
-                <text x="294" y="310" text-anchor="middle" font-size="8" font-weight="800" fill="#38bdf8">[4] MODEM 5G</text>
-                <text x="294" y="324" text-anchor="middle" font-size="7" fill="#f8fafc">Wi-Fi / GPS</text>
-
-                <rect x="115" y="553" width="150" height="62" fill="#f8fafc" stroke="#475569" stroke-width="1.5" rx="4"/>
-                <text x="190" y="575" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[5] ÁUDIO 10W & CONVERSOR USB 5V</text>
-                <text x="190" y="592" text-anchor="middle" font-size="7.2" fill="#334155">2x Alto-Falantes IP65 + 2 Portas USB</text>
-
-                <rect x="275" y="553" width="82" height="62" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8" rx="4"/>
-                <text x="316" y="575" text-anchor="middle" font-size="8.5" font-weight="800" fill="#dc2626">[6] CHAVE SOS</text>
-                <text x="316" y="590" text-anchor="middle" font-size="7" fill="#7f1d1d">Contato Seco</text>
+                <!-- Vão estrutural inferior limpo (Sem alto-falantes e sem chave SOS física) -->
+                <rect x="115" y="553" width="240" height="62" fill="#f8fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" rx="4"/>
+                <text x="235" y="576" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[4] VÃO ESTRUTURAL ESTANQUE (SEM SAÍDA DE SOM)</text>
+                <text x="235" y="593" text-anchor="middle" font-size="7.2" fill="#334155">Chapa Frontal Cega IP65 • Sem Mosca de Som / Sem USB Externo</text>
 
                 <text x="235" y="635" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff">═══ CHAPA DEFLETORA / BARREIRA TÉRMICA ═══</text>
 
                 <!-- Zona 3: Base Fria -->
                 <rect x="108" y="646" width="122" height="104" fill="#f0fdf4" stroke="#15803d" stroke-width="1.8" rx="4"/>
-                <text x="169" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[7] ELÉTRICA & MPPT</text>
-                <text x="169" y="682" text-anchor="middle" font-size="7.2" fill="#1e293b">• Controlador MPPT 10A</text>
+                <text x="169" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[5] ELÉTRICA & MPPT</text>
+                <text x="169" y="682" text-anchor="middle" font-size="7.2" fill="#1e293b">• Controlador MPPT 20A</text>
                 <text x="169" y="696" text-anchor="middle" font-size="7.2" fill="#1e293b">• Fonte 220V ➔ 12V/24V</text>
                 <text x="169" y="710" text-anchor="middle" font-size="7.2" fill="#1e293b">• Disjuntor + DPS + DR</text>
 
                 <rect x="238" y="646" width="124" height="104" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2" rx="4"/>
-                <text x="300" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1e3a8a">[8] BATERIA LiFePO4</text>
-                <text x="300" y="682" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0f172a">12,8V 30Ah (Zona Fria)</text>
+                <text x="300" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1e3a8a">[6] BATERIA LiFePO4</text>
+                <text x="300" y="682" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0f172a">12,8V 40Ah (Zona Fria)</text>
                 <text x="300" y="698" text-anchor="middle" font-size="7" fill="#15803d">15cm do solo • Isolada</text>
 
                 <rect x="55" y="770" width="360" height="22" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
                 <rect x="75" y="758" width="8" height="45" fill="#dc2626"/>
                 <rect x="231" y="758" width="8" height="45" fill="#dc2626"/>
                 <rect x="387" y="758" width="8" height="45" fill="#dc2626"/>
-                <text x="235" y="818" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">[9] FLANGE DE BASE + 6 CHUMBADORES PARABOLT Ø16mm + ELETRODUTO Ø50mm</text>
+                <text x="235" y="818" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">[7] FLANGE DE BASE + 6 CHUMBADORES PARABOLT Ø16mm + ELETRODUTO Ø50mm</text>
 
                 <!-- Direita: Corte Lateral B-B -->
                 <path d="M 540,770 L 720,770 L 720,105 Q 720,50 664,50 L 540,50 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>
@@ -2255,7 +2323,7 @@
                 <text x="526" y="115" text-anchor="end" font-size="8" font-weight="700" fill="#dc2626">SAÍDA AR QUENTE 💨</text>
                 <rect x="712" y="195" width="8" height="320" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
                 <rect x="682" y="205" width="28" height="300" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
-                <rect x="615" y="285" width="42" height="90" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+                <rect x="658" y="290" width="24" height="80" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
                 <path d="M 580,690 L 580,120" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6,4"/>
                 <polygon points="580,112 574,124 586,124" fill="#0284c7"/>
                 <text x="594" y="430" text-anchor="middle" transform="rotate(-90 594,430)" font-size="8.5" font-weight="800" fill="#0284c7">FLUXO DE VENTILAÇÃO INTERNA (EFEITO CHAMINÉ)</text>
@@ -2280,20 +2348,19 @@
                 </div>
                 <ul>
                   <li><strong>Placa Solar 35Wp (64×21cm):</strong> Embutida na parte plana do topo para ficar invisível a quem olha de frente.</li>
-                  <li><strong>Manta Térmica Isolante + 2 Coolers 120mm:</strong> Isola o calor do teto e sopra o ar quente para fora pelas venezianas superiores traseiras sempre que passar de 38°C.</li>
-                  <li><strong>Câmera IP + Sensor PIR + Antena 5G:</strong> Alojados no barramento superior frontal.</li>
+                  <li><strong>Manta Térmica Isolante + 2 Coolers 120mm:</strong> Isola o calor do teto e sopra o ar quente para fora pelas venezianas superiores traseiras sempre que passar de 35°C.</li>
                 </ul>
               </div>
 
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num">2</span>
-                  <h5>Corpo Central (0,65m a 1,75m) — Tela & Computação</h5>
+                  <h5>Corpo Central (0,65m a 1,75m) — Tela 43" & PC Acoplado</h5>
                 </div>
                 <ul>
-                  <li><strong>Esqueleto em Metalon 40×40mm:</strong> Estrutura tubular interna soldada com <strong>4 furos M8 padrão VESA (400×400mm)</strong> que seguram o Monitor Industrial 43" atrás do vidro temperado 8mm (IK10).</li>
-                  <li><strong>Mini-PC Fanless + Modem 5G/Wi-Fi:</strong> Fixados na bandeja metálica central com 6 furos roscados M5.</li>
-                  <li><strong>Áudio 10W + Conversor USB 5V + Contato SOS:</strong> Alojados logo abaixo do monitor.</li>
+                  <li><strong>Esqueleto Interno em Metalon 40×40mm:</strong> Estrutura tubular interna soldada com <strong>4 furos M8 padrão VESA (400×400mm)</strong> que seguram o Monitor Industrial 43" atrás do vidro temperado 8mm (IK10).</li>
+                  <li><strong>PC Acoplado (Slot OPS) ou Mini-PC Fanless:</strong> Encaixado diretamente atrás da tela touch (sem cabos soltos) ou no trilho central.</li>
+                  <li><strong>Frente Sem Mosca de Som:</strong> Abaixo da tela a chapa frontal é 100% fechada, eliminando alto-falantes, amplificadores e portas USB externas que poderiam oxidar ou sofrer vandalismo.</li>
                 </ul>
               </div>
 
@@ -2304,8 +2371,8 @@
                 </div>
                 <ul>
                   <li><strong>Chapa Defletora Térmica (c/ 2 furos passa-cabo Ø 32mm):</strong> Separa o calor do monitor da base inferior.</li>
-                  <li><strong>Quadro Elétrico em Trilho DIN:</strong> Controlador Solar MPPT 10A, Fonte Híbrida 220V/12V, Disjuntor Bipolar, DPS anti-raios e DR.</li>
-                  <li><strong>Bateria LiFePO4 (12,8V 30Ah):</strong> Posicionada a 15 cm do solo (zona mais fresca), recebendo ar frio pelas venezianas inferiores.</li>
+                  <li><strong>Quadro Elétrico em Trilho DIN:</strong> Controlador Solar MPPT 20A, Fonte Híbrida 220V/12V, Disjuntor Bipolar, DPS anti-raios e DR.</li>
+                  <li><strong>Bateria LiFePO4 (12,8V 40Ah):</strong> Posicionada a 15 cm do solo (zona mais fresca), recebendo ar frio pelas venezianas inferiores.</li>
                 </ul>
               </div>
             </div>
@@ -2317,8 +2384,8 @@
              =============================================================== -->
         <div id="est-tab-content-est-table" class="est-tab-pane hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>📏 Prancha 03/03 — Tabela de Coordenadas de Furação e Guia de Montagem do Mockup no Papel</h4>
-            <p>Medidas exatas na escala real (<strong>1:1 em Metal</strong>) e na escala reduzida (<strong>1:10 para Maquete em Papel</strong>):</p>
+            <h4>📏 Prancha 03/03 — Tabela de Coordenadas de Furação (Estrutura Limpa "Só Tela") e Guia do Mockup no Papel</h4>
+            <p>Medidas exatas na escala real (<strong>1:1 em Metal</strong>) e na escala reduzida (<strong>1:10 para Maquete em Papel</strong>), já sem furos de som ("mosca de som") ou recortes desnecessários:</p>
           </div>
 
           <div class="table-responsive" style="margin-bottom:16px;">
@@ -2338,15 +2405,6 @@
                 <tr>
                   <td><strong style="color:#f87171;">F1</strong></td>
                   <td>Frente (Topo)</td>
-                  <td>Câmera IP + Sensor PIR de Presença</td>
-                  <td>1 Furo Redondo + 1 Retângulo</td>
-                  <td>Ø 22 mm + 24×16 mm</td>
-                  <td>Ø 2,2 mm + 2,4×1,6 mm</td>
-                  <td>Y = 198,5 cm (19,8 cm)</td>
-                </tr>
-                <tr>
-                  <td><strong style="color:#f87171;">F2</strong></td>
-                  <td>Frente (Topo)</td>
                   <td>Fixação da Placa Superior de Jaú</td>
                   <td>4 Furos de Rebite nos Cantos</td>
                   <td>4× Ø 5 mm (Placa 58×22cm)</td>
@@ -2354,70 +2412,52 @@
                   <td>Y = 184,0 cm (18,4 cm)</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F3</strong></td>
+                  <td><strong style="color:#f87171;">F2</strong></td>
                   <td>Frente (Centro)</td>
-                  <td>Janela da Tela Touchscreen 43" Vertical</td>
+                  <td>Janela Única da Tela Touchscreen 43" Vertical</td>
                   <td>Recorte Retangular Vazado</td>
                   <td>550 × 960 mm (55×96 cm)</td>
                   <td>5,5 × 9,6 cm</td>
                   <td>Y = 119,0 cm (11,9 cm)</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F4</strong></td>
-                  <td>Frente (Inf. Esq.)</td>
-                  <td>Grelha de Som 10W + 2 Tomadas USB</td>
-                  <td>40 Microfuros + 2 Retângulos</td>
-                  <td>40× Ø 4mm + 2× (28×44mm)</td>
-                  <td>Furos agulha + 2× (3×4mm)</td>
-                  <td>Y = 48,0 cm (4,8 cm)</td>
+                  <td><strong style="color:#10b981;">—</strong></td>
+                  <td>Frente (Abaixo da Tela)</td>
+                  <td>Chapa Frontal Cega Estanque (IP65)</td>
+                  <td>Sem Furos (Zero Mosca de Som / USB)</td>
+                  <td>Chapa Contínua 2,5 mm</td>
+                  <td>Chapa Lisa</td>
+                  <td>Y = 0 a 70 cm</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F5</strong></td>
-                  <td>Frente (Inf. Dir.)</td>
-                  <td>Botão Físico de Socorro (SOS 192/153)</td>
-                  <td>Furo Circular Passante</td>
-                  <td>Ø 38 mm (Flange Ø 52mm)</td>
-                  <td>Ø 3,8 mm</td>
-                  <td>Y = 48,0 cm (4,8 cm)</td>
-                </tr>
-                <tr>
-                  <td><strong style="color:#f87171;">F6</strong></td>
-                  <td>Frente (Base)</td>
-                  <td>Placa Institucional Prefeitura de Jaú</td>
-                  <td>4 Furos de Rebite nos Cantos</td>
-                  <td>4× Ø 5 mm (Placa 46×14,5cm)</td>
-                  <td>4× Ø 0,5 mm (4,6×1,45cm)</td>
-                  <td>Y = 32,0 cm (3,2 cm)</td>
-                </tr>
-                <tr>
-                  <td><strong style="color:#f87171;">F7 / F9</strong></td>
+                  <td><strong style="color:#f87171;">F3 / F5</strong></td>
                   <td>Costa (Traseira)</td>
                   <td>Venezianas de Exaustão (Topo) e Admissão (Base)</td>
-                  <td>17 Rasgos Horizontais</td>
+                  <td>17 Rasgos Horizontais Inclinados</td>
                   <td>340 × 10 mm cada aleta</td>
                   <td>3,4 × 0,1 cm cada rasgo</td>
                   <td>Y = 195 cm e Y = 35 cm</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F8</strong></td>
-                  <td>Costa (Porta)</td>
-                  <td>Porta Traseira + 2 Fechaduras Tubulares</td>
+                  <td><strong style="color:#f87171;">F4</strong></td>
+                  <td>Costa (Tampão)</td>
+                  <td>Tampão Traseiro de Acesso + 2 Fechaduras Tubulares</td>
                   <td>Recorte Porta + 2 Cilindros</td>
-                  <td>Porta 62×182cm + 2× Ø 19mm</td>
-                  <td>Porta 6,2×18,2cm + 2× Ø 2mm</td>
+                  <td>Porta 60×180cm + 2× Ø 19mm</td>
+                  <td>Porta 6,0×18,0cm + 2× Ø 2mm</td>
                   <td>Y = 145 cm e Y = 75 cm</td>
                 </tr>
                 <tr>
                   <td><strong style="color:#f87171;">SOLAR</strong></td>
                   <td>Topo Plano</td>
-                  <td>Berço do Painel Solar 35Wp + Passa-Cabo</td>
+                  <td>Berço do Painel Solar 35Wp + Passa-Cabo IP68</td>
                   <td>Rebaixo Retangular + 2 Furos</td>
                   <td>640 × 210 mm + Furo Ø 16mm</td>
                   <td>6,4 × 2,1 cm + Furo Ø 1,6mm</td>
                   <td>Y = 220,0 cm (Topo)</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F10 / F11</strong></td>
+                  <td><strong style="color:#f87171;">F6 / F7</strong></td>
                   <td>Base (Chão)</td>
                   <td>6 Chumbadores Parabolt + Eletroduto Central</td>
                   <td>6 Furos Periféricos + 1 Central</td>
@@ -2437,7 +2477,7 @@
               </div>
               <ul>
                 <li><strong>1. Imprima a Prancha 01:</strong> Use Papel Cartão, Couchê 180g ou cole a folha impressa sobre cartolina.</li>
-                <li><strong>2. Abra os Recortes Vermelhos Primeiro:</strong> Com estilete e régua, recorte a janela da <strong>Tela 43" [F3]</strong>, o furo do <strong>Botão SOS [F5]</strong> e o furo central da base <strong>[F11]</strong> antes de soltar o molde.</li>
+                <li><strong>2. Abra o Recorte Vermelho da Tela Primeiro:</strong> Com estilete e régua, recorte apenas a janela da <strong>Tela 43" [F2]</strong> na frente e o furo central da base <strong>[F7]</strong> antes de soltar o molde (não há furos de som na frente!).</li>
                 <li><strong>3. Recorte o Contorno Externo (Linha Preta):</strong> Recorte em volta da cruz planificada preservando as <strong>Abas 1 a 7</strong>.</li>
                 <li><strong>4. Vinque as Dobras Azuis a 90°:</strong> Passe uma caneta sem tinta com régua sobre as linhas tracejadas azuis para dobrar com precisão.</li>
                 <li><strong>5. Curva da Quina Superior Frontal:</strong> Enrole suavemente a faixa laranja (1,1 cm) sobre um lápis para criar a quina arredondada da frente, deixando os 2,4 cm de trás retos (onde fica o painel solar).</li>
@@ -2447,12 +2487,12 @@
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">🚪</span>
-                <h5>Como Mostrar a Estrutura Interna na Sua Maquete</h5>
+                <h5>Como Mostrar a Carcaça e o Tampão Traseiro na Sua Maquete</h5>
               </div>
               <ul>
-                <li><strong>Porta Traseira que Abre de Verdade:</strong> Na face da <em>Costa</em>, corte apenas <strong>3 lados</strong> do pontilhado vermelho da porta (topo, base e esquerda) e dobre o lado direito como dobradiça.</li>
-                <li><strong>Prateleira da Barreira Térmica:</strong> Cole um retângulo de papel cartão (7,0 × 3,5 cm) por dentro a 3,5 cm da base para separar a Bateria LiFePO4 (embaixo, no frio) da Tela e Mini-PC (no meio).</li>
-                <li><strong>Cole o Raio-X da Prancha 02 por Dentro:</strong> Recorte o desenho do <em>Corte A-A Frontal</em> da Prancha 02 e cole na parede interna da maquete — ao abrir a porta traseira, a banca verá todos os componentes internos posicionados!</li>
+                <li><strong>Tampão Traseiro que Abre de Verdade:</strong> Na face da <em>Costa</em>, corte apenas <strong>3 lados</strong> do pontilhado vermelho da porta (topo, base e direita) e dobre o lado esquerdo como dobradiça.</li>
+                <li><strong>Prateleira da Barreira Térmica:</strong> Cole um retângulo de papel cartão (7,0 × 3,5 cm) por dentro a 3,5 cm da base para separar a Bateria LiFePO4 (embaixo, no frio) da Tela 43" com PC acoplado (no meio).</li>
+                <li><strong>Cole o Raio-X da Prancha 02 por Dentro:</strong> Recorte o desenho do <em>Corte A-A Frontal</em> da Prancha 02 e cole na parede interna da maquete — ao abrir o tampão traseiro, a banca verá todos os componentes internos posicionados!</li>
               </ul>
             </div>
           </div>
@@ -2461,7 +2501,7 @@
       </div>
 
       <div class="modal-foot">
-        <span class="foot-disclaimer">Arquivo: <strong>estrutura</strong> • Plano de Construção, Corte/Dobra/Furação e Estrutura Interna do Totem de Jaú</span>
+        <span class="foot-disclaimer">Arquivo: <strong>estrutura</strong> • Plano de Construção, Corte/Dobra/Furação (Frente Limpa Só Tela) e Estrutura Interna do Totem de Jaú</span>
         <div style="display:flex; gap:10px; align-items:center;">
           <a href="estrutura.html" target="_blank" class="btn-primary-blue" style="background:#dc2626; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">📥 Abrir / Baixar estrutura.pdf (Pronto p/ Impressão)</a>
           <button id="btn-close-estrutura-foot" class="btn-primary-blue">Fechar Estrutura</button>
@@ -2470,7 +2510,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261012_v6"></script>
-  <script src="app.js?v=20261012_v6"></script>
+  <script src="totem3d.js?v=20261012_v7"></script>
+  <script src="app.js?v=20261012_v7"></script>
 </body>
 </html>

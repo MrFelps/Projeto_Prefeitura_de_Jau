@@ -1399,109 +1399,13 @@ class Totem3DViewer {
     }
 
     // -----------------------------------------------------------------------
-    // 2. PAINEL INFERIOR FRONTAL + PLACA MUNICIPAL DE JAÚ — Aço Escovado Natural
+    // 2. CHAPA INFERIOR FRONTAL CEGA E ESTANQUE (Sem Mosca de Som / Só Tela)
     // -----------------------------------------------------------------------
     {
       const lctx = this.lowerConsoleCtx;
       lctx.fillStyle = metalBase;
       lctx.fillRect(0, 0, 512, 420);
       this.drawBrushedGrain(lctx, 0, 0, 512, 420, 0.06, 0.08);
-
-      // Faixa de ícones de conectividade em chapa escovada natural
-      lctx.fillStyle = metalLight;
-      lctx.fillRect(24, 18, 464, 74);
-      lctx.strokeStyle = metalBorder;
-      lctx.lineWidth = 2.5;
-      lctx.strokeRect(24, 18, 464, 74);
-
-      const badges = [
-        { icon: '📲', label: 'QR CODE' },
-        { icon: '🍃', label: '100% ESG' },
-        { icon: '♿', label: 'LIBRAS/VOZ' },
-        { icon: '☀️', label: 'SOLAR' }
-      ];
-      badges.forEach((b, i) => {
-        const bx = 52 + i * 112;
-        lctx.font = '23px sans-serif';
-        lctx.textAlign = 'center';
-        lctx.fillText(b.icon, bx + 36, 51);
-        lctx.fillStyle = titleColor;
-        lctx.font = 'bold 12px sans-serif';
-        lctx.fillText(b.label, bx + 36, 75);
-      });
-
-      // Seção de Som Direcional e Acessibilidade (Caixa Esquerda em Metal Natural)
-      lctx.save();
-      lctx.fillStyle = metalMid;
-      lctx.fillRect(24, 110, 286, 118);
-      lctx.strokeStyle = metalBorder;
-      lctx.lineWidth = 2.5;
-      lctx.strokeRect(24, 110, 286, 118);
-      lctx.beginPath();
-      lctx.rect(26, 112, 282, 114);
-      lctx.clip();
-
-      lctx.fillStyle = titleColor;
-      lctx.font = 'bold 12px sans-serif';
-      lctx.textAlign = 'left';
-      lctx.fillText('🔊 SAÍDA DE ÁUDIO & ACESSIBILIDADE', 36, 133, 264);
-
-      // Grelha de som direcional perfurada no metal (área total, sem portas USB)
-      lctx.fillStyle = '#1e293b';
-      for (let rIdx = 0; rIdx < 4; rIdx++) {
-        for (let cIdx = 0; cIdx < 16; cIdx++) {
-          lctx.beginPath();
-          lctx.arc(46 + cIdx * 15, 160 + rIdx * 14, 3.5, 0, Math.PI * 2);
-          lctx.fill();
-        }
-      }
-      lctx.restore();
-
-      // Caixa Direita: Moldura do Botão Físico de Socorro (SOS)
-      lctx.save();
-      lctx.fillStyle = isDarkMetal ? '#451a1a' : '#e5d4d4';
-      lctx.fillRect(322, 110, 166, 118);
-      lctx.strokeStyle = '#b91c1c';
-      lctx.lineWidth = 2.5;
-      lctx.strokeRect(322, 110, 166, 118);
-      lctx.beginPath();
-      lctx.rect(324, 112, 162, 114);
-      lctx.clip();
-
-      lctx.fillStyle = isDarkMetal ? '#fca5a5' : '#991b1b';
-      lctx.font = 'bold 11px sans-serif';
-      lctx.textAlign = 'center';
-      lctx.fillText('🚨 BOTÃO DE SOCORRO', 405, 130, 150);
-      lctx.fillStyle = isDarkMetal ? '#fecaca' : '#7f1d1d';
-      lctx.font = 'bold 10px sans-serif';
-      lctx.fillText('SAMU 192 • GCM 153', 405, 218, 150);
-      lctx.restore();
-
-      // PLACA DE JAÚ (Placa Institucional em Aço Inox / Ferro Escovado Natural)
-      const plateGrad = lctx.createLinearGradient(24, 248, 488, 395);
-      plateGrad.addColorStop(0, metalLight);
-      plateGrad.addColorStop(0.5, metalMid);
-      plateGrad.addColorStop(1, metalDark);
-      lctx.fillStyle = plateGrad;
-      lctx.fillRect(24, 248, 464, 145);
-      this.drawBrushedGrain(lctx, 24, 248, 464, 145, 0.08, 0.08);
-
-      lctx.strokeStyle = metalBorder;
-      lctx.lineWidth = 3;
-      lctx.strokeRect(24, 248, 464, 145);
-      this.drawCornerRivets(lctx, 24, 248, 464, 145, 14);
-
-      lctx.fillStyle = titleColor;
-      lctx.font = 'bold 21px sans-serif';
-      lctx.textAlign = 'center';
-      lctx.fillText('🏛️ PREFEITURA MUNICIPAL DE JAÚ', 256, 294, 426);
-      lctx.fillStyle = greenBadgeColor;
-      lctx.font = 'bold 14.5px sans-serif';
-      lctx.fillText('CIDADE INTELIGENTE • SUSTENTÁVEL • ACESSÍVEL', 256, 326, 426);
-      lctx.fillStyle = mutedTextColor;
-      lctx.font = 'bold 13px sans-serif';
-      lctx.fillText('Projeto Integrador Senac Jaú • Totemize Smart City', 256, 356, 426);
-
       if (this.lowerTexture) this.lowerTexture.needsUpdate = true;
     }
 
@@ -1737,7 +1641,7 @@ class Totem3DViewer {
     const bodyY = wcOffset + 128;
 
     // 2. MENU LATERAL DE ACESSIBILIDADE UNIVERSAL (ABNT NBR 9050 / GOV.BR)
-    const sbW = 152; // Alargado para os lados para ocupar a coluna de forma espaçosa
+    const sbW = 152;
     const sbH = footY - (wcOffset + 115);
     ctx.fillStyle = hc ? '#000000' : '#0c326f';
     ctx.fillRect(0, wcOffset + 115, sbW, sbH);
@@ -1750,71 +1654,79 @@ class Totem3DViewer {
 
     // Tag Superior do Menu Lateral
     ctx.fillStyle = hc ? '#000000' : '#ffcd07';
-    ctx.fillRect(8, wcOffset + 124, sbW - 16, 24);
+    ctx.fillRect(10, wcOffset + 124, sbW - 20, 24);
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '900 12px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('ACESSO', sbW / 2, wcOffset + 140);
 
-    // 4 Botões Principais de Acessibilidade (Largos e Horizontais, preenchendo a coluna)
+    // 3 Botões Principais em formato de QUADRADOS MAIORES (Sem Áudio — Máquina Só Tela)
     const mainSideBtns = [
       { icon: '👁️', label: 'Contraste', active: hc },
       { icon: '🦻', label: 'Libras', active: this.showVLibrasBox },
-      { icon: '🔊', label: 'Áudio', active: false },
       { icon: '♿', label: 'Alcance', active: this.isWheelchair }
     ];
 
-    mainSideBtns.forEach((b, idx) => {
-      const by = wcOffset + 156 + idx * 64;
-      const bw = sbW - 16;
-      const bh = 54;
-      const bx = 8;
+    const squareBtnH = this.isWheelchair ? 92 : 112;
+    const squareBtnGap = 14;
 
-      ctx.fillStyle = b.active ? (hc ? '#ffff00' : '#ffcd07') : (hc ? '#111827' : 'rgba(255,255,255,0.12)');
+    mainSideBtns.forEach((b, idx) => {
+      const by = wcOffset + 160 + idx * (squareBtnH + squareBtnGap);
+      const bw = sbW - 20;
+      const bh = squareBtnH;
+      const bx = 10;
+
+      ctx.fillStyle = b.active ? (hc ? '#ffff00' : '#ffcd07') : (hc ? '#111827' : 'rgba(255,255,255,0.13)');
       ctx.fillRect(bx, by, bw, bh);
-      ctx.strokeStyle = b.active ? (hc ? '#ffff00' : '#d9a400') : 'rgba(255,255,255,0.25)';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = b.active ? (hc ? '#ffff00' : '#d9a400') : 'rgba(255,255,255,0.32)';
+      ctx.lineWidth = 2;
       ctx.strokeRect(bx, by, bw, bh);
 
-      // Ícone à esquerda e texto à direita (layout horizontal)
+      // Ícone grande centralizado em cima + Rótulo centralizado embaixo (Quadrado Grande)
       ctx.fillStyle = b.active ? '#0c326f' : (hc ? '#ffff00' : '#ffffff');
-      ctx.font = '22px sans-serif';
+      ctx.font = '32px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(b.icon, bx + 22, by + 34);
+      ctx.fillText(b.icon, bx + bw / 2, by + bh * 0.48);
 
-      ctx.font = '800 14px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(b.label, bx + 42, by + 34);
+      ctx.font = '800 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.label, bx + bw / 2, by + bh * 0.80);
     });
 
-    // 2 Botões de Fonte (A+ e A-) lado a lado para não esticar a coluna para baixo
-    const fontY = wcOffset + 156 + 4 * 64 + 6;
-    const fontW = (sbW - 22) / 2;
-    const fontH = 48;
-    
-    // A+
-    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.12)';
-    ctx.fillRect(8, fontY, fontW, fontH);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.strokeRect(8, fontY, fontW, fontH);
-    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.font = '900 16px sans-serif';
-    ctx.fillText('A+', 8 + fontW / 2, fontY + 22);
-    ctx.font = '800 10.5px sans-serif';
-    ctx.fillText('Maior', 8 + fontW / 2, fontY + 38);
+    // 2 Botões de Fonte (A+ Maior e A- Padrão) MENORES fixados no CANTO INFERIOR da barra azul
+    const fontH = 34;
+    const fontY = footY - fontH - 12;
+    const fontW = (sbW - 26) / 2;
 
-    // A-
-    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.12)';
-    ctx.fillRect(8 + fontW + 6, fontY, fontW, fontH);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.strokeRect(8 + fontW + 6, fontY, fontW, fontH);
+    // Linha divisória sutil acima dos botões menores no canto inferior
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(10, fontY - 6);
+    ctx.lineTo(sbW - 10, fontY - 6);
+    ctx.stroke();
+
+    // A+ Maior (Menor, no canto inferior esquerdo da barra azul)
+    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.13)';
+    ctx.fillRect(10, fontY, fontW, fontH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(10, fontY, fontW, fontH);
     ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
     ctx.textAlign = 'center';
-    ctx.font = '900 16px sans-serif';
-    ctx.fillText('A-', 8 + fontW + 6 + fontW / 2, fontY + 22);
-    ctx.font = '800 10.5px sans-serif';
-    ctx.fillText('Padrão', 8 + fontW + 6 + fontW / 2, fontY + 38);
+    ctx.font = '900 11.5px sans-serif';
+    ctx.fillText('A+ Maior', 10 + fontW / 2, fontY + 21);
+
+    // A- Padrão (Menor, no canto inferior direito da barra azul)
+    ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.13)';
+    ctx.fillRect(10 + fontW + 6, fontY, fontW, fontH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(10 + fontW + 6, fontY, fontW, fontH);
+    ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = '900 11.5px sans-serif';
+    ctx.fillText('A- Padrão', 10 + fontW + 6 + fontW / 2, fontY + 21);
 
     // 3. Conteúdo Central de acordo com a aba selecionada
     if (this.screenState === 'bus') {

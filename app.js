@@ -235,16 +235,10 @@ class TotemApp {
     }
   }
 
-  // Leitor de Voz Nativo (Web Speech API)
-  falar(texto) {
-    if (!this.isVoiceActive && !texto.includes('ativad') && !texto.includes('desativad')) return;
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(texto);
-      utterance.lang = 'pt-BR';
-      utterance.rate = 1.05;
-      window.speechSynthesis.speak(utterance);
-    }
+  // Máquina 100% Visual ("Só Tela" — Sem saída de som física)
+  falar(_texto) {
+    // Desativado: o totem físico não possui saída de som nem mosca de alto-falante
+    return;
   }
 
   // Carregamento do VLibras
