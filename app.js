@@ -1443,6 +1443,7 @@ class TotemApp {
         const isCurrentlyHidden = menuOverlay ? menuOverlay.classList.contains('hidden') : true;
         if (isCurrentlyHidden) {
           if (menuOverlay) menuOverlay.classList.remove('hidden');
+          document.body.classList.add('menu-overlay-active');
           if (modalSchematics) modalSchematics.classList.add('hidden');
           if (modalEstrutura) modalEstrutura.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.add('active');
@@ -1451,12 +1452,14 @@ class TotemApp {
           this.resetInactivityTimer();
         } else {
           if (menuOverlay) menuOverlay.classList.add('hidden');
+          document.body.classList.remove('menu-overlay-active');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 80);
         }
       } else if (action === 'xray') {
         // Fecha overlays para exibir o Totem 3D no centro com Raio-X Interno
         if (menuOverlay) menuOverlay.classList.add('hidden');
+        document.body.classList.remove('menu-overlay-active');
         if (modalSchematics) modalSchematics.classList.add('hidden');
         if (modalEstrutura) modalEstrutura.classList.add('hidden');
         if (btnOrbScreen) btnOrbScreen.classList.remove('active');
@@ -1477,6 +1480,7 @@ class TotemApp {
         const isHidden = modalSchematics.classList.contains('hidden');
         if (isHidden) {
           if (menuOverlay) menuOverlay.classList.add('hidden');
+          document.body.classList.remove('menu-overlay-active');
           if (modalEstrutura) modalEstrutura.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
@@ -1491,6 +1495,7 @@ class TotemApp {
         const isHidden = modalEstrutura.classList.contains('hidden');
         if (isHidden) {
           if (menuOverlay) menuOverlay.classList.add('hidden');
+          document.body.classList.remove('menu-overlay-active');
           if (modalSchematics) modalSchematics.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
@@ -1532,6 +1537,7 @@ class TotemApp {
     if (btnCloseMenuOverlay) {
       btnCloseMenuOverlay.addEventListener('click', () => {
         if (menuOverlay) menuOverlay.classList.add('hidden');
+        document.body.classList.remove('menu-overlay-active');
         if (btnOrbScreen) btnOrbScreen.classList.remove('active');
         if (this.viewer3D) setTimeout(() => this.viewer3D.handleResize(), 80);
       });

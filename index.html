@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261013_v19">
+  <link rel="stylesheet" href="style.css?v=20261013_v20_mobile">
   <style>
     /* Travar completamente zoom da página, rolagem vertical/horizontal e barras laterais no tablet */
     *, *::before, *::after {
@@ -364,6 +364,89 @@
     .gov-city-pill:hover {
       background: #168821 !important;
       color: #ffffff !important;
+    }
+
+    /* Ocultar botões flutuantes do simulador 3D quando a tela 2D do Totem estiver aberta */
+    body.menu-overlay-active .top-left-orbs,
+    body.menu-overlay-active .top-right-orbs,
+    body.menu-overlay-active .bottom-right-orb-wrap,
+    body.menu-overlay-active #city-selector-popover,
+    body.menu-overlay-active #orb-360-popover,
+    body:has(#totem-menu-overlay:not(.hidden)) .top-left-orbs,
+    body:has(#totem-menu-overlay:not(.hidden)) .top-right-orbs,
+    body:has(#totem-menu-overlay:not(.hidden)) .bottom-right-orb-wrap,
+    body:has(#totem-menu-overlay:not(.hidden)) #city-selector-popover,
+    body:has(#totem-menu-overlay:not(.hidden)) #orb-360-popover {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .totem-menu-overlay {
+      z-index: 6000 !important;
+    }
+    .totem-menu-overlay-header {
+      z-index: 6100 !important;
+    }
+
+    /* Otimização dos botões flutuantes 3D em Smartphones */
+    @media (max-width: 768px) {
+      .top-left-orbs {
+        top: 10px !important;
+        left: 10px !important;
+        gap: 8px !important;
+      }
+      .orb-btn {
+        width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        gap: 2px !important;
+        border-width: 2px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+      }
+      .orb-svg {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      .orb-tag {
+        font-size: 7px !important;
+        letter-spacing: 0.1px !important;
+      }
+      .orb-tooltip {
+        display: none !important;
+      }
+      .top-right-orbs {
+        top: 10px !important;
+        right: 10px !important;
+      }
+      .top-right-orbs .orb-btn {
+        width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+      }
+      .bottom-right-orb-wrap {
+        bottom: 12px !important;
+        right: 10px !important;
+      }
+      .bottom-right-orb-wrap .orb-btn {
+        width: 46px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+      }
+      .city-popover {
+        right: 10px !important;
+        top: 60px !important;
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+        padding: 12px !important;
+      }
+      .orb-360-popover {
+        right: 10px !important;
+        bottom: 66px !important;
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+        padding: 12px !important;
+      }
     }
   </style>
 </head>
@@ -2821,7 +2904,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261013_v19"></script>
-  <script src="app.js?v=20261013_v19"></script>
+  <script src="totem3d.js?v=20261013_v20_mobile"></script>
+  <script src="app.js?v=20261013_v20_mobile"></script>
 </body>
 </html>

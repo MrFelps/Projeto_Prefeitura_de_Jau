@@ -5292,3 +5292,559 @@ body:not(.panel-collapsed) .tablet-top-actions {
   color: #ffffff;
 }
 
+/* ========================================================================= */
+/* RESPONSIVIDADE COMPLETA PARA SMARTPHONES (IOS & ANDROID - ATÉ 768px)       */
+/* ========================================================================= */
+@media (max-width: 768px) {
+  /* Destravar corpo para permitir rolagem touch fluida quando necessário */
+  html, body {
+    width: 100vw !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  /* Overlay da Tela 2D em Tela Cheia no Celular */
+  .totem-menu-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    z-index: 6000 !important;
+    background: #0f172a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Botão de Fechar / Voltar ao 3D no Topo Direito */
+  .totem-menu-overlay-header {
+    position: absolute !important;
+    top: 6px !important;
+    right: 8px !important;
+    z-index: 6100 !important;
+    padding: 2px 6px !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .btn-close-overlay {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+
+  .btn-close-overlay .close-icon {
+    font-size: 11px !important;
+  }
+
+  /* Wrapper e Carcaça Ocupam 100% da Largura e Altura Sem Borda Excessiva */
+  .totem-wrapper,
+  .totem-menu-overlay .totem-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--gov-white-ice) !important;
+  }
+
+  .totem-frame {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .totem-top-sensor {
+    height: 12px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+  }
+
+  .chassis-brand {
+    font-size: 7px !important;
+    right: 8px !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .totem-bottom-chassis {
+    height: 12px !important;
+    border-top: 1px solid #cbd5e1 !important;
+  }
+
+  .chassis-label {
+    font-size: 7px !important;
+  }
+
+  /* A Tela Digital do Totem */
+  .totem-screen {
+    width: 100vw !important;
+    height: calc(100vh - 24px) !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Cabeçalho do Totem em Telas Pequenas */
+  .totem-header {
+    padding: 5px 8px 6px !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
+    border-bottom-width: 2px !important;
+  }
+
+  .gov-top-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    font-size: 8.5px !important;
+  }
+
+  .gov-location-indicator {
+    font-size: 8.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    max-width: 60% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .gov-location-indicator svg {
+    width: 11px !important;
+    height: 11px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .gov-location-indicator span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .gov-city-pill {
+    padding: 1px 5px !important;
+    font-size: 8px !important;
+    margin-left: 2px !important;
+  }
+
+  .gov-solar-status {
+    font-size: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .header-main-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+  }
+
+  .logo-box {
+    gap: 5px !important;
+  }
+
+  .city-crest svg {
+    width: 20px !important;
+    height: 22px !important;
+  }
+
+  .brand-title {
+    font-size: 11.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .brand-sub {
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+
+  .header-telemetry {
+    padding: 2px 5px !important;
+    gap: 5px !important;
+    border-radius: 6px !important;
+  }
+
+  .header-divider {
+    height: 20px !important;
+  }
+
+  .clock-widget .time {
+    font-size: 13px !important;
+    line-height: 1.1 !important;
+  }
+
+  .clock-widget .date {
+    font-size: 8px !important;
+  }
+
+  /* Layout Central: Menu Lateral Compacto (48px) para Dar Espaço Total ao Conteúdo */
+  .totem-middle-layout {
+    flex: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+  }
+
+  .kiosk-access-sidebar {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    padding: 5px 2px !important;
+    border-right-width: 2px !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar-controls-top {
+    gap: 4px !important;
+    width: 100% !important;
+    padding-bottom: 4px !important;
+  }
+
+  .sidebar-top-notice {
+    gap: 2px !important;
+  }
+
+  .sidebar-pill-tag {
+    font-size: 6.5px !important;
+    padding: 1px 1px !important;
+    letter-spacing: 0 !important;
+    border-radius: 4px !important;
+  }
+
+  .btn-sidebar-access {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 42px !important;
+    max-height: 52px !important;
+    padding: 3px 1px !important;
+    gap: 2px !important;
+    border-radius: 6px !important;
+    border-width: 1px !important;
+  }
+
+  .btn-sidebar-access .sb-icon {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+  }
+
+  .btn-sidebar-access .sb-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+  }
+
+  .btn-sidebar-access .sb-txt {
+    font-size: 6.5px !important;
+    line-height: 1 !important;
+    font-weight: 800 !important;
+    white-space: normal !important;
+    text-align: center !important;
+    word-break: break-word !important;
+  }
+
+  .sidebar-controls-bottom {
+    gap: 2px !important;
+    width: 100% !important;
+  }
+
+  .font-zoom-grid {
+    gap: 2px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+  }
+
+  .btn-zoom {
+    padding: 2px 1px !important;
+    font-size: 7.5px !important;
+    min-height: 20px !important;
+    flex: 1 !important;
+    border-radius: 4px !important;
+  }
+
+  /* Área de Conteúdo Útil: Rolagem Touch Livre e Ampla */
+  .totem-views-container {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 6px 8px 12px !important;
+  }
+
+  /* Banner Informativo Offline */
+  .alert-banner {
+    padding: 4px 6px !important;
+    gap: 4px !important;
+    margin-bottom: 5px !important;
+    border-radius: 6px !important;
+  }
+
+  .alert-tag {
+    font-size: 7.5px !important;
+    padding: 1px 4px !important;
+    gap: 2px !important;
+  }
+
+  .alert-tag svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  .alert-text {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  .welcome-box {
+    margin-bottom: 5px !important;
+  }
+
+  .welcome-box h2 {
+    font-size: 13px !important;
+    margin: 0 !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  /* Grade dos Cards: Proporcional, Sem Distorção */
+  .modules-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    min-height: 0 !important;
+    flex: none !important;
+  }
+
+  .module-card {
+    padding: 7px 7px 5px !important;
+    min-height: 92px !important;
+    border-radius: 9px !important;
+    border-width: 1.5px !important;
+    gap: 2px !important;
+    justify-content: space-between !important;
+    box-shadow: 0 2px 0 #cbd5e1 !important;
+  }
+
+  .card-top-row {
+    margin-bottom: 2px !important;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+
+  .card-icon-badge {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+  }
+
+  .card-icon-badge svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .card-tag {
+    font-size: 6.5px !important;
+    padding: 1px 3px !important;
+    letter-spacing: 0 !important;
+    border-radius: 4px !important;
+  }
+
+  .card-content h3 {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    margin: 0 0 1px !important;
+  }
+
+  .card-content p {
+    font-size: 8px !important;
+    line-height: 1.18 !important;
+    margin: 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .card-bottom-action {
+    margin-top: 2px !important;
+  }
+
+  .card-action-text {
+    font-size: 7.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .card-arrow-circle {
+    width: 13px !important;
+    height: 13px !important;
+    font-size: 7.5px !important;
+  }
+
+  /* Barra de Atalhos Rápidos no Celular (2x2) */
+  .city-quick-bar {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+    margin-top: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .quick-service-pill {
+    padding: 5px 6px !important;
+    border-radius: 6px !important;
+    gap: 4px !important;
+  }
+
+  .quick-service-pill .q-txt {
+    font-size: 8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Rodapé do Totem */
+  .totem-footer {
+    padding: 3px 6px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn-footer-home {
+    padding: 3px 6px !important;
+    font-size: 8px !important;
+    gap: 3px !important;
+    border-radius: 6px !important;
+  }
+
+  .btn-footer-home svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .dooh-carousel {
+    font-size: 7.5px !important;
+    padding: 0 3px !important;
+  }
+
+  .dooh-badge {
+    font-size: 6.5px !important;
+    padding: 1px 3px !important;
+  }
+
+  .btn-footer-esg {
+    padding: 3px 5px !important;
+    font-size: 7.5px !important;
+    gap: 2px !important;
+    border-radius: 6px !important;
+  }
+
+  .btn-footer-esg svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  .btn-footer-emergency-corner {
+    padding: 3px 5px !important;
+    font-size: 7.5px !important;
+    gap: 2px !important;
+    border-radius: 6px !important;
+  }
+
+  .btn-footer-emergency-corner svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* Telas Internas (Mapa, Calçados, Turismo, Serviços, etc.) */
+  .view-header-row {
+    padding: 4px 0 6px !important;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .btn-back-home {
+    padding: 4px 8px !important;
+    font-size: 9.5px !important;
+    border-radius: 6px !important;
+  }
+
+  .view-title {
+    font-size: 12.5px !important;
+  }
+
+  .ref-card {
+    padding: 7px 9px !important;
+    gap: 5px !important;
+    margin-bottom: 6px !important;
+    border-radius: 8px !important;
+  }
+
+  .ref-distance-badge {
+    font-size: 8px !important;
+    padding: 2px 5px !important;
+  }
+
+  .ref-name {
+    font-size: 11px !important;
+  }
+
+  .ref-address {
+    font-size: 9px !important;
+  }
+
+  /* Modais de Especificação e Estrutura Adaptados para Tela de Celular */
+  .modal-card-hardware,
+  .modal-card-blueprint,
+  .modal-card-qr,
+  .modal-card-esg {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  .hw-modal-tabs {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .btn-hw-tab {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+    min-height: 38px !important;
+  }
+
+  .diagram-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
