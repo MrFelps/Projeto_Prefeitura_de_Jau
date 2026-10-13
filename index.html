@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Totem Inteligente Jaú - Mockup Funcional (Totemize)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,21 +13,46 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261012_v7">
+  <link rel="stylesheet" href="style.css?v=20261012_v13">
   <style>
-    /* Garantir zero aba lateral e 100% da tela ocupada pelo fundo 3D */
+    /* Travar completamente zoom da página, rolagem vertical/horizontal e barras laterais no tablet */
+    *, *::before, *::after {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
     html, body {
+      position: fixed !important;
+      inset: 0 !important;
       display: block !important;
       width: 100vw !important;
       height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
       margin: 0 !important;
       padding: 0 !important;
       overflow: hidden !important;
+      overscroll-behavior: none !important;
+      touch-action: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-text-size-adjust: 100% !important;
     }
-    #totem-3d-stage {
+    #totem-3d-stage,
+    .totem-3d-viewport,
+    #totem-3d-canvas-mount,
+    #totem-3d-canvas-mount canvas {
       width: 100vw !important;
       height: 100vh !important;
       margin: 0 !important;
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+      touch-action: none !important;
     }
     /* 3 Bolinhas Redondas e Azuis no Canto Superior Esquerdo (idênticas ao padrão do botão 360°) */
     .top-left-orbs {
@@ -130,6 +155,216 @@
       flex-direction: column !important;
       align-items: flex-end !important;
     }
+    /* Bolinha Redonda no Canto Superior Direito (Trocar de Cidade) */
+    .top-right-orbs {
+      position: fixed !important;
+      top: 20px !important;
+      right: 20px !important;
+      z-index: 3100 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      gap: 12px !important;
+      pointer-events: none;
+    }
+    .orb-btn-city {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 100%) !important;
+      border-color: #34d399 !important;
+      box-shadow: 0 12px 30px rgba(6, 78, 59, 0.5), 0 0 18px rgba(52, 211, 153, 0.35) !important;
+    }
+    .orb-btn-city:hover,
+    .orb-btn-city.active {
+      transform: scale(1.08) !important;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 14px 34px rgba(16, 185, 129, 0.65) !important;
+    }
+    .orb-btn-city .orb-svg {
+      color: #34d399 !important;
+      stroke: #34d399 !important;
+    }
+    .orb-btn-city:hover .orb-svg,
+    .orb-btn-city.active .orb-svg {
+      color: #ffffff !important;
+      stroke: #ffffff !important;
+    }
+    .top-right-orbs .orb-tooltip {
+      left: auto !important;
+      right: 78px !important;
+      transform: translateY(-50%) translateX(8px) !important;
+      border-color: #34d399 !important;
+    }
+    .top-right-orbs .orb-btn:hover .orb-tooltip {
+      transform: translateY(-50%) translateX(0) !important;
+    }
+    /* Popover da Troca de Cidade */
+    .city-popover {
+      pointer-events: auto !important;
+      position: fixed !important;
+      top: 96px !important;
+      right: 20px !important;
+      width: 370px !important;
+      max-width: calc(100vw - 40px) !important;
+      background: rgba(15, 23, 42, 0.96) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 2px solid #34d399 !important;
+      border-radius: 20px !important;
+      padding: 18px !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.25) !important;
+      z-index: 3200 !important;
+      animation: fadeInPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .city-popover.hidden {
+      display: none !important;
+    }
+    @keyframes fadeInPop {
+      from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .city-popover-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 6px !important;
+    }
+    .city-popover-title-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+    .city-popover-badge {
+      background: #059669 !important;
+      color: #ffffff !important;
+      font-size: 10px !important;
+      font-weight: 900 !important;
+      padding: 3px 8px !important;
+      border-radius: 6px !important;
+      letter-spacing: 0.5px !important;
+    }
+    .city-popover h4 {
+      margin: 0 !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #f8fafc !important;
+    }
+    .btn-close-city-pop {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: #cbd5e1 !important;
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      font-size: 13px !important;
+      transition: all 0.15s ease !important;
+    }
+    .btn-close-city-pop:hover {
+      background: #ef4444 !important;
+      color: #ffffff !important;
+      border-color: #ef4444 !important;
+    }
+    .city-popover-sub {
+      font-size: 12px !important;
+      color: #94a3b8 !important;
+      margin: 0 0 14px 0 !important;
+      line-height: 1.4 !important;
+    }
+    .city-options-list {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+    }
+    .city-option-card {
+      width: 100% !important;
+      text-align: left !important;
+      padding: 12px 14px !important;
+      border-radius: 14px !important;
+      background: rgba(30, 41, 59, 0.8) !important;
+      border: 1.5px solid rgba(148, 163, 184, 0.25) !important;
+      color: #ffffff !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+    }
+    .city-option-card:hover {
+      background: rgba(51, 65, 85, 0.95) !important;
+      border-color: #38bdf8 !important;
+      transform: translateY(-2px) !important;
+    }
+    .city-option-card.active {
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+      border-color: #34d399 !important;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.3) !important;
+    }
+    .city-card-header {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 6px !important;
+    }
+    .city-flag {
+      font-size: 22px !important;
+      line-height: 1 !important;
+    }
+    .city-card-title-col {
+      flex: 1 !important;
+    }
+    .city-name-row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+    .city-name-row strong {
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      color: #ffffff !important;
+    }
+    .city-status-pill {
+      font-size: 9.5px !important;
+      font-weight: 800 !important;
+      padding: 2px 7px !important;
+      border-radius: 9999px !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #cbd5e1 !important;
+    }
+    .city-option-card.active .city-status-pill {
+      background: #10b981 !important;
+      color: #ffffff !important;
+    }
+    .city-card-subtitle {
+      display: block !important;
+      font-size: 11.5px !important;
+      color: #38bdf8 !important;
+      font-weight: 600 !important;
+      margin-top: 2px !important;
+    }
+    .city-card-desc {
+      font-size: 11px !important;
+      color: #94a3b8 !important;
+      margin: 0 !important;
+      line-height: 1.4 !important;
+    }
+    .gov-city-pill {
+      background: rgba(22, 136, 33, 0.15) !important;
+      color: #168821 !important;
+      border: 1px solid #168821 !important;
+      border-radius: 9999px !important;
+      padding: 2px 10px !important;
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      transition: all 0.2s ease !important;
+    }
+    .gov-city-pill:hover {
+      background: #168821 !important;
+      color: #ffffff !important;
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans select-none">
@@ -194,6 +429,64 @@
     </button>
   </nav>
 
+  <!-- =================================================================== -->
+  <!-- CANTO SUPERIOR DIREITO: BOTÃO CIRCULAR DE TROCA DE CIDADE           -->
+  <!-- =================================================================== -->
+  <aside class="top-right-orbs" aria-label="Seletor de Município">
+    <button type="button" id="btn-orb-city" class="orb-btn orb-btn-city" onclick="window.triggerCitySwitcher && window.triggerCitySwitcher(event)" title="Trocar Cidade do Totem (Jaú / Itapuí)">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+      <span class="orb-tag" id="orb-city-tag">JAÚ</span>
+      <span class="orb-tooltip">Trocar Cidade (Jaú / Itapuí)</span>
+    </button>
+
+    <!-- POPOVER / MODAL DE ESCOLHA DA CIDADE -->
+    <div id="city-selector-popover" class="city-popover hidden" onclick="event.stopPropagation()">
+      <div class="city-popover-header">
+        <div class="city-popover-title-row">
+          <span class="city-popover-badge">MUNICÍPIO</span>
+          <h4>Escolha a Cidade do Totem</h4>
+        </div>
+        <button type="button" id="btn-close-city-popover" class="btn-close-city-pop" onclick="window.triggerCitySwitcher && window.triggerCitySwitcher(event)" aria-label="Fechar">✕</button>
+      </div>
+      <p class="city-popover-sub">Altera instantaneamente o totem (tela 2D, dados, eventos e placa 3D):</p>
+      <div class="city-options-list">
+        <!-- OPÇÃO 1: JAÚ / SP -->
+        <button type="button" class="city-option-card active" data-city="jau" onclick="app && app.setCity('jau')">
+          <div class="city-card-header">
+            <span class="city-flag">🏛️</span>
+            <div class="city-card-title-col">
+              <div class="city-name-row">
+                <strong>Jaú / SP</strong>
+                <span class="city-status-pill active-pill">CIDADE ATIVA</span>
+              </div>
+              <span class="city-card-subtitle">Estância Turística • Capital do Calçado Feminino</span>
+            </div>
+          </div>
+          <p class="city-card-desc">Praça da República (Jardim de Baixo), Polo do Calçado, Matriz e Teatro.</p>
+        </button>
+
+        <!-- OPÇÃO 2: ITAPUÍ / SP -->
+        <button type="button" class="city-option-card" data-city="itapui" onclick="app && app.setCity('itapui')">
+          <div class="city-card-header">
+            <span class="city-flag">🌴</span>
+            <div class="city-card-title-col">
+              <div class="city-name-row">
+                <strong>Itapuí / SP</strong>
+                <span class="city-status-pill">SELECIONAR</span>
+              </div>
+              <span class="city-card-subtitle">Prainha do Rio Tietê • Topiarias • Festas Tradicionais</span>
+            </div>
+          </div>
+          <p class="city-card-desc">Praça da Matriz, Prainha, Festa do Peão, Quermesse Santo Antônio e Carnaval de Rua.</p>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- OVERLAY / MODAL: TELA 2D DO MENU DO TOTEM (ABRE POR CIMA DO 3D SEM DISTORCER) -->
   <div id="totem-menu-overlay" class="totem-menu-overlay hidden">
     <!-- Barra superior de fechamento do menu -->
@@ -213,7 +506,7 @@
       <div id="totem-chassis" class="totem-frame">
       <!-- Topo metálico limpo do chassi -->
       <div class="totem-top-sensor">
-        <div class="chassis-brand">PREFEITURA DE JAÚ • SP</div>
+        <div class="chassis-brand" id="chassis-brand">PREFEITURA DE JAÚ • SP</div>
       </div>
 
       <!-- TELA TOUCH VERTICAL (ASPECT RATIO 9:16) -->
@@ -237,7 +530,7 @@
         <!-- OVERLAY: MODO VITRINE DINÂMICA (OCIOSO APÓS 45s) -->
         <div id="screen-idle-overlay" class="idle-overlay hidden">
           <div class="idle-slide">
-            <div class="idle-badge">Estância Turística de Jaú</div>
+            <div class="idle-badge" id="idle-badge">Estância Turística de Jaú</div>
             <h1 id="idle-title">Ônibus, Comércio, Turismo e Serviços</h1>
             <p id="idle-desc">Consulte horários, distâncias a pé e leve mapas direto no celular.</p>
             <div class="idle-touch-cta">
@@ -255,7 +548,8 @@
           <div class="gov-top-bar">
             <div class="gov-location-indicator">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="#168821"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-              <span>Você está em: <strong>Praça da República (Jardim de Baixo)</strong></span>
+              <span>Você está em: <strong id="location-name">Praça da República (Jardim de Baixo)</strong></span>
+              <button type="button" class="gov-city-pill" onclick="window.triggerCitySwitcher && window.triggerCitySwitcher(event)" title="Alternar Município do Totem" style="margin-left: 6px;">📍 <span id="gov-city-name">Jaú</span></button>
             </div>
             <div class="gov-solar-status">
               <span class="solar-dot"></span>
@@ -265,7 +559,7 @@
 
           <div class="header-main-row">
             <div class="logo-box">
-              <span class="city-crest" aria-label="Brasão Oficial de Jaú">
+              <span class="city-crest" id="city-crest" aria-label="Brasão Oficial de Jaú">
                 <svg viewBox="0 0 36 40" width="28" height="30" fill="none">
                   <!-- Coroa Mural Prateada/Dourada -->
                   <path d="M6 4h4v3h3V4h4v3h3V4h4v3h3V4h3v6H6V4z" fill="#ffcd07"/>
@@ -278,8 +572,8 @@
                 </svg>
               </span>
               <div>
-                <h1 class="brand-title">PREFEITURA DE JAÚ</h1>
-                <span class="brand-sub">Terminal de Utilidade Pública</span>
+                <h1 class="brand-title" id="brand-title">PREFEITURA DE JAÚ</h1>
+                <span class="brand-sub" id="brand-sub">Terminal de Utilidade Pública</span>
               </div>
             </div>
 
@@ -308,57 +602,64 @@
         <!-- LAYOUT CENTRAL DO TOTEM (MENU LATERAL DE ACESSIBILIDADE + CONTEÚDO TOUCH) -->
         <div class="totem-middle-layout">
 
-          <!-- MENU LATERAL DE ACESSIBILIDADE: BOTÕES NA METADE INFERIOR PARA ALCANCE DE CADEIRANTE -->
+          <!-- MENU LATERAL DE ACESSIBILIDADE: 3 BOTÕES NO CANTO SUPERIOR (1º LIBRAS, 2º CONTRASTE, 3º BAIXAR TELA) -->
           <aside class="kiosk-access-sidebar" role="toolbar" aria-label="Acessibilidade">
-            <div class="sidebar-top-notice">
-              <span class="sidebar-pill-tag">ACESSO</span>
-              <span class="sidebar-ergo-hint">Zona de alcance NBR 9050</span>
-            </div>
+            <div class="sidebar-controls-top">
+              <div class="sidebar-top-notice">
+                <span class="sidebar-pill-tag">ACESSO</span>
+              </div>
 
-            <div class="sidebar-controls-bottom">
-              <!-- 1. ALCANCE / BAIXAR TELA (NO TOPO DO BLOCO INFERIOR PARA FÁCIL ACESSO) -->
-              <button id="btn-wheelchair" class="btn-sidebar-access" title="Baixar tela para cadeirante ou baixa estatura" aria-label="Baixar Tela">
-                <span class="sb-icon">
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
-                    <circle cx="12" cy="4" r="2.1"/>
-                    <path d="M19 13v-2c-1.54.02-3.09-.75-4.07-1.83l-1.29-1.43c-.17-.19-.38-.34-.61-.45H13c-.35-.2-.75-.3-1.19-.26-.64.05-1.2.4-1.51.93L8.4 12.87C8.14 13.31 8 13.82 8 14.33V19h2v-4.67l1.45-2.58 2.05 3.25H19v-2h-3.92l-1.4-2.22 1.34 1.48c.84.93 2.05 1.63 3.48 1.74zM10 18c-2.21 0-4-1.79-4-4s1.79-4 4-4c.73 0 1.41.2 2 .55V8.29C11.39 8.1 10.71 8 10 8c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.97 0 5.43-2.16 5.9-5h-2.05c-.44 1.72-2 3-3.85 3z"/>
-                  </svg>
-                </span>
-                <span class="sb-txt">Baixar Tela</span>
-              </button>
-
-              <!-- 2. LIBRAS -->
+              <!-- 1º BOTÃO: LIBRAS (LOGO VETORIAL 1:1 SEM DISTORÇÃO) -->
               <button id="btn-vlibras" class="btn-sidebar-access" title="Tradutor de Libras" aria-label="Libras">
                 <span class="sb-icon">
-                  <svg viewBox="0 0 640 512" width="30" height="30" fill="currentColor">
-                    <path d="M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8-15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7 65.4 22.8 82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"/>
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                    <path d="M18 11V6a1.5 1.5 0 0 0-3 0v4"/>
+                    <path d="M15 10V4.5a1.5 1.5 0 0 0-3 0V10"/>
+                    <path d="M12 10.5V6a1.5 1.5 0 0 0-3 0v7"/>
+                    <path d="M18 8.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.5a5.5 5.5 0 0 1-4.2-1.9L6.4 15.6a1.5 1.5 0 0 1 2.2-2L10 15"/>
+                    <path d="M4.5 9.5a4.5 4.5 0 0 1 4.5-4.5"/>
+                    <path d="M2.5 7.5A6.5 6.5 0 0 1 9 1"/>
                   </svg>
                 </span>
                 <span class="sb-txt">Libras</span>
               </button>
 
-              <!-- 3. ALTO CONTRASTE -->
+              <!-- 2º BOTÃO: CONTRASTE (LOGO VETORIAL 1:1 SEM DISTORÇÃO) -->
               <button id="btn-contrast" class="btn-sidebar-access" title="Alto Contraste" aria-label="Alto Contraste">
                 <span class="sb-icon">
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"/>
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" preserveAspectRatio="xMidYMid meet">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
                     <path d="M12 3a9 9 0 0 1 0 18V3z" fill="currentColor"/>
                   </svg>
                 </span>
                 <span class="sb-txt">Contraste</span>
               </button>
 
-              <!-- 4. TAMANHO DA LETRA (A+ / A-) -->
-              <div class="sidebar-font-group">
-                <button id="btn-font-plus" class="btn-sidebar-access btn-font-mini" title="Aumentar Letra" aria-label="Aumentar Letra">
-                  <span class="sb-icon font-ctrl-txt">A+</span>
-                  <span class="sb-txt">Maior</span>
-                </button>
-                <button id="btn-font-reset" class="btn-sidebar-access btn-font-mini" title="Letra Padrão" aria-label="Letra Padrão">
-                  <span class="sb-icon font-ctrl-txt">A-</span>
-                  <span class="sb-txt">Normal</span>
-                </button>
-              </div>
+              <!-- 3º BOTÃO: BAIXAR TELA (LOGO VETORIAL 1:1 SEM DISTORÇÃO) -->
+              <button id="btn-wheelchair" class="btn-sidebar-access" title="Baixar tela para 2/3 inferiores" aria-label="Baixar Tela">
+                <span class="sb-icon">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                    <circle cx="10" cy="4.5" r="2" fill="currentColor" stroke="none"/>
+                    <path d="M10 8v5.5h5l2 4.5"/>
+                    <path d="M10 10.8h4"/>
+                    <path d="M12.5 18a4.5 4.5 0 1 1-4.5-6.2"/>
+                    <path d="M19.5 3.5v7m-2.5-2.5 2.5 2.5 2.5-2.5"/>
+                  </svg>
+                </span>
+                <span class="sb-txt">Baixar Tela</span>
+              </button>
+            </div>
+
+            <!-- CONTROLE DE TAMANHO DA LETRA (A+ / A-) NA BASE DA BARRA -->
+            <div class="sidebar-font-group">
+              <button id="btn-font-plus" class="btn-sidebar-access btn-font-mini" title="Aumentar Letra" aria-label="Aumentar Letra">
+                <span class="sb-icon font-ctrl-txt">A+</span>
+                <span class="sb-txt">Maior</span>
+              </button>
+              <button id="btn-font-reset" class="btn-sidebar-access btn-font-mini" title="Letra Padrão" aria-label="Letra Padrão">
+                <span class="sb-icon font-ctrl-txt">A-</span>
+                <span class="sb-txt">Normal</span>
+              </button>
             </div>
           </aside>
 
@@ -373,7 +674,7 @@
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
                 AVISO MUNICIPAL
               </span>
-              <p class="alert-text">Vacinação aberta até 17h nos postos • Tempo estável no Centro</p>
+              <p class="alert-text" id="alert-text">Vacinação aberta até 17h nos postos • Tempo estável no Centro</p>
             </div>
 
             <!-- PERGUNTA DIRETA (SEM INSTRUÇÃO ÓBVIA DE IA) -->
@@ -391,14 +692,14 @@
                       <path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-10.5-6V6h12v5H6z"/>
                     </svg>
                   </div>
-                  <span class="card-tag live-pill">PRÓXIMO: 4 MIN</span>
+                  <span class="card-tag live-pill" id="card-bus-tag">PRÓXIMO: 4 MIN</span>
                 </div>
                 <div class="card-content">
-                  <h3>Ônibus e Horários</h3>
-                  <p>Veja qual linha passa neste ponto e os próximos horários.</p>
+                  <h3 id="card-bus-title">Ônibus e Horários</h3>
+                  <p id="card-bus-desc">Veja qual linha passa neste ponto e os próximos horários.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Ver 4 linhas</span>
+                  <span class="card-action-text" id="card-bus-action">Ver 4 linhas</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
@@ -412,14 +713,14 @@
                       <path d="M507.2 193.9c3.3-15.5 4.8-27.2 4.8-42.2 0-67.7-34.2-103-34.2-103C300.9 131.1 251.2 205.7 195.4 304.4c-17.1 30.3-102.5-2.7-150 25.1C19.1 345 0 374.7 0 434.4c0 0 76.2 28.9 159.8 28.9s101.3-19.2 131-86.2C362.1 215.9 423.4 193.9 507.2 193.9z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">A 3 MIN A PÉ</span>
+                  <span class="card-tag" id="card-shoes-tag">A 3 MIN A PÉ</span>
                 </div>
                 <div class="card-content">
-                  <h3>Polo do Calçado</h3>
-                  <p>Rua Major Prado, Shopping do Calçado e lojas de fábrica.</p>
+                  <h3 id="card-shoes-title">Polo do Calçado</h3>
+                  <p id="card-shoes-desc">Rua Major Prado, Shopping do Calçado e lojas de fábrica.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Como chegar</span>
+                  <span class="card-action-text" id="card-shoes-action">Como chegar</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
@@ -433,14 +734,14 @@
                       <path d="M11 16 L11 21 L13 21 L13 16 Z"/>
                     </svg>
                   </div>
-                  <span class="card-tag">LAZER GRÁTIS</span>
+                  <span class="card-tag" id="card-tourism-tag">LAZER GRÁTIS</span>
                 </div>
                 <div class="card-content">
-                  <h3>Turismo e Parques</h3>
-                  <p>Igreja Matriz a 150m, Parque do Rio Jaú e Teatro Municipal.</p>
+                  <h3 id="card-tourism-title">Turismo e Parques</h3>
+                  <p id="card-tourism-desc">Igreja Matriz a 150m, Parque do Rio Jaú e Teatro Municipal.</p>
                 </div>
                 <div class="card-bottom-action">
-                  <span class="card-action-text">Ver locais</span>
+                  <span class="card-action-text" id="card-tourism-action">Ver locais</span>
                   <span class="card-arrow-circle">➔</span>
                 </div>
               </button>
@@ -467,7 +768,7 @@
             </div>
 
             <!-- ACESSO RÁPIDO DE 1 TOQUE (AGORA SÃO BOTÕES REAIS CLICÁVEIS) -->
-            <div class="city-quick-bar">
+            <div class="city-quick-bar" id="city-quick-bar">
               <button type="button" class="quick-service-pill" onclick="app.openModal('modal-contacts')">
                 <span class="q-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="#dc2626"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z"/></svg>
@@ -514,7 +815,7 @@
               <button class="filter-tab" data-filter="bairros">Bairros / Distrito</button>
             </div>
 
-            <div class="bus-list">
+            <div class="bus-list" id="bus-list">
               <!-- Linha 1: Jardim de Baixo -->
               <div class="bus-item bus-item-here" data-category="centro">
                 <div class="bus-eta-box live">
@@ -597,11 +898,11 @@
                   <path d="M507.2 193.9c-11.5 54.6-38.9 124.7-45.2 269.3h-33.4c0 0 0-175.9-42.4-233.1v-36.2l121 0z"/>
                   <path d="M507.2 193.9c3.3-15.5 4.8-27.2 4.8-42.2 0-67.7-34.2-103-34.2-103C300.9 131.1 251.2 205.7 195.4 304.4c-17.1 30.3-102.5-2.7-150 25.1C19.1 345 0 374.7 0 434.4c0 0 76.2 28.9 159.8 28.9s101.3-19.2 131-86.2C362.1 215.9 423.4 193.9 507.2 193.9z"/>
                 </svg>
-                Onde Comprar Calçados em Jaú
+                <span id="shoes-view-title-text">Onde Comprar Calçados em Jaú</span>
               </h2>
             </div>
 
-            <div class="tour-list">
+            <div class="tour-list" id="shoes-tour-list">
               <!-- Local 1: Rua Major Prado (Mais perto a pé da praça) -->
               <div class="tour-card">
                 <div class="tour-icon icon-shoes-box" aria-label="Comércio Centro">
@@ -670,11 +971,11 @@
               </button>
               <h2>
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="vertical-align:-3px; margin-right:6px;"><path d="M12 2 C8.5 2 6 4.5 6 7.5 C4.5 8 3.5 9.5 3.5 11.5 C3.5 14 5.5 16 8 16 L16 16 C18.5 16 20.5 14 20.5 11.5 C20.5 9.5 19.5 8 18 7.5 C18 4.5 15.5 2 12 2 Z"/><path d="M11 16 L11 21 L13 21 L13 16 Z"/></svg>
-                Passeios e Lazer em Jaú
+                <span id="tourism-view-title-text">Passeios e Lazer em Jaú</span>
               </h2>
             </div>
 
-            <div class="tour-list">
+            <div class="tour-list" id="tourism-tour-list">
               <!-- Turismo 1: Igreja Matriz (Ao lado do ponto atual) -->
               <div class="tour-card">
                 <div class="tour-icon icon-tour-box" aria-label="Igreja Matriz de Jaú">
@@ -757,7 +1058,7 @@
               </h2>
             </div>
 
-            <div class="services-columns">
+            <div class="services-columns" id="services-columns">
               <!-- Coluna Ouvidoria & Localização Rápida -->
               <div class="service-box">
                 <h3>Atendimento Direto no Celular (QR Code)</h3>
@@ -819,134 +1120,270 @@
 
         </section>
 
-          <!-- QUADRADINHO DO VLIBRAS (TRAVADO NO CANTO INFERIOR DIREITO - FUNDO BRANCO PURO) -->
-          <div id="vlibras-kiosk-box" class="vlibras-kiosk-box hidden" title="VLibras - Tradutor de Língua de Sinais">
-            <button id="btn-close-vlibras" class="btn-close-vlibras" title="Fechar Tradutor" aria-label="Fechar Tradutor">✕</button>
+          <!-- INTÉRPRETE DE LIBRAS RECORTADO EM CHROMA KEY (SEM QUADRADO / FUNDO 100% TRANSPARENTE) -->
+          <div id="vlibras-kiosk-box" class="vlibras-kiosk-box hidden" title="Intérprete de LIBRAS — Toque em qualquer texto da tela para traduzir">
+            <button id="btn-close-vlibras" class="btn-close-vlibras" title="Fechar Intérprete de Libras" aria-label="Fechar Intérprete de Libras">✕</button>
 
-            <!-- Badge superior indicando o sinal / gesto atual -->
-            <div class="vlibras-top-status">
-              <span id="vlibras-sign-badge" class="vlibras-sign-badge">LIBRAS • TRADUTOR</span>
-            </div>
-
-            <!-- Palco do Boneco Intérprete Articulado no Fundo Branco -->
+            <!-- Palco 100% Transparente (Efeito Tela Verde Recortada / Chroma Key) -->
             <div class="vlibras-avatar-stage">
-              <svg id="vlibras-avatar-svg" class="vlibras-avatar-svg" viewBox="0 0 160 148" width="138" height="126">
-                <!-- Halo suave de fundo -->
-                <circle cx="80" cy="74" r="64" fill="#f1f5f9"/>
-                <circle cx="80" cy="74" r="56" fill="#e8f0fe" opacity="0.65"/>
+              <svg id="vlibras-avatar-svg" class="vlibras-avatar-svg" viewBox="0 0 240 256" width="228" height="244" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <!-- Sombreamento 3D Volumétrico da Pele (Luz de Estúdio Frontal-Superior) -->
+                  <radialGradient id="libSkinFace" cx="46%" cy="38%" r="60%" fx="42%" fy="32%">
+                    <stop offset="0%" stop-color="#ffe1c9"/>
+                    <stop offset="52%" stop-color="#f3be9c"/>
+                    <stop offset="85%" stop-color="#dc9873"/>
+                    <stop offset="100%" stop-color="#c27a55"/>
+                  </radialGradient>
+                  <linearGradient id="libSkinNeck" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d48e6a"/>
+                    <stop offset="45%" stop-color="#eab08d"/>
+                    <stop offset="100%" stop-color="#b8714d"/>
+                  </linearGradient>
+                  <linearGradient id="libSkinArmL" x1="15%" y1="0%" x2="85%" y2="100%">
+                    <stop offset="0%" stop-color="#f9ccb0"/>
+                    <stop offset="55%" stop-color="#e7ad89"/>
+                    <stop offset="100%" stop-color="#c7825c"/>
+                  </linearGradient>
+                  <linearGradient id="libSkinArmR" x1="85%" y1="0%" x2="15%" y2="100%">
+                    <stop offset="0%" stop-color="#f9ccb0"/>
+                    <stop offset="55%" stop-color="#e7ad89"/>
+                    <stop offset="100%" stop-color="#c7825c"/>
+                  </linearGradient>
+                  <radialGradient id="libSkinHand" cx="48%" cy="42%" r="58%">
+                    <stop offset="0%" stop-color="#ffe0c8"/>
+                    <stop offset="65%" stop-color="#ebb492"/>
+                    <stop offset="100%" stop-color="#c9845e"/>
+                  </radialGradient>
 
-                <!-- TRONCO E CAMISA POLO AZUL -->
+                  <!-- Camisa Oficial de Intérprete (Azul Marinho Profundo 3D c/ Dobras de Tecido) -->
+                  <radialGradient id="libShirtTorso" cx="50%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#1e4fa3"/>
+                    <stop offset="48%" stop-color="#0f3478"/>
+                    <stop offset="85%" stop-color="#081f4d"/>
+                    <stop offset="100%" stop-color="#051332"/>
+                  </radialGradient>
+                  <linearGradient id="libShirtSleeve" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#1b4694"/>
+                    <stop offset="60%" stop-color="#0c285e"/>
+                    <stop offset="100%" stop-color="#061638"/>
+                  </linearGradient>
+
+                  <!-- Cabelo Realista Texturizado em Camadas 3D -->
+                  <linearGradient id="libHairMain" x1="20%" y1="0%" x2="80%" y2="100%">
+                    <stop offset="0%" stop-color="#4e301d"/>
+                    <stop offset="45%" stop-color="#2c190e"/>
+                    <stop offset="100%" stop-color="#170c06"/>
+                  </linearGradient>
+                  <linearGradient id="libHairShine" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#6b442b" stop-opacity="0"/>
+                    <stop offset="50%" stop-color="#855638" stop-opacity="0.75"/>
+                    <stop offset="100%" stop-color="#6b442b" stop-opacity="0"/>
+                  </linearGradient>
+
+                  <!-- Íris Realista Castanho-Mel -->
+                  <radialGradient id="libIris" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#1e110a"/>
+                    <stop offset="45%" stop-color="#5c361b"/>
+                    <stop offset="85%" stop-color="#361d0c"/>
+                    <stop offset="100%" stop-color="#1a0e06"/>
+                  </radialGradient>
+
+                  <!-- Lábios Naturais -->
+                  <linearGradient id="libLips" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#bf6b63"/>
+                    <stop offset="50%" stop-color="#a8524a"/>
+                    <stop offset="100%" stop-color="#8c3f38"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- =========================================================
+                     1. TRONCO, OMBROS ANATÔMICOS E CAMISA POLO 3D (RECORTADOS)
+                     ========================================================= -->
                 <g id="vlibras-torso-group" class="vlibras-torso-group">
-                  <!-- Ombros e tronco -->
-                  <path d="M 34 144 C 34 100 50 86 80 86 C 110 86 126 100 126 144 Z" fill="#0c326f"/>
-                  <!-- Detalhe lateral da camisa -->
-                  <path d="M 46 144 C 48 112 58 96 80 96 C 102 96 112 112 114 144 Z" fill="#1351b4"/>
-                  <!-- Gola polo dourada -->
-                  <path d="M 62 86 L 80 105 L 98 86 L 90 84 L 80 95 L 70 84 Z" fill="#ffcd07"/>
+                  <!-- Torso e Ombros com caimento real de estúdio -->
+                  <path d="M 38 254 C 38 196 46 160 68 148 C 84 140 98 138 120 138 C 142 138 156 140 172 148 C 194 160 202 196 202 254 Z" fill="url(#libShirtTorso)"/>
+
+                  <!-- Dobras de tecido e volume peitoral 3D -->
+                  <path d="M 68 150 C 76 184 82 220 80 254" stroke="#06173a" stroke-width="2.5" fill="none" opacity="0.55"/>
+                  <path d="M 172 150 C 164 184 158 220 160 254" stroke="#06173a" stroke-width="2.5" fill="none" opacity="0.55"/>
+                  <path d="M 92 178 Q 120 188 148 178" stroke="#2860bd" stroke-width="1.6" fill="none" opacity="0.35" stroke-linecap="round"/>
+
+                  <!-- Sombra do pescoço e abertura da gola -->
+                  <path d="M 97 132 L 120 164 L 143 132 Z" fill="#071a3e"/>
+
+                  <!-- Pescoço Anatômico com tendões esternocleidomastoideos sutis -->
+                  <path d="M 101 106 L 101 141 C 101 151 110 156 120 156 C 130 156 139 151 139 141 L 139 106 Z" fill="url(#libSkinNeck)"/>
+                  <path d="M 104 114 Q 120 124 136 114" fill="none" stroke="#b56c49" stroke-width="1.8" opacity="0.55"/>
+                  <path d="M 107 120 L 114 148" stroke="#c47d59" stroke-width="1.4" opacity="0.4" stroke-linecap="round"/>
+                  <path d="M 133 120 L 126 148" stroke="#c47d59" stroke-width="1.4" opacity="0.4" stroke-linecap="round"/>
+
+                  <!-- Gola Polo Estruturada com vivo institucional discreto -->
+                  <path d="M 96 131 L 84 148 L 112 165 L 120 153 L 101 135 Z" fill="#133d8a" stroke="#2557b0" stroke-width="1"/>
+                  <path d="M 144 131 L 156 148 L 128 165 L 120 153 L 139 135 Z" fill="#103579" stroke="#2557b0" stroke-width="1"/>
+                  <!-- Peitilho com 2 botões -->
+                  <rect x="116.5" y="158" width="7" height="28" rx="2" fill="#0a2458" stroke="#1e4b9c" stroke-width="0.8"/>
+                  <circle cx="120" cy="166" r="1.6" fill="#93c5fd"/>
+                  <circle cx="120" cy="177" r="1.6" fill="#93c5fd"/>
+                  <!-- Crachá/Pin sutil de Intérprete LIBRAS no peito esquerdo -->
+                  <g transform="translate(144, 174)">
+                    <rect x="0" y="0" width="16" height="11" rx="2.5" fill="#0284c7" stroke="#7dd3fc" stroke-width="0.9"/>
+                    <path d="M 4 8 L 7 3 L 10 8 M 11 4 L 13 8" stroke="#ffffff" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                  </g>
                 </g>
 
-                <!-- PESCOÇO -->
-                <rect x="71" y="70" width="18" height="20" rx="5" fill="#f4b393"/>
-
-                <!-- CABEÇA E EXPRESSÃO FACIAL (GRAMÁTICA DA LIBRAS) -->
+                <!-- =========================================================
+                     2. CABEÇA HUMANA REALISTA 3D & EXPRESSÕES NÃO-MANUAIS
+                     ========================================================= -->
                 <g id="vlibras-head-group" class="vlibras-head-group">
-                  <!-- Orelhas -->
-                  <ellipse cx="53" cy="52" rx="4.5" ry="7" fill="#f4b393"/>
-                  <ellipse cx="107" cy="52" rx="4.5" ry="7" fill="#f4b393"/>
-                  <!-- Rosto -->
-                  <ellipse cx="80" cy="50" rx="26" ry="28" fill="#ffd1b3" stroke="#e0a98b" stroke-width="1"/>
-                  <!-- Cabelo Castanho Moderno do Ícaro -->
-                  <path d="M 53 46 C 51 24 64 15 80 15 C 97 15 109 24 107 46 C 103 35 94 30 80 30 C 66 30 57 35 53 46 Z" fill="#4a2c18"/>
-                  <path d="M 60 22 C 70 16 90 16 98 25 C 88 21 72 21 60 22 Z" fill="#633d24"/>
+                  <!-- Orelhas Anatômicas com hélix e trago -->
+                  <g>
+                    <path d="M 85 74 C 79 72 77 80 79 88 C 80 94 84 97 87 95 Z" fill="url(#libSkinNeck)" stroke="#c27a55" stroke-width="0.9"/>
+                    <path d="M 81 78 C 80 82 81 88 84 91" stroke="#b36843" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+                    <path d="M 155 74 C 161 72 163 80 161 88 C 160 94 156 97 153 95 Z" fill="url(#libSkinNeck)" stroke="#c27a55" stroke-width="0.9"/>
+                    <path d="M 159 78 C 160 82 159 88 156 91" stroke="#b36843" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+                  </g>
 
-                  <!-- Sobrancelhas Expressivas -->
+                  <!-- Crânio, Maçãs do Rosto e Mandíbula Masculina Realista -->
+                  <path d="M 85 64 C 85 38 100 28 120 28 C 140 28 155 38 155 64 C 155 79 153 93 147 104 C 141 114 130 122 120 122 C 110 122 99 114 93 104 C 87 93 85 79 85 64 Z" fill="url(#libSkinFace)" stroke="#c9825c" stroke-width="0.9"/>
+
+                  <!-- Sombreamento Suave de Barba Cerrada / Contorno Maxilar Realista -->
+                  <path d="M 88 86 C 89 102 102 120 120 121 C 138 120 151 102 152 86 C 149 98 139 113 120 114 C 101 113 91 98 88 86 Z" fill="#523422" opacity="0.14"/>
+
+                  <!-- Maçãs do Rosto / Rubor de Luz Natural -->
+                  <ellipse cx="99" cy="86" rx="8" ry="5" fill="#d97b66" opacity="0.18"/>
+                  <ellipse cx="141" cy="86" rx="8" ry="5" fill="#d97b66" opacity="0.18"/>
+
+                  <!-- Cabelo Realista Masculino em Camadas 3D (Corte Degradê Moderno) -->
+                  <path d="M 84 70 C 81 52 84 34 96 24 C 106 16 132 15 144 24 C 156 33 159 52 156 70 C 154 57 151 48 145 43 C 136 37 125 39 114 38 C 101 37 92 43 88 54 C 86 59 85 65 84 70 Z" fill="url(#libHairMain)"/>
+                  <!-- Topete volumoso texturizado -->
+                  <path d="M 89 44 C 95 24 118 17 139 24 C 148 27 153 36 151 45 C 144 36 130 33 114 35 C 101 36 93 40 89 44 Z" fill="url(#libHairMain)"/>
+                  <!-- Reflexo de luz nos fios do cabelo -->
+                  <path d="M 96 31 C 110 23 130 23 143 32 C 131 28 111 28 96 31 Z" fill="url(#libHairShine)"/>
+                  <!-- Costeletas laterais -->
+                  <path d="M 84 62 L 87 80 L 89 67 Z" fill="#2c190e"/>
+                  <path d="M 156 62 L 153 80 L 151 67 Z" fill="#2c190e"/>
+
+                  <!-- Sobrancelhas Anatômicas Expressivas (Gramática Facial da Libras) -->
                   <g id="vlibras-brows" class="vlibras-brows">
-                    <path d="M 64 40 Q 70 36.5 75 39.5" stroke="#4a2c18" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-                    <path d="M 85 39.5 Q 90 36.5 96 40" stroke="#4a2c18" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                    <path d="M 94 64 C 99 60.5 107 60.5 113 63.5 C 107 62.5 99 62.8 94 64 Z" fill="#2b180d" stroke="#2b180d" stroke-width="1.6" stroke-linecap="round"/>
+                    <path d="M 146 64 C 141 60.5 133 60.5 127 63.5 C 133 62.5 141 62.8 146 64 Z" fill="#2b180d" stroke="#2b180d" stroke-width="1.6" stroke-linecap="round"/>
                   </g>
 
-                  <!-- Olhos com brilho -->
+                  <!-- Olhos Humanos Realistas (Esclera, Íris 3D, Pupila, Pálpebra e Brilho Duplo) -->
                   <g id="vlibras-eyes" class="vlibras-eyes">
-                    <ellipse cx="70" cy="48" rx="3.4" ry="3.8" fill="#1e293b"/>
-                    <ellipse cx="90" cy="48" rx="3.4" ry="3.8" fill="#1e293b"/>
-                    <circle cx="71.2" cy="46.8" r="1.2" fill="#ffffff"/>
-                    <circle cx="91.2" cy="46.8" r="1.2" fill="#ffffff"/>
+                    <!-- Olho Esquerdo -->
+                    <path d="M 95 73 Q 104 68 112 73 Q 104 77.5 95 73 Z" fill="#ffffff" stroke="#8c583c" stroke-width="0.8"/>
+                    <circle cx="104" cy="72.8" r="3.9" fill="url(#libIris)"/>
+                    <circle cx="104" cy="72.8" r="1.8" fill="#090503"/>
+                    <circle cx="105.3" cy="71.4" r="1.1" fill="#ffffff"/>
+                    <circle cx="102.7" cy="74.1" r="0.55" fill="#ffffff" opacity="0.8"/>
+                    <path d="M 94.5 72.8 Q 104 67.2 112.5 72.8" stroke="#2b180d" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                    <path d="M 95.5 69.5 Q 104 66 111.5 69.5" stroke="#b87451" stroke-width="0.9" fill="none" opacity="0.7"/>
+
+                    <!-- Olho Direito -->
+                    <path d="M 128 73 Q 136 68 145 73 Q 136 77.5 128 73 Z" fill="#ffffff" stroke="#8c583c" stroke-width="0.8"/>
+                    <circle cx="136" cy="72.8" r="3.9" fill="url(#libIris)"/>
+                    <circle cx="136" cy="72.8" r="1.8" fill="#090503"/>
+                    <circle cx="137.3" cy="71.4" r="1.1" fill="#ffffff"/>
+                    <circle cx="134.7" cy="74.1" r="0.55" fill="#ffffff" opacity="0.8"/>
+                    <path d="M 127.5 72.8 Q 136 67.2 145.5 72.8" stroke="#2b180d" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                    <path d="M 128.5 69.5 Q 136 66 144.5 69.5" stroke="#b87451" stroke-width="0.9" fill="none" opacity="0.7"/>
                   </g>
 
-                  <!-- Nariz -->
-                  <path d="M 80 49 L 78.5 56 L 82.5 56.5" stroke="#d99b7c" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- Nariz Esculpido em 3D (Dorso, Ponta e Abas Nasais) -->
+                  <g>
+                    <path d="M 118 68 L 116 86 C 114 88 115 91 120 91.5 C 125 91 126 88 124 86 L 122 68" fill="none" stroke="#bd7652" stroke-width="1.3" stroke-linecap="round"/>
+                    <path d="M 120 69 L 119.5 87" stroke="#ffeada" stroke-width="1.2" opacity="0.65" stroke-linecap="round"/>
+                    <path d="M 113.5 89.5 Q 116.5 92 120 91.5 Q 123.5 92 126.5 89.5" fill="none" stroke="#a6603e" stroke-width="1.4" stroke-linecap="round"/>
+                  </g>
 
-                  <!-- Boca (Alterna entre sorriso e articulação labial da Libras) -->
-                  <path id="vlibras-mouth-idle" class="vlibras-mouth-idle" d="M 72 62 Q 80 68 88 62" stroke="#b91c1c" stroke-width="2.2" fill="#ffffff" stroke-linecap="round"/>
-                  <ellipse id="vlibras-mouth-talk" class="vlibras-mouth-talk" cx="80" cy="63.5" rx="5.5" ry="4" fill="#991b1b" stroke="#ffffff" stroke-width="1"/>
+                  <!-- Sulco Nasolabial Suave -->
+                  <path d="M 110 89 Q 105 96 104 103" stroke="#c47c58" stroke-width="0.9" fill="none" opacity="0.45" stroke-linecap="round"/>
+                  <path d="M 130 89 Q 135 96 136 103" stroke="#c47c58" stroke-width="0.9" fill="none" opacity="0.45" stroke-linecap="round"/>
+
+                  <!-- Boca Realista (Repouso Sereno vs Articulação Labial de Libras) -->
+                  <g id="vlibras-mouth-idle" class="vlibras-mouth-idle">
+                    <path d="M 108 101 Q 114 98.5 120 100 Q 126 98.5 132 101 Q 126 106.5 120 106.5 Q 114 106.5 108 101 Z" fill="url(#libLips)"/>
+                    <path d="M 107.5 101 Q 120 104 132.5 101" stroke="#732d27" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                    <path d="M 114 111 Q 120 113 126 111" stroke="#bd7652" stroke-width="1" fill="none" opacity="0.5" stroke-linecap="round"/>
+                  </g>
+
+                  <g id="vlibras-mouth-talk" class="vlibras-mouth-talk">
+                    <ellipse cx="120" cy="102.5" rx="8.5" ry="5.5" fill="#63171b" stroke="url(#libLips)" stroke-width="2.2"/>
+                    <path d="M 113.5 99.5 Q 120 101 126.5 99.5" stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="120" cy="105.5" rx="4.5" ry="2" fill="#d96b6b"/>
+                  </g>
                 </g>
 
-                <!-- LINHAS DE MOVIMENTO DE SINALIZAÇÃO (APARECEM AO TRADUZIR) -->
-                <g class="vlibras-motion-lines">
-                  <path d="M 18 76 Q 12 60 24 46" stroke="#0284c7" stroke-width="2" stroke-dasharray="3 3" fill="none" stroke-linecap="round"/>
-                  <path d="M 142 76 Q 148 60 136 46" stroke="#0284c7" stroke-width="2" stroke-dasharray="3 3" fill="none" stroke-linecap="round"/>
-                </g>
-
-                <!-- BRAÇO, ANTEBRAÇO E MÃO ARTICULADA ESQUERDA (COM 5 DEDOS EM LIBRAS) -->
+                <!-- =========================================================
+                     3. BRAÇO, ANTEBRAÇO E MÃO ESCULPIDA ESQUERDA (5 DEDOS 3D)
+                     ========================================================= -->
                 <g id="vlibras-arm-l" class="vlibras-arm-l">
-                  <!-- Manga azul do braço esquerdo -->
-                  <path d="M 42 96 C 28 102 22 116 30 126 L 44 118 Z" fill="#0c326f"/>
-                  <!-- Antebraço esquerdo erguido para sinalização -->
-                  <path d="M 32 118 C 24 106 28 88 42 78 C 47 75 52 80 48 86 C 40 96 38 108 42 118 Z" fill="#f4b393" stroke="#d99b7c" stroke-width="1"/>
-                  <!-- Mão esquerda com 5 dedos configurando sinal de Libras -->
+                  <!-- Manga Esquerda 3D -->
+                  <path d="M 68 148 C 50 156 38 176 36 202 L 62 206 C 65 186 70 168 76 156 Z" fill="url(#libShirtSleeve)" stroke="#1e4b9c" stroke-width="0.8"/>
+                  <!-- Antebraço Anatômico Esquerdo Erguido -->
+                  <path d="M 38 198 C 34 184 44 156 64 134 L 78 142 C 64 166 56 188 58 202 Z" fill="url(#libSkinArmL)" stroke="#bf7954" stroke-width="0.9"/>
+
+                  <!-- Mão Esquerda Esculpida e Articulada (Pulso + Palma + 5 Dedos Anatômicos) -->
                   <g id="vlibras-hand-l" class="vlibras-hand-l">
-                    <!-- Palma da mão esquerda -->
-                    <rect x="36" y="66" width="16" height="15" rx="6" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1.2"/>
-                    <!-- Polegar aberto -->
-                    <rect x="50" y="69" width="8" height="4.5" rx="2.2" transform="rotate(-25 50 69)" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <!-- Palma Anatômica Esquerda -->
+                    <path d="M 58 136 C 54 126 57 115 66 112 C 75 110 83 115 84 125 C 85 134 79 141 70 142 C 63 142 59 139 58 136 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="1"/>
+                    <!-- Polegar Articulado -->
+                    <path d="M 80 128 C 87 123 93 117 91 113 C 89 110 83 113 78 120 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Indicador -->
-                    <rect x="47" y="53" width="4.2" height="15" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 76 114 L 79 92 C 79.5 88 74.5 87.5 73.5 91.5 L 70.5 113 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Médio -->
-                    <rect x="42.5" y="51" width="4.2" height="17" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 69.5 113 L 70.5 88 C 70.8 84 65.5 84 65 88 L 64 113 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Anelar -->
-                    <rect x="38" y="54" width="4.2" height="14" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 63.5 114 L 62.5 92 C 62.2 88 57.2 88.5 57.5 92.5 L 58.5 115 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Mínimo -->
-                    <rect x="34" y="57" width="3.8" height="12" rx="1.8" transform="rotate(-8 34 57)" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
-                    <!-- Linhas da palma -->
-                    <path d="M 40 73 Q 44 71 48 74" stroke="#d99b7c" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                    <path d="M 58 117 L 55 99 C 54.5 95.5 50 96.5 50.8 100 L 54 119 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
+                    <!-- Linhas de expressão da palma da mão -->
+                    <path d="M 62 126 Q 70 122 78 127" stroke="#b8714d" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                    <path d="M 64 132 Q 71 130 76 134" stroke="#b8714d" stroke-width="0.9" fill="none" stroke-linecap="round"/>
                   </g>
                 </g>
 
-                <!-- BRAÇO, ANTEBRAÇO E MÃO ARTICULADA DIREITA (COM 5 DEDOS EM LIBRAS) -->
+                <!-- =========================================================
+                     4. BRAÇO, ANTEBRAÇO E MÃO ESCULPIDA DIREITA (5 DEDOS 3D)
+                     ========================================================= -->
                 <g id="vlibras-arm-r" class="vlibras-arm-r">
-                  <!-- Manga azul do braço direito -->
-                  <path d="M 118 96 C 132 102 138 116 130 126 L 116 118 Z" fill="#0c326f"/>
-                  <!-- Antebraço direito erguido para sinalização -->
-                  <path d="M 128 118 C 136 106 132 88 118 78 C 113 75 108 80 112 86 C 120 96 122 108 118 118 Z" fill="#f4b393" stroke="#d99b7c" stroke-width="1"/>
-                  <!-- Mão direita com 5 dedos configurando sinal de Libras -->
+                  <!-- Manga Direita 3D -->
+                  <path d="M 172 148 C 190 156 202 176 204 202 L 178 206 C 175 186 170 168 164 156 Z" fill="url(#libShirtSleeve)" stroke="#1e4b9c" stroke-width="0.8"/>
+                  <!-- Antebraço Anatômico Direito Erguido -->
+                  <path d="M 202 198 C 206 184 196 156 176 134 L 162 142 C 176 166 184 188 182 202 Z" fill="url(#libSkinArmR)" stroke="#bf7954" stroke-width="0.9"/>
+
+                  <!-- Mão Direita Esculpida e Articulada (Pulso + Palma + 5 Dedos Anatômicos) -->
                   <g id="vlibras-hand-r" class="vlibras-hand-r">
-                    <!-- Palma da mão direita -->
-                    <rect x="108" y="66" width="16" height="15" rx="6" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1.2"/>
-                    <!-- Polegar aberto -->
-                    <rect x="102" y="69" width="8" height="4.5" rx="2.2" transform="rotate(25 110 69)" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <!-- Palma Anatômica Direita -->
+                    <path d="M 182 136 C 186 126 183 115 174 112 C 165 110 157 115 156 125 C 155 134 161 141 170 142 C 177 142 181 139 182 136 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="1"/>
+                    <!-- Polegar Articulado -->
+                    <path d="M 160 128 C 153 123 147 117 149 113 C 151 110 157 113 162 120 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Indicador -->
-                    <rect x="108.8" y="53" width="4.2" height="15" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 164 114 L 161 92 C 160.5 88 165.5 87.5 166.5 91.5 L 169.5 113 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Médio -->
-                    <rect x="113.3" y="51" width="4.2" height="17" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 170.5 113 L 169.5 88 C 169.2 84 174.5 84 175 88 L 176 113 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Anelar -->
-                    <rect x="117.8" y="54" width="4.2" height="14" rx="2" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
+                    <path d="M 176.5 114 L 177.5 92 C 177.8 88 182.8 88.5 182.5 92.5 L 181.5 115 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
                     <!-- Mínimo -->
-                    <rect x="122.2" y="57" width="3.8" height="12" rx="1.8" transform="rotate(8 122 57)" fill="#ffd1b3" stroke="#d99b7c" stroke-width="1"/>
-                    <!-- Linhas da palma -->
-                    <path d="M 112 74 Q 116 71 120 73" stroke="#d99b7c" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                    <path d="M 182 117 L 185 99 C 185.5 95.5 190 96.5 189.2 100 L 186 119 Z" fill="url(#libSkinHand)" stroke="#bf7954" stroke-width="0.9"/>
+                    <!-- Linhas de expressão da palma da mão -->
+                    <path d="M 178 126 Q 170 122 162 127" stroke="#b8714d" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+                    <path d="M 176 132 Q 169 130 164 134" stroke="#b8714d" stroke-width="0.9" fill="none" stroke-linecap="round"/>
                   </g>
                 </g>
               </svg>
             </div>
 
-            <!-- Caixa de Legenda e Sequência de Sinais Abaixo do Boneco -->
+            <!-- Legenda Flutuante Discreta (Estilo TV / Chroma Key — Sem Caixa Quadrada) -->
             <div class="vlibras-subtitle-box">
               <div class="vlibras-sub-tag-line">
                 <span class="v-pulse-dot"></span>
-                <span id="vlibras-status-tag" class="v-tag">LIBRAS • AO VIVO</span>
+                <span id="vlibras-sign-badge" class="v-tag">LIBRAS AO VIVO</span>
                 <button id="btn-replay-libras" class="btn-replay-libras" title="Repetir sinais em Libras">↻</button>
               </div>
-              <p id="vlibras-subtitle-text" class="vlibras-sub-text">Toque em qualquer texto para traduzir em sinais</p>
+              <p id="vlibras-subtitle-text" class="vlibras-sub-text">Toque em qualquer texto para traduzir</p>
             </div>
           </div>
 
@@ -1058,10 +1495,16 @@
                 <div class="esg-cards-grid">
                   <div class="esg-feature-card">
                     <div class="feat-icon">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#1351b4"><circle cx="12" cy="4" r="2.2"/><path d="M19 13v-2c-1.54.02-3.09-.75-4.07-1.83l-1.29-1.43c-.17-.19-.38-.34-.61-.45H13c-.35-.2-.75-.3-1.19-.26-.64.05-1.2.4-1.51.93L8.4 12.87C8.14 13.31 8 13.82 8 14.33V19h2v-4.67l1.45-2.58 2.05 3.25H19v-2h-3.92l-1.4-2.22 1.34 1.48c.84.93 2.05 1.63 3.48 1.74z"/></svg>
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#1351b4" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                        <circle cx="10" cy="4.5" r="2" fill="#1351b4" stroke="none"/>
+                        <path d="M10 8v5.5h5l2 4.5"/>
+                        <path d="M10 10.8h4"/>
+                        <path d="M12.5 18a4.5 4.5 0 1 1-4.5-6.2"/>
+                        <path d="M19.5 3.5v7m-2.5-2.5 2.5 2.5 2.5-2.5"/>
+                      </svg>
                     </div>
                     <h5>Alcance NBR 9050</h5>
-                    <p>Botões na metade inferior da tela e modo de rebaixamento para cadeirantes.</p>
+                    <p>Modo Baixar Tela que rebaixa toda a interface para os 2/3 inferiores do totem.</p>
                   </div>
                   <div class="esg-feature-card">
                     <div class="feat-icon">
@@ -1179,10 +1622,10 @@
                     <div class="c-badge">153</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>Guarda Civil Municipal de Jaú</strong>
+                        <strong id="contacts-gcm-title">Guarda Civil Municipal de Jaú</strong>
                         <span class="tag-24h">24H • GRATUITO</span>
                       </div>
-                      <span class="c-desc">Apoio nas praças, patrulhamento municipal e auxílio ao cidadão.</span>
+                      <span class="c-desc" id="contacts-gcm-desc">Apoio nas praças, patrulhamento municipal e auxílio ao cidadão.</span>
                     </div>
                   </div>
                 </div>
@@ -1230,14 +1673,14 @@
                   </div>
 
                   <div class="contact-card admin-card">
-                    <div class="c-badge-admin">JAÚ</div>
+                    <div class="c-badge-admin" id="contacts-admin-badge">JAÚ</div>
                     <div class="c-info">
                       <div class="c-head-line">
-                        <strong>Plantão Social • Assistência Social de Jaú</strong>
+                        <strong id="contacts-admin-title">Plantão Social • Assistência Social de Jaú</strong>
                         <span class="tag-office">Seg a Sex • 08h às 17h</span>
                       </div>
-                      <span class="phone-highlight">(14) 3602-5777</span>
-                      <span class="c-desc">Acolhimento a pessoas em vulnerabilidade ou situação de rua.</span>
+                      <span class="phone-highlight" id="contacts-admin-phone">(14) 3602-5777</span>
+                      <span class="c-desc" id="contacts-admin-desc">Acolhimento a pessoas em vulnerabilidade ou situação de rua.</span>
                     </div>
                   </div>
                 </div>
@@ -1245,7 +1688,7 @@
             </div>
 
             <div class="contacts-panel-foot">
-              <span class="foot-note">Você está na <strong>Praça da República (Jardim de Baixo — Centro de Jaú)</strong>. Informe este local ao pedir socorro.</span>
+              <span class="foot-note" id="contacts-foot-note">Você está na <strong>Praça da República (Jardim de Baixo — Centro de Jaú)</strong>. Informe este local ao pedir socorro.</span>
             </div>
           </div>
 
@@ -1254,9 +1697,8 @@
 
       </div><!-- Fim do totem-screen -->
 
-      <!-- Base / Suporte inferior do chassi metálico -->
+      <!-- Base / Suporte inferior do chassi metálico (100% cego e estanque IP66, sem grelha) -->
       <div class="totem-bottom-chassis">
-        <div class="chassis-vent"></div>
         <div class="chassis-label">SISTEMA INTELIGENTE DE UTILIDADE PÚBLICA</div>
       </div>
     </div>
@@ -1403,7 +1845,7 @@
               </div>
             </div>
 
-            <!-- Seção 4: Carcaça, Tampão Traseiro & Raio-X Interno -->
+            <!-- Seção 4: Carcaça, Tampão Traseiro & Raio-X Interno (Estrutura Enxuta IP66) -->
             <div class="popover-section">
               <span class="sec-title">🚪 Carcaça, Tampão Traseiro & Raio-X</span>
               <div style="margin-bottom:6px;">
@@ -1412,21 +1854,7 @@
               <div class="popover-grid-3">
                 <button class="btn-dock" data-hw-view="xray" title="Carcaça Visível + Tampão Aberto + Raio-X">🔍 Raio-X + Tampão</button>
                 <button class="btn-dock" data-hw-view="door" title="Carcaça Sólida + Tampão Traseiro Aberto 105°">🚪 Tampão Aberto</button>
-                <button class="btn-dock" data-hw-view="exploded" title="Vista Explodida em Camadas">💥 Explodido</button>
-              </div>
-              <div class="popover-grid-3" style="margin-top:6px;">
-                <button class="btn-dock" id="btn-hw-glow-power">⚡ Fios Energia</button>
-                <button class="btn-dock" id="btn-hw-glow-data">🌐 Fios Dados</button>
-                <button class="btn-dock" id="btn-hw-hotspots">📍 Pontos (1-10)</button>
-              </div>
-            </div>
-
-            <!-- Seção 4B: Opção de Computador (Touch c/ PC Acoplado All-in-One vs Mini-PC Separado) -->
-            <div class="popover-section">
-              <span class="sec-title">💻 Computador: Acoplado na Tela vs Separado</span>
-              <div class="popover-grid-2">
-                <button type="button" class="btn-dock active" data-pc-arch="allinone" title="Tela Touch 43&quot; já com Computador Acoplado atrás da própria tela (All-in-One / Slot OPS)">🖥️ Touch c/ PC Acoplado</button>
-                <button type="button" class="btn-dock" data-pc-arch="minipc" title="Monitor Touch + Mini-PC Industrial Separado no Rack">💻 Mini-PC Separado</button>
+                <button class="btn-dock" id="btn-hw-hotspots" title="Mostrar os 7 Componentes Internos Essenciais">📍 Pontos (1-7)</button>
               </div>
             </div>
 
@@ -1466,7 +1894,7 @@
       <div class="modal-head">
         <div class="hw-head-badge">
           <span class="badge-tag">3. PARTE TÉCNICA & ENGENHARIA DO PRODUTO</span>
-          <h3 id="hw-modal-title">Memorial Técnico, Carcaça, Tampão Traseiro e Opções de Computador</h3>
+          <h3 id="hw-modal-title">Memorial Técnico: Gabinete Selado IP66, Porta Traseira Limpa e Tela Touch All-in-One</h3>
           <p>Dossiê Técnico Construtivo do Totem Inteligente de Jaú • Totemize (Senac PI / Prefeitura de Jaú)</p>
         </div>
         <button id="btn-close-hw-schematics" class="btn-close-modal" aria-label="Fechar Parte Técnica">✕</button>
@@ -1476,7 +1904,7 @@
         <!-- ABAS INTERNAS DO MODAL DE PARTE TÉCNICA -->
         <div class="hw-modal-tabs">
           <button class="btn-hw-tab active" data-hw-tab="overview">📄 Texto Técnico Geral & Especificações</button>
-          <button class="btn-hw-tab" data-hw-tab="risks">⚠️ Análise da Estrutura & Possibilidades de Erro</button>
+          <button class="btn-hw-tab" data-hw-tab="risks">⚠️ Análise da Estrutura & Prevenção no Tempo</button>
           <button class="btn-hw-tab" data-hw-tab="wiring">🔌 Tabela de Fiação ("Qual fio conecta onde")</button>
           <button class="btn-hw-tab" data-hw-tab="diagram">📐 Diagrama de Blocos & Fluxo de Energia</button>
           <button class="btn-hw-tab" data-hw-tab="bom">📦 Memorial de Componentes (BOM)</button>
@@ -1486,85 +1914,82 @@
         <!-- ABA 0 (PADRÃO): TEXTO TÉCNICO GERAL & ESPECIFICAÇÕES DO PROJETO -->
         <div id="hw-tab-content-overview" class="hw-tab-pane active">
           <div class="hw-pane-intro">
-            <h4>📄 Memorial Descritivo: Carcaça Limpa ("Só Tela"), Tampão Traseiro e Computador Acoplado vs Separado</h4>
-            <p>Documento técnico consolidado detalhando a estrutura frontal limpa (sem saída de som / sem mosca de som), como a carcaça metálica e o tampão traseiro são construídos para manutenção, e comparando a <strong>Tela Touch já com Computador Acoplado (All-in-One / Slot OPS)</strong> versus <strong>Mini-PC Separado</strong>.</p>
+            <h4>📄 Memorial Descritivo: Gabinete Selado Passivo (IP66), Frente "Só Tela" e Tela Touch All-in-One (PC Acoplado)</h4>
+            <p>Documento técnico consolidado detalhando a estrutura blindada para ficar <strong>100% no tempo (sol e chuva)</strong>: frente limpa (sem saída de som, sem câmeras e sem sensores externos), gabinete selado sem furos de ventilação e <strong>Tela Touch 43" já com Computador Acoplado (Slot OPS Fanless)</strong>.</p>
           </div>
 
           <div class="tech-text-dossier">
             <div class="tech-text-section">
-              <h5>1. Como é a Carcaça Oca, a Frente "Só Tela" (Sem Mosca de Som) e o Tampão Traseiro</h5>
+              <h5>1. Carcaça Selada para Ficar no Tempo (IP66), Frente "Só Tela" e Porta Traseira Limpa</h5>
               <p>
-                A <strong>Carcaça do Totem</strong> é construída como um gabinete monobloco <strong>oco por dentro</strong> em <strong>chapa de aço carbono galvanizado dobrado de 2,5 mm de espessura</strong> (dimensões externas de <strong>2,20m de altura × 0,70m de largura × 0,35m de profundidade</strong>). A face frontal foi projetada com engenharia <strong>100% Limpa ("Só Tela")</strong>: possui exclusivamente a placa superior institucional de Jaú e a janela do monitor touch de 43", <strong>eliminando completamente a "mosca de som" (furos de alto-falante), tomadas USB externas e botões físicos salientes</strong> — o que impede infiltração de água pela frente e elimina pontos de vandalismo.
+                A <strong>Carcaça do Totem</strong> é construída como um gabinete monobloco estanque em <strong>chapa de aço carbono galvanizado dobrado de 2,5 mm de espessura</strong> (dimensões externas de <strong>2,20m de altura × 0,70m de largura × 0,35m de profundidade</strong>). A face frontal foi projetada com engenharia <strong>100% Limpa ("Só Tela")</strong>: possui exclusivamente a placa superior institucional de Jaú e a janela do monitor touch de 43", <strong>eliminando completamente saídas de som, câmeras, sensores de presença, tomadas USB externas e grelhas</strong> — o que impede infiltração de água pela frente e elimina qualquer processo extra de LGPD ou manutenção.
               </p>
               <p>
-                Nas costas da máquina fica o <strong>Tampão Traseiro de Acesso Técnico (Porta Traseira de 0,60m × 1,80m)</strong> por onde a equipe abre o totem para acessar os componentes internos:
+                Nas costas da máquina fica a <strong>Porta Traseira Limpa de Acesso Técnico (0,60m × 1,80m)</strong> com construção 100% embutida:
               </p>
               <ul style="margin: 8px 0 8px 20px; line-height: 1.6;">
-                <li><strong>3 Dobradiças Externas Reforçadas (Lado Esquerdo):</strong> Permitem abrir o tampão traseiro em até <strong>105°</strong> com total estabilidade sem empenar a folha metálica.</li>
-                <li><strong>Puxador Vertical + 2 Fechaduras Tubulares Antivandalismo (Lado Direito):</strong> Duas fechaduras de alta segurança acionam linguetas internas giratórias de aço que travam o tampão por trás da aba da carcaça.</li>
-                <li><strong>Quadro de Vedação em Borracha EPDM (IP65) + Pingadeira:</strong> Todo o vão traseiro da carcaça possui perfil esponjoso de borracha automotiva EPDM que é comprimido pelo tampão quando fechado, impedindo 100% a entrada de água de chuva e poeira.</li>
-                <li><strong>3 Costelas Ômega Internas, Pistão a Gás e Porta-Documentos:</strong> Na face interna do tampão há 3 perfis metálicos horizontais de reforço (contra torção), bolso em chapa para guardar o esquema elétrico impresso e amortecedor a gás que segura o tampão aberto contra o vento durante a manutenção.</li>
+                <li><strong>Dobradiças Internas Ocultas (Lado Esquerdo):</strong> Permitem abrir o tampão traseiro em até <strong>105°</strong> sem expor pinos pelo lado de fora da carcaça.</li>
+                <li><strong>Fechadura Escamoteável Blindada em Inox 316 (Lado Direito):</strong> Padrão industrial <em>flush-mount</em> (Dirak / Kaba WK2) embutida rente à chapa, sem alças salientes e sem plaquinhas externas.</li>
+                <li><strong>Quadro de Vedação em Borracha EPDM (IP66) + Pingadeira:</strong> Todo o vão traseiro possui perfil esponjoso de borracha automotiva EPDM comprimido pela porta e <strong>zero rasgos ou venezianas abertas</strong>, impedindo 100% a entrada de chuva de vento, jatos d'água e poeira.</li>
+                <li><strong>2 Costelas Metálicas Internas Anti-Torção:</strong> Na face interna da porta há 2 perfis horizontais estruturais soldados que garantem rigidez mecânica sem peças móveis desnecessárias.</li>
               </ul>
             </div>
 
             <div class="tech-text-section" style="border-left: 4px solid #0284c7; padding-left: 14px; background: rgba(2, 132, 199, 0.06); border-radius: 8px; padding: 14px;">
-              <h5>2. É necessário ter um Computador Separado ou podemos comprar a Tela Touch já com Computador Acoplado?</h5>
+              <h5>2. Computador 100% Acoplado na Própria Tela Touch 43" (All-in-One / Slot OPS Fanless)</h5>
               <p>
-                <strong>NÃO é obrigatório ter um computador separado no rack!</strong> Existe sim — e é inclusive a solução mais moderna usada hoje em totens profissionais — a opção de comprarmos um <strong>Monitor Touch Industrial All-in-One (Tela Touch já com o Computador Acoplado)</strong>. Existem duas formas comerciais de adquirir essa tela com computador acoplado:
+                Para eliminar cabos soltos, fontes extras e suportes redundantes dentro da carcaça, o projeto adota exclusivamente a <strong>Tela Touch Industrial 43" All-in-One já com o Computador Acoplado na traseira do display (Padrão Intel OPS — Open Pluggable Specification)</strong>:
               </p>
               <ul style="margin: 8px 0 10px 20px; line-height: 1.65;">
                 <li>
-                  <strong>Opção Recomendada — Tela Touch 43" com Slot OPS Acoplado (Open Pluggable Specification):</strong> A tela touch industrial já vem de fábrica com um encaixe traseiro padrão Intel OPS (conector interno de 80 pinos). O computador é um módulo compacto que desliza como uma gaveta diretamente atrás da própria tela e é preso por 2 parafusos manuais. <strong>Vantagens:</strong> Elimina 100% os cabos HDMI, USB Touch e fonte separada (tudo passa pelo conector interno da própria tela), não ocupa espaço no rack da carcaça, evita mau contato por vibração e, se um dia precisar trocar ou atualizar o PC, basta soltar 2 parafusos e puxar a gaveta OPS sem precisar desmontar a tela!
+                  <strong>Encaixe Direto (Zero Cabos de Vídeo/Touch):</strong> O módulo do computador desliza como uma gaveta diretamente no conector industrial interno de 80 pinos atrás da tela touch e é travado por 2 parafusos manuais. Vídeo Full HD, dados do Touchscreen e energia passam internamente pelo próprio barramento da tela.
                 </li>
                 <li>
-                  <strong>Opção All-in-One Integrado (Placa-Mãe Embutida na Tela — Android Industrial RK3588 ou Windows/Linux):</strong> O próprio chassi fechado do monitor Touch 43" já traz a placa de computador embutida internamente. Você só liga <strong>1 único cabo de energia</strong> na tela e ela já funciona como computador completo + touchscreen. É a opção mais simples de montar e mais barata na compra inicial.
+                  <strong>Dissipação Passiva Fanless (Sem Ventoinhas):</strong> O computador acoplado possui chassi em alumínio extrudado aletado que transfere o calor de forma passiva, sem cooler que possa travar ou acumular poeira.
                 </li>
                 <li>
-                  <strong>Opção Modular Tradicional — Monitor Touch + Mini-PC Separado no Rack:</strong> Compram-se duas peças independentes (apenas o monitor touch + um Mini-PC fanless tipo Intel NUC/Industrial preso no trilho interno) ligadas por cabo HDMI e cabo USB. Só é necessária caso vocês já possuam o Mini-PC separado ou queiram comprar monitor e PC de fornecedores totalmente distintos.
+                  <strong>Manutenção Rápida:</strong> Caso um dia seja necessário atualizar ou substituir o computador, basta abrir a porta traseira, soltar 2 parafusos e puxar a gaveta OPS em segundos, sem desmontar a tela de 43".
                 </li>
               </ul>
-              <p style="margin-top: 6px;">
-                💡 <em>Dica interativa: No menu da bolinha <strong>360°</strong> (canto inferior direito), você pode alternar em tempo real entre <strong>"🖥️ Touch c/ PC Acoplado"</strong> e <strong>"💻 Mini-PC Separado"</strong> para ver a diferença dentro da carcaça 3D!</em>
-              </p>
             </div>
 
             <div class="tech-text-section">
-              <h5>3. Interface Visual 100% Silenciosa ("Só Tela"), Tela Touch Industrial e Ergonomia (ABNT NBR 9050)</h5>
+              <h5>3. Interface Visual 100% por Toque + LIBRAS (Zero Som) e Acessibilidade no Topo (ABNT NBR 9050)</h5>
               <p>
-                Na face frontal, o equipamento integra um <strong>Display LCD Industrial de 43 polegadas em orientação vertical (9:16)</strong> com resolução Full HD (1920 × 1080px) e <strong>backlight de ultra alto brilho de 1.500 nits</strong>, garantindo leitura nítida mesmo sob incidência direta de luz solar ao meio-dia. O painel é protegido por um vidro temperado laminado de <strong>8 mm</strong> com película antirreflexo e camada sensível ao toque <strong>PCAP (Capacitiva Projetada) de 10 toques simultâneos</strong>.
+                Na face frontal, o equipamento integra um <strong>Display LCD Industrial de 43 polegadas em orientação vertical (9:16)</strong> com resolução Full HD (1920 × 1080px) e <strong>backlight de ultra alto brilho de 1.500 nits</strong>, garantindo leitura nítida sob sol pleno. O painel é protegido por vidro temperado laminado de <strong>8 mm (grau IK10)</strong> com camada sensível ao toque <strong>PCAP de 10 toques simultâneos e rejeição de gotas de água (Water-Rejection)</strong>.
               </p>
               <p>
-                Em conformidade rigorosa com a norma brasileira de acessibilidade <strong>ABNT NBR 9050</strong>, o centro operacional dos controles interativos está posicionado na faixa ergonômica entre <strong>0,80m e 1,20m de altura em relação ao piso</strong>. Na barra lateral azul escura da tela ficam os <strong>3 grandes botões quadrados de acessibilidade</strong> (<strong>Alto Contraste</strong>, <strong>Intérprete de LIBRAS VLibras</strong> e <strong>Alcance Cadeirante</strong>, que rebaixa toda a interface gráfica para a metade inferior da tela) e, no canto inferior da mesma barra azul, os controles compactos de <strong>Fonte Maior (A+) e Padrão (A-)</strong> — operando com zero poluição sonora na praça.
+                Como o totem opera <strong>100% por toque e visualmente (sem saída de som)</strong>, toda a acessibilidade está concentrada na <strong>faixa superior da tela</strong> com 3 botões largos: <strong>LIBRAS (VLibras)</strong>, <strong>Alto Contraste</strong> e <strong>Baixar Tela (Modo Cadeirante)</strong> — que rebaixa toda a interface ativa para os <strong>2/3 inferiores da tela</strong> (deixando o 1/3 superior livre), atendendo rigorosamente à norma <strong>ABNT NBR 9050</strong>.
               </p>
             </div>
 
             <div class="tech-text-section">
               <h5>4. Matriz Energética Híbrida (Rede 220V + Energia Solar Fotovoltaica 35Wp ESG)</h5>
               <p>
-                No topo traseiro plano do totem (atrás da quina frontal arredondada, invisível para quem olha de frente) está embutido um <strong>Painel Solar Fotovoltaico Monocristalino de 35Wp (64 × 21 cm)</strong>. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que mantém carregado o banco de baterias estacionárias de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na zona fria da base inferior.
+                No topo traseiro plano do totem (atrás da quina frontal arredondada, invisível para quem olha de frente) está embutido um <strong>Painel Solar Fotovoltaico Monocristalino de 35Wp (64 × 21 cm)</strong>. A energia solar captada desce por cabos solares de dupla isolação (4,0 mm²) até o <strong>Controlador de Carga Inteligente MPPT de 20A</strong>, que mantém carregado o banco de bateria estacionária de <strong>Lítio-Ferro-Fosfato (LiFePO4) de 12,8V / 40Ah (480 Wh)</strong> alojado na base inferior.
               </p>
               <p>
-                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais e os canais de emergência na tela (SAMU 192, Bombeiros 193, GCM 153 e Polícia 190) funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>. Além disso, a política <strong>100% Paperless (Zero Papel)</strong> substitui impressoras térmicas por <strong>QR Codes dinâmicos</strong> lidos pela câmera do celular do cidadão.
+                Essa arquitetura híbrida atua como um <strong>No-Break Sustentável (UPS)</strong>: reduz o consumo da rede elétrica municipal durante o dia e mantém os serviços essenciais funcionando por até <strong>24 horas de autonomia mesmo em caso de apagão na praça</strong>, além de operar de forma <strong>100% Paperless (Zero Papel)</strong> via QR Codes na tela.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- ABA NOVA: ANÁLISE COMPLETA DA ESTRUTURA & POSSIBILIDADES DE ERRO (FMEA) -->
+        <!-- ABA 1: ANÁLISE COMPLETA DA ESTRUTURA & PREVENÇÃO DE FALHAS NO TEMPO (FMEA) -->
         <div id="hw-tab-content-risks" class="hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>⚠️ Análise Completa da Estrutura da Máquina & Prevenção de Falhas (FMEA)</h4>
-            <p>Diagnóstico de engenharia avaliando a estrutura limpa ("Só Tela", sem saída de som), todos os pontos críticos que poderiam apresentar falha em ambiente externo e como cada risco foi eliminado no projeto:</p>
+            <h4>⚠️ Análise da Estrutura Enxuta para Ficar no Tempo & Prevenção de Falhas</h4>
+            <p>Diagnóstico de engenharia mostrando por que eliminamos saídas de som, câmeras, sensores e furos de ventilação para garantir durabilidade máxima ao ar livre:</p>
           </div>
 
           <div class="tech-text-dossier" style="margin-bottom: 16px;">
             <div class="tech-text-section" style="border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.08); padding: 14px; border-radius: 8px;">
-              <h5>✅ Por que tirar a "Mosca de Som" (Saída de Áudio), USB Externo e Botões Físicos foi uma decisão certeira de engenharia?</h5>
+              <h5>✅ Por que remover Som, Câmeras/Sensores, Furos de Ventilação e Mini-PC Separado deixou o projeto à prova de falhas?</h5>
               <ul style="margin: 8px 0 4px 20px; line-height: 1.65;">
-                <li><strong>1. Eliminação Total de Infiltração Frontal (Vedação IP65 Real):</strong> Qualquer "mosca de som" (furação tipo colmeia na chapa frontal) é uma porta de entrada direta para água de chuva com vento e jatos de mangueira durante a lavagem da praça pública. Sem saída de som, a frente da máquina é 100% cega e estanque (apenas chapa contínua + vidro laminado 8mm colado com fita estrutural VHB 3M e selante PU marítimo).</li>
-                <li><strong>2. Eliminação de Pontos de Vandalismo Crítico:</strong> Em mobiliário urbano público, grelhas furadas ("mosca de som") e portas USB externas são os alvos nº 1 de vandalismo (entupimento com chiclete, introdução de arames/palitos, líquidos ou curto-circuito intencional nas portas 5V).</li>
-                <li><strong>3. Menos Peças que Dão Defeito (Alta Confiabilidade MTBF):</strong> Alto-falantes expostos à variação térmica e umidade rasgam a membrana ou oxidam a bobina em poucos meses; amplificadores de áudio consomem energia da bateria solar e geram calor extra dentro do gabinete.</li>
-                <li><strong>4. Custo de Fabricação e Corte a Laser CNC Mais Limpo:</strong> Na planificação da chapa frontal, eliminam-se dezenas de microfuros de punção/laser, restando apenas o recorte retangular central da tela de 43" (55 × 96 cm) e os 4 furos de fixação da placa superior de Jaú.</li>
+                <li><strong>1. Gabinete 100% Cego e Selado (IP66 Real contra Temporal):</strong> Sem furos de som na frente e sem rasgos/venezianas de cooler nas costas, não existe nenhum caminho para entrada de chuva com vento, jatos de lavagem da praça, poeira ou insetos.</li>
+                <li><strong>2. Zero Processos Extras de LGPD (Sem Câmeras ou Sensores):</strong> Ao operar exclusivamente pelo toque na tela e pelo botão de LIBRAS, o município não precisa gerenciar imagens de cidadãos nem lidar com falsos disparos causados por galhos, chuva ou animais na praça.</li>
+                <li><strong>3. Zero Manutenção de Filtros e Ventoinhas:</strong> Coolers externos entopem de poeira e travam em poucos meses ao ar livre. Com o módulo PC All-in-One Fanless (15W) e dissipação passiva pela estrutura metálica e vidro frontal, não há peças giratórias para quebrar.</li>
+                <li><strong>4. Custo de Fabricação e Corte a Laser CNC Mais Limpo:</strong> Na planificação da chapa, restam apenas os recortes estritamente necessários: janela da tela 43" na frente, porta traseira com fechadura embutida Inox 316, berço solar no topo e base chumbada.</li>
               </ul>
             </div>
           </div>
@@ -1573,44 +1998,44 @@
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num" style="background:#dc2626;">E1</span>
-                <h5>Risco 1: Superaquecimento Interno e "Mancha Preta" na Tela LCD</h5>
+                <h5>Risco 1: Calor Solar ao Meio-Dia na Praça</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Sob sol de 38°C ao meio-dia em Jaú, o gabinete metálico fechado + o monitor de 1.500 nits podem passar de 65°C internos, causando manchas escuras no cristal líquido (<em>LCD blackening</em>), perda de vida útil da bateria e travamento térmico do PC.</li>
-                <li><strong>Solução na Estrutura:</strong> Divisão interna em <strong>3 zonas térmicas independentes</strong> com <strong>chapa defletora</strong> isolando a bateria LiFePO4 na base fria (a 15 cm do chão); <strong>manta térmica aluminizada</strong> sob o teto solar; e <strong>2 exaustores IP54 (rolamento duplo Ball Bearing)</strong> no topo traseiro acionados por termostato a 35°C criando efeito chaminé.</li>
+                <li><strong>O que pode dar erro:</strong> Incidência solar direta de 38°C aquecer o gabinete e a bateria na praça de Jaú.</li>
+                <li><strong>Solução na Estrutura:</strong> Uso de processador de ultrabaixo consumo (15W Fanless acoplado na tela), <strong>dissipação passiva direta pela estrutura metálica</strong> e <strong>chapa divisória interna</strong> que isola a bateria LiFePO4 na zona fria da base (junto ao piso de concreto).</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num" style="background:#dc2626;">E2</span>
-                <h5>Risco 2: Entrada de Água pela Porta Traseira ("Tampão") ou Condensação</h5>
+                <h5>Risco 2: Chuva Forte de Vento e Lavagem da Praça</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Chuva de vento infiltrar pela fresta do tampão traseiro ou pelas venezianas de ventilação, ou a umidade da madrugada condensar gotas de água nas placas eletrônicas.</li>
-                <li><strong>Solução na Estrutura:</strong> Tampão traseiro embutido com <strong>perfil de borracha automotiva EPDM perimetral comprimida</strong> + <strong>calha pingadeira superior</strong>; venezianas traseiras estampadas a <strong>45° para baixo (tipo louver) com manta hidrofóbica G4</strong>; prensa-cabo <strong>IP68</strong> no teto solar; e <strong>resistor anticondensação de 30W</strong> controlado por higrostato.</li>
+                <li><strong>O que pode dar erro:</strong> Água infiltrar por furos de som, grelhas de ventilação ou frestas da porta traseira.</li>
+                <li><strong>Solução na Estrutura:</strong> Gabinete <strong>100% selado passivo (IP66)</strong> sem nenhum rasgo de ventilação, frente cega sem saída de som e porta traseira vedada com <strong>borracha automotiva EPDM contínua comprimida</strong> + prensa-cabo solar <strong>IP68</strong> no topo.</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num" style="background:#dc2626;">E3</span>
-                <h5>Risco 3: Mau Contato de Cabos (HDMI/USB) ou Travamento do Sistema</h5>
+                <h5>Risco 3: Mau Contato de Cabos de Vídeo/Touch</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Vibração de trânsito pesado soltar o cabo HDMI (tela preta) ou cabo USB (touch para de responder), ou o sistema operacional congelar de madrugada sem ninguém para reiniciar.</li>
-                <li><strong>Solução na Estrutura:</strong> Adoção da <strong>Tela Touch com Computador Acoplado (Slot OPS / All-in-One)</strong>, que elimina cabos HDMI e USB soltos usando conector industrial direto de 80 pinos parafusado na própria tela; refrigeração <strong>100% Fanless</strong> (sem ventoinha no PC para não entupir de poeira); e <strong>Watchdog Timer em hardware</strong> que reinicia a máquina sozinho se o software travar por 10 segundos.</li>
+                <li><strong>O que pode dar erro:</strong> Em totens com PC separado, a dilatação térmica e vibração soltam cabos HDMI ou USB.</li>
+                <li><strong>Solução na Estrutura:</strong> Adoção exclusiva da <strong>Tela Touch 43" com Computador Acoplado (Slot OPS)</strong> conectada por barramento interno rígido de 80 pinos parafusado atrás do display (zero cabos HDMI/USB soltos) + <strong>Watchdog Auto-Reboot</strong>.</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num" style="background:#dc2626;">E4</span>
-                <h5>Risco 4: "Toque Fantasma" (Ghost Touch) por Chuva e Reflexo Solar</h5>
+                <h5>Risco 4: "Toque Fantasma" por Gotas de Chuva e Reflexo Solar</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Gotas de chuva escorrendo pelo vidro acionarem botões sozinhos na tela capacitiva, ou o reflexo do sol impedir que idosos enxerguem as informações.</li>
-                <li><strong>Solução na Estrutura:</strong> Controladora Touch <strong>PCAP Industrial com algoritmo Water-Rejection (Rejeição de Água)</strong> calibrada para vidro de 8mm (ignora gotas e escorrimento de água); vidro com <strong>tratamento químico Antirreflexo (AR)</strong> + brilho de <strong>1.500 nits</strong> + <strong>Modo Alto Contraste Amarelo/Preto</strong> em botão quadrado grande na barra lateral.</li>
+                <li><strong>O que pode dar erro:</strong> Gotas de chuva escorrendo pelo vidro acionarem botões sozinhos na tela ou o sol ofuscar a leitura.</li>
+                <li><strong>Solução na Estrutura:</strong> Controladora Touch <strong>PCAP Industrial com algoritmo Water-Rejection (Rejeição de Água)</strong> calibrada para vidro de 8mm + tratamento <strong>Antirreflexo (AR)</strong> + brilho de <strong>1.500 nits</strong> + <strong>Alto Contraste</strong> no topo da tela.</li>
               </ul>
             </div>
 
@@ -1620,29 +2045,29 @@
                 <h5>Risco 5: Surto Elétrico / Raio na Praça ou Choque Elétrico</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Descarga atmosférica (raio) na rede de iluminação da praça queimar o monitor/PC, ou falha de isolação energizar a carcaça metálica.</li>
-                <li><strong>Solução na Estrutura:</strong> Quadro DIN com <strong>DPS Classe II 40kA</strong> (desvia surtos de raio para a terra), <strong>DR 30mA</strong> (desarma em milissegundos se houver fuga de corrente), <strong>cordoalha de aterramento equipotencial PE</strong> interligando carcaça + tampão traseiro, e operação interna toda em <strong>baixa tensão segura (12V/24V DC)</strong> com no-break <strong>LiFePO4</strong> (química incombustível).</li>
+                <li><strong>O que pode dar erro:</strong> Descarga atmosférica na rede da praça queimar o equipamento ou energizar a carcaça metálica.</li>
+                <li><strong>Solução na Estrutura:</strong> Trilho DIN com <strong>DPS Classe II 40kA</strong>, <strong>DR 30mA</strong>, <strong>Barramento de Cobre PE de Aterramento</strong> interligando toda a carcaça e operação interna em <strong>baixa tensão segura (12V DC)</strong> com bateria incombustível <strong>LiFePO4</strong>.</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num" style="background:#dc2626;">E6</span>
-                <h5>Risco 6: Arrombamento do Tampão Traseiro, Impacto ou Tombamento</h5>
+                <h5>Risco 6: Vandalismo na Porta Traseira ou Impacto Frontal</h5>
               </div>
               <ul>
-                <li><strong>O que pode dar erro:</strong> Tentativa de abrir o tampão traseiro com alavanca (pé-de-cabra), pedrada na tela ou tentativa de derrubar o totem.</li>
-                <li><strong>Solução na Estrutura:</strong> Tampão traseiro sem frestas externas de alavanca, travado por <strong>2 fechaduras tubulares de alta segurança + 3 dobradiças reforçadas + 3 costelas ômega internas anti-torção</strong>; vidro frontal laminado temperado de <strong>8 mm grau IK10</strong>; e flange de base chumbada por dentro com <strong>6 Parabolts M16 (Ø 16mm)</strong> no concreto.</li>
+                <li><strong>O que pode dar erro:</strong> Tentativa de forçar alças ou dobradiças externas com alavanca, ou impacto contra o vidro.</li>
+                <li><strong>Solução na Estrutura:</strong> Porta traseira lisa com <strong>dobradiças internas ocultas</strong> e <strong>Fechadura Escamoteável Blindada em Aço Inox 316 (Dirak/Kaba WK2)</strong> + vidro frontal laminado temperado de <strong>8 mm grau IK10</strong> + <strong>6 chumbadores Parabolt M16</strong> internos.</li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- ABA 1: TABELA DE FIAÇÃO E CABEAMENTO DETALHADA -->
+        <!-- ABA 2: TABELA DE FIAÇÃO E CABEAMENTO DETALHADA -->
         <div id="hw-tab-content-wiring" class="hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>⚡ Tabela de Conexões Elétricas, Dados e Aterramento</h4>
-            <p>Mapeamento completo de cada chicote de cabos, cores padrão NBR 5410, bitolas, tensões operacionais e dispositivos conectados dentro da máquina:</p>
+            <h4>⚡ Tabela de Conexões Elétricas, Barramento OPS e Aterramento</h4>
+            <p>Mapeamento enxuto e direto dos circuitos internos (padrão NBR 5410) com a Tela Touch All-in-One (PC Acoplado):</p>
           </div>
 
           <div class="table-responsive">
@@ -1661,7 +2086,7 @@
               <tbody>
                 <tr class="row-ac">
                   <td><strong>⚡ Rede AC 220V</strong></td>
-                  <td>Prensa-cabo Subterrâneo</td>
+                  <td>Eletroduto Subterrâneo (Base)</td>
                   <td>Disjuntor Bipolar 16A</td>
                   <td><span class="wire-color brown"></span> Marrom (Fase 1) + <span class="wire-color black"></span> Preto (Fase 2/N)</td>
                   <td>2,5 mm² Antichama</td>
@@ -1675,108 +2100,72 @@
                   <td><span class="wire-color brown"></span> Marrom + <span class="wire-color blue"></span> Azul Claro</td>
                   <td>2,5 mm²</td>
                   <td>220V AC</td>
-                  <td>Proteção contra raios, picos e choque elétrico humano.</td>
+                  <td>Proteção contra raios, surtos e choque elétrico humano.</td>
                 </tr>
                 <tr class="row-ac">
                   <td><strong>⚡ Entrada Fonte SMPS</strong></td>
                   <td>Saída do DR 30mA</td>
-                  <td>Bornes L e N da Fonte</td>
+                  <td>Bornes L e N da Fonte 12V</td>
                   <td><span class="wire-color brown"></span> Marrom (L) + <span class="wire-color blue"></span> Azul (N)</td>
                   <td>2,5 mm²</td>
-                  <td>220V AC (1,8A máx)</td>
-                  <td>Alimentação da fonte chaveada industrial 240W.</td>
+                  <td>220V AC</td>
+                  <td>Alimentação da fonte chaveada industrial MeanWell 240W.</td>
                 </tr>
                 <tr class="row-dc">
-                  <td><strong>🔴 Barramento DC 12V</strong></td>
-                  <td>Fonte SMPS (V+ / V-)</td>
-                  <td>Bloco Distribuidor DIN</td>
+                  <td><strong>🔴 Alimentação All-in-One 43"</strong></td>
+                  <td>Fonte 12V / Saída Load MPPT</td>
+                  <td>Tela Touch 43" + Módulo PC OPS Acoplado</td>
                   <td><span class="wire-color red"></span> Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
                   <td>2,5 mm² Flexível</td>
-                  <td>12V DC Estabilizado (20A)</td>
-                  <td>Distribuição principal de energia DC de baixa tensão.</td>
-                </tr>
-                <tr class="row-dc">
-                  <td><strong>💻 PC Acoplado (OPS) / Mini-PC</strong></td>
-                  <td>Bloco DC 12V / Slot OPS</td>
-                  <td>Barramento OPS / Jack DC IPC</td>
-                  <td><span class="wire-color red"></span> Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
-                  <td>1,5 mm² com ferrite</td>
-                  <td>12V DC / 5A (60W)</td>
-                  <td>Alimentação contínua do computador com filtro anti-ruído.</td>
-                </tr>
-                <tr class="row-dc">
-                  <td><strong>🖥️ Display LCD 43"</strong></td>
-                  <td>Bloco DC 12V</td>
-                  <td>Placa Scaler AD + Driver LED</td>
-                  <td><span class="wire-color red"></span> Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
-                  <td>1,5 mm² Siliconado</td>
-                  <td>12V DC / 8A (96W)</td>
-                  <td>Alimentação do backlight LED de alto brilho (1500 nits).</td>
+                  <td>12V DC Estabilizado</td>
+                  <td>Alimenta simultaneamente o Display 1500 nits e o PC OPS pelo conector interno.</td>
                 </tr>
                 <tr class="row-solar">
                   <td><strong>☀️ Painel Solar 35Wp</strong></td>
-                  <td>Módulo Fotovoltaico Teto (64×21cm)</td>
-                  <td>Entrada PV do MPPT 20A</td>
-                  <td><span class="wire-color orange"></span> Laranja/Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
+                  <td>Módulo Fotovoltaico Topo (64×21cm)</td>
+                  <td>Entrada PV do Controlador MPPT 20A</td>
+                  <td><span class="wire-color orange"></span> Vermelho Solar (+) / <span class="wire-color black"></span> Preto (-)</td>
                   <td>4,0 mm² Solar Dupla Capa</td>
                   <td>18.5V Vmp / 1.9A</td>
-                  <td>Geração solar com conectores MC4 e proteção anti-UV.</td>
+                  <td>Captação solar limpa pelo prensa-cabo IP68 do teto.</td>
                 </tr>
                 <tr class="row-solar">
-                  <td><strong>🔋 Banco LiFePO4</strong></td>
-                  <td>Controlador MPPT (BAT)</td>
-                  <td>Terminais Bateria 12V 40Ah</td>
+                  <td><strong>🔋 Bateria LiFePO4</strong></td>
+                  <td>Controlador MPPT (Bornes BAT)</td>
+                  <td>Bateria 12,8V 40Ah na Base Fria</td>
                   <td><span class="wire-color red"></span> Vermelho (+) / <span class="wire-color black"></span> Preto (-)</td>
-                  <td>10,0 mm² Automotivo</td>
+                  <td>10,0 mm² Flexível</td>
                   <td>12,8V DC Nominal (480Wh)</td>
-                  <td>No-break sustentável ESG com fusível lâmina de 30A.</td>
+                  <td>No-break sustentável ESG para até 24h de autonomia sem rede.</td>
                 </tr>
                 <tr class="row-data">
-                  <td><strong>🔵 Sinal de Vídeo Full HD</strong></td>
-                  <td>Conector OPS 80p / HDMI</td>
-                  <td>Entrada Digital Placa Scaler</td>
-                  <td><span class="wire-color darkblue"></span> Azul Escuro Blindado</td>
-                  <td>Barramento OPS / HDMI 2.1</td>
-                  <td>TMDS Digital 1080p@60Hz</td>
-                  <td>Transmissão de imagem direta sem perda de sinal.</td>
-                </tr>
-                <tr class="row-data">
-                  <td><strong>🟡 Dados Touchscreen</strong></td>
-                  <td>Placa Controladora PCAP</td>
-                  <td>Barramento OPS / Porta USB</td>
-                  <td><span class="wire-color yellow"></span> Amarelo / Dourado</td>
-                  <td>USB 2.0 Blindado</td>
-                  <td>5V DC + Dados D+/D-</td>
-                  <td>Transmissão de toques simultâneos (10 pontos c/ rejeição de água).</td>
-                </tr>
-                <tr class="row-data">
-                  <td><strong>🟢 Telemetria Solar & Bateria</strong></td>
-                  <td>Controlador Solar MPPT</td>
-                  <td>Porta RS485 / Serial PC</td>
-                  <td><span class="wire-color green"></span> Verde Blindado</td>
-                  <td>Cabo RS485 Blindado Industrial</td>
-                  <td>Modbus RTU / Telemetria 9600bps</td>
-                  <td>Comunicação direta totem-painel solar: geração, status de bateria e rede 220V.</td>
+                  <td><strong>🔵 Vídeo + Touch Internos</strong></td>
+                  <td>Módulo PC Acoplado (Slot OPS)</td>
+                  <td>Display 43" + Tela Touch PCAP</td>
+                  <td><span class="wire-color darkblue"></span> Conector Interno OPS 80 Pinos</td>
+                  <td>Barramento Rígido Interno</td>
+                  <td>HDMI Digital + USB Touch Internos</td>
+                  <td>Zero cabos externos soltos: conexão direta dentro do próprio monitor.</td>
                 </tr>
                 <tr class="row-pe">
                   <td><strong>🛡️ Aterramento PE</strong></td>
                   <td>Barramento de Cobre PE</td>
-                  <td>Carcaça, Tampão e Suporte</td>
+                  <td>Carcaça, Porta Traseira, Suporte VESA e DPS</td>
                   <td><span class="wire-color greenyellow"></span> Verde com Amarelo</td>
                   <td>4,0 mm² + Cordoalha</td>
-                  <td>0V Referencial</td>
-                  <td>Proteção equipotencial contra descargas e eletricidade estática.</td>
+                  <td>0V Referencial (Terra)</td>
+                  <td>Proteção equipotencial completa da estrutura metálica externa.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- ABA 2: DIAGRAMA DE BLOCOS & FLUXO DE ENERGIA -->
+        <!-- ABA 3: DIAGRAMA DE BLOCOS & FLUXO DE ENERGIA -->
         <div id="hw-tab-content-diagram" class="hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>📐 Arquitetura Elétrica & Diagrama de Blocos Unifilar</h4>
-            <p>Fluxo hierárquico de energia híbrida (Rede da Praça + Solar ESG) e barramento de dados:</p>
+            <h4>📐 Arquitetura Elétrica & Diagrama de Blocos Unifilar (7 Componentes Internos)</h4>
+            <p>Fluxo direto de energia híbrida (Rede 220V + Solar ESG) alimentando a Tela Touch 43" All-in-One:</p>
           </div>
 
           <div class="hw-diagram-card">
@@ -1785,31 +2174,31 @@
               <div class="diagram-node node-ac">
                 <div class="node-badge">ENTRADA AC</div>
                 <h5>Rede Elétrica 220V</h5>
-                <p>Prensa-cabo IP68 da base</p>
+                <p>Eletroduto subterrâneo Ø50mm</p>
                 <div class="node-arrow">➔</div>
               </div>
 
               <!-- Bloco 2: Proteção DIN -->
               <div class="diagram-node node-prot">
-                <div class="node-badge">QUADRO DIN</div>
+                <div class="node-badge">TRILHO DIN</div>
                 <h5>Disjuntor 16A + DPS + DR</h5>
-                <p>Proteção anti-surto e humana</p>
+                <p>Proteção anti-raios e humana</p>
                 <div class="node-arrow">➔</div>
               </div>
 
               <!-- Bloco 3: Fonte SMPS -->
               <div class="diagram-node node-smps">
                 <div class="node-badge">CONVERSÃO</div>
-                <h5>Fonte MeanWell 12V 20A</h5>
+                <h5>Fonte Industrial 12V 20A</h5>
                 <p>Conversão AC/DC (Eficiência 90%)</p>
                 <div class="node-arrow">➔</div>
               </div>
 
-              <!-- Bloco 4: Distribuição DC -->
+              <!-- Bloco 4: Tela All-in-One -->
               <div class="diagram-node node-dc">
-                <div class="node-badge">BARRAMENTO DC</div>
-                <h5>Linha Estabilizada 12V</h5>
-                <p>Alimenta Tela All-in-One/PC e Exaustão</p>
+                <div class="node-badge">ALL-IN-ONE</div>
+                <h5>Tela 43" + PC OPS Acoplado</h5>
+                <p>12V DC • Zero cabos soltos de vídeo/touch</p>
               </div>
             </div>
 
@@ -1817,185 +2206,168 @@
             <div class="diagram-solar-row">
               <div class="solar-node">
                 <span class="s-icon">☀️</span>
-                <strong>Painel Solar 35Wp (Teto)</strong>
-                <small>64×21cm • 18.5V Vmp (Cabos 4mm² MC4)</small>
+                <strong>Painel Solar 35Wp (Topo)</strong>
+                <small>64×21cm • 18.5V Vmp (Prensa-cabo IP68)</small>
               </div>
               <div class="solar-arrow">➔</div>
               <div class="solar-node highlight">
                 <span class="s-icon">⚡</span>
                 <strong>Controlador MPPT 20A</strong>
-                <small>Rastreamento de Ponto de Máxima Potência</small>
+                <small>Gerencia carga solar e alimentação 12V</small>
               </div>
               <div class="solar-arrow">➔</div>
               <div class="solar-node">
                 <span class="s-icon">🔋</span>
                 <strong>Bateria LiFePO4 12V 40Ah</strong>
-                <small>Backup SOS 24h sem interrupção</small>
+                <small>No-break 24h na zona fria da base</small>
               </div>
             </div>
 
-            <!-- Rota de Dados -->
+            <!-- Rota de Dados Interna -->
             <div class="diagram-data-row">
               <div class="data-box">
-                <span class="d-badge">NÚCLEO</span>
-                <h6>PC Acoplado (Slot OPS) ou Mini-PC</h6>
-                <p>Core i5 / 16GB / SSD 512GB Fanless</p>
+                <span class="d-badge">UNIFICADO</span>
+                <h6>Módulo PC Acoplado (Slot OPS Fanless)</h6>
+                <p>Encaixado direto nas costas da Tela 43"</p>
               </div>
               <div class="data-links">
-                <div class="d-link"><span class="link-tag blue">OPS 80p / HDMI</span> ➔ Placa Scaler AD ➔ LCD 43" (1500 nits)</div>
-                <div class="d-link"><span class="link-tag yellow">USB Touch Intern.</span> ➔ Controladora Touch PCAP (10 toques)</div>
-                <div class="d-link"><span class="link-tag green">RS485 Telemetria</span> ➔ Controlador Solar MPPT & Bateria</div>
+                <div class="d-link"><span class="link-tag blue">Conector OPS 80p</span> ➔ Vídeo Full HD 1080p direto para o painel LCD 43" (1500 nits)</div>
+                <div class="d-link"><span class="link-tag yellow">Barramento Touch</span> ➔ Recebe os toques da tela PCAP (10 pontos c/ Water-Rejection)</div>
+                <div class="d-link"><span class="link-tag green">Antena 4G/5G/Wi-Fi</span> ➔ Atualiza horários de ônibus e serviços municipais em tempo real</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ABA 3: MEMORIAL DE COMPONENTES (BOM) -->
+        <!-- ABA 4: MEMORIAL DE COMPONENTES (BOM — 7 ITENS INTERNOS) -->
         <div id="hw-tab-content-bom" class="hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>📦 Lista de Materiais e Componentes Industriais (BOM)</h4>
-            <p>Especificações de nível comercial/industrial preparadas para operação externa contínua (24/7/365):</p>
+            <h4>📦 Lista Enxuta de Componentes Internos e Estruturais (BOM)</h4>
+            <p>Apenas os componentes essenciais homologados para operação externa selada (24/7 no tempo, sem peças redundantes):</p>
           </div>
 
           <div class="bom-grid">
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">01</span>
-                <h5>Módulo PC Acoplado (OPS) ou Mini-PC Fanless</h5>
+                <h5>Display Touch 43" All-in-One (Alto Brilho 1500 nits)</h5>
               </div>
               <ul>
-                <li><strong>Formato:</strong> Gaveta Intel OPS acoplada atrás da tela (zero cabos) ou Mini-PC no trilho</li>
-                <li><strong>CPU:</strong> Intel Core i5 11ª Ger / Rockchip RK3588 (Baixo consumo 15W)</li>
-                <li><strong>Memória & SSD:</strong> 16 GB DDR4 + SSD NVMe 512 GB Industrial (-20°C a +70°C)</li>
-                <li><strong>Gabinete:</strong> Alumínio extrudado com aletas passivas (sem ventoinha interna)</li>
-                <li><strong>Watchdog:</strong> Temporizador em hardware com auto-reboot automático</li>
+                <li><strong>Brilho & Resolução:</strong> 1500 nits (leitura sob sol pleno) • Full HD 1920×1080 Vertical</li>
+                <li><strong>Vidro Frontal:</strong> Temperado laminado 8mm Antirreflexo (AR) grau IK10</li>
+                <li><strong>Touchscreen:</strong> PCAP 10 toques com algoritmo Water-Rejection (ignora chuva)</li>
+                <li><strong>Construção:</strong> Frente 100% cega IP66 (sem furos de som e sem sensores externos)</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">02</span>
-                <h5>Display LCD 43" Ultra Alto Brilho ("Só Tela")</h5>
+                <h5>Módulo PC Industrial Acoplado na Tela (Slot OPS Fanless)</h5>
               </div>
               <ul>
-                <li><strong>Brilho:</strong> 1500 nits (Legível sob luz solar direta plena ao meio-dia)</li>
-                <li><strong>Resolução:</strong> 1920 × 1080 Full HD (Proporção 9:16 Vertical)</li>
-                <li><strong>Vidro Frontal:</strong> Temperado laminado de 8mm anti-reflexo (AR) e grau IK10</li>
-                <li><strong>Tecnologia Touch:</strong> Capacitivo Projetado (PCAP) 10 toques c/ Water-Rejection</li>
-                <li><strong>Construção:</strong> Frente limpa sem furos de alto-falante ("sem mosca de som")</li>
+                <li><strong>Formato:</strong> Gaveta padrão Intel OPS acoplada diretamente atrás da tela 43"</li>
+                <li><strong>Processador & Memória:</strong> Core i5 Industrial / RK3588 (15W) • 16GB RAM • SSD 512GB</li>
+                <li><strong>Refrigeração:</strong> 100% Passiva Fanless (chassi aletado sem ventoinha)</li>
+                <li><strong>Confiabilidade:</strong> Zero cabos HDMI/USB soltos + Watchdog Auto-Reboot</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">03</span>
-                <h5>Quadro Elétrico em Trilho DIN TS-35</h5>
+                <h5>Proteção Elétrica AC em Trilho DIN (Disjuntor + DPS + DR)</h5>
               </div>
               <ul>
-                <li><strong>Disjuntor:</strong> Bipolar 16A Curva C (Schneider Electric / Siemens)</li>
-                <li><strong>DPS:</strong> Classe II 275V / 40kA monopolar para proteção contra raios</li>
-                <li><strong>DR:</strong> Interruptor Residual 30mA bipolar (Proteção à vida humana)</li>
-                <li><strong>Fonte SMPS:</strong> MeanWell LRS-200-12 (Entrada 100-240V / Saída 12V 17A)</li>
-                <li><strong>Aterramento:</strong> Barramento de cobre eletrolítico com parafusos M5</li>
+                <li><strong>Disjuntor Geral:</strong> Bipolar 16A Curva C (norma NBR 5410)</li>
+                <li><strong>DPS Anti-Raios:</strong> Classe II 275V / 40kA para descargas atmosféricas na praça</li>
+                <li><strong>Interruptor DR:</strong> Residual 30mA de alta sensibilidade contra choques elétricos</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">04</span>
-                <h5>Sistema Solar & Backup ESG</h5>
+                <h5>Fonte Chaveada Industrial 12V DC & Barramento PE</h5>
               </div>
               <ul>
-                <li><strong>Painel Fotovoltaico:</strong> 35Wp Monocristalino (64×21 cm) embutido no topo plano</li>
-                <li><strong>Controlador:</strong> MPPT 20A inteligente com display digital e eficiência de 99%</li>
-                <li><strong>Bateria:</strong> LiFePO4 (Lítio-Ferro-Fosfato) 12,8V 40Ah (480 Wh) na zona fria</li>
-                <li><strong>Ciclos:</strong> +3.500 ciclos (Vida útil estimada: 8 a 10 anos)</li>
-                <li><strong>BMS Integrado:</strong> Proteção contra sobrecarga, curto e sub-tensão</li>
+                <li><strong>Fonte SMPS:</strong> Entrada 100-240V AC ➔ Saída 12V DC 20A (240W, eficiência 90%)</li>
+                <li><strong>Proteções:</strong> Curto-circuito, sobrecarga e sobretensão automáticas</li>
+                <li><strong>Aterramento PE:</strong> Barramento de cobre eletrolítico conectado à haste Copperweld</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">05</span>
-                <h5>Climatização & Gestão Térmica</h5>
+                <h5>Sistema Solar 35Wp, Controlador MPPT 20A & Bateria LiFePO4</h5>
               </div>
               <ul>
-                <li><strong>Exaustão:</strong> 2x Microventiladores industriais 120mm com rolamento duplo</li>
-                <li><strong>Termostato:</strong> Bimetálico ajustável em trilho DIN (ativado em >35°C)</li>
-                <li><strong>Filtro de Ar:</strong> Grelha inferior traseira com manta hidrofóbica lavável G4</li>
-                <li><strong>Aquecedor:</strong> Resistor cerâmico 30W anticondensação para madrugadas frias</li>
+                <li><strong>Painel Solar:</strong> 35Wp Monocristalino (64×21 cm) embutido no topo plano</li>
+                <li><strong>Controlador Solar:</strong> MPPT 20A inteligente (eficiência de conversão de 99%)</li>
+                <li><strong>Bateria No-Break:</strong> LiFePO4 12,8V 40Ah (480Wh) na base fria (autonomia de 24h)</li>
               </ul>
             </div>
 
             <div class="bom-card">
               <div class="bom-header">
                 <span class="bom-num">06</span>
-                <h5>Carcaça Oca & Tampão Traseiro Antivandalismo</h5>
+                <h5>Carcaça Selada IP66, Suporte VESA & Porta Traseira Limpa</h5>
               </div>
               <ul>
-                <li><strong>Material:</strong> Chapa de aço carbono 2,5mm eletrogalvanizada anticorrosiva</li>
-                <li><strong>Pintura:</strong> Eletrostática a pó poliéster para área externa (resistente a UV)</li>
-                <li><strong>Vedação:</strong> Borracha perimetral dupla em EPDM para grau IP65</li>
-                <li><strong>Tampão Traseiro:</strong> 3 dobradiças reforçadas + 2 fechaduras tubulares + 3 costelas ômega</li>
-                <li><strong>Amortecedor:</strong> Pistão a gás para sustentação do tampão traseiro aberto a 105°</li>
+                <li><strong>Chapa Externa:</strong> Aço carbono galvanizado 2,5mm + pintura eletrostática UV</li>
+                <li><strong>Suporte Interno:</strong> Travessas estruturais VESA (4× M8) + divisória térmica</li>
+                <li><strong>Porta Traseira:</strong> Dobradiças internas ocultas + Fechadura Escamoteável Inox 316 + Vedação EPDM</li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- ABA 4: MANUAL DE MONTAGEM E NORMAS TÉCNICAS -->
+        <!-- ABA 5: MANUAL DE MONTAGEM E NORMAS TÉCNICAS -->
         <div id="hw-tab-content-assembly" class="hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>🛠️ Roteiro de Montagem da Máquina & Normas Técnicas</h4>
-            <p>Sequência padrão de fabricação da máquina e normas brasileiras atendidas pelo projeto:</p>
+            <h4>🛠️ Roteiro Simplificado de Montagem & Normas Técnicas</h4>
+            <p>Sequência limpa de fabricação (sem processos extras de áudio, câmeras ou exaustores abertos):</p>
           </div>
 
           <div class="assembly-steps">
             <div class="step-item">
               <span class="step-badge">Etapa 1</span>
               <div>
-                <h5>Fixação Mecânica da Carcaça Oca e Tampão Traseiro</h5>
-                <p>Corte a laser CNC e dobra das chapas de 2,5mm (frente limpa só com o recorte da tela 43"), solda das 3 dobradiças do tampão traseiro e aplicação da borracha EPDM IP65.</p>
+                <h5>Corte CNC, Dobra da Carcaça Selada IP66 e Porta Traseira Limpa</h5>
+                <p>Corte a laser e dobra das chapas de 2,5mm (frente cega só com a janela da tela 43" e costas sem rasgos de ventilação), instalação das dobradiças ocultas, fechadura embutida Inox 316 e borracha EPDM.</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 2</span>
               <div>
-                <h5>Instalação do Vidro Temperado 8mm e Display Touch 43"</h5>
-                <p>Aplicação da fita de adesão estrutural VHB 3M + selante PU marítimo, posicionamento do vidro laminado 8mm IK10 e montagem do monitor Touch 43" no chassi VESA interno.</p>
+                <h5>Fixação do Vidro Laminado 8mm (IK10) e Tela Touch 43" All-in-One</h5>
+                <p>Colagem estrutural do vidro 8mm com VHB 3M + PU marítimo e fixação direta da Tela Touch 43" já com o módulo PC OPS acoplado nas travessas VESA internas (4 parafusos M8).</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 3</span>
               <div>
-                <h5>Montagem do Quadro Elétrico DIN e Chicote Elétrico</h5>
-                <p>Encaixe dos disjuntores, DPS, DR e fonte no trilho DIN TS-35. Passagem dos cabos com terminais ilhós tubulares prensados nas canaletas cinzas.</p>
+                <h5>Montagem do Trilho DIN (Disjuntor, DPS, DR, Fonte 12V e MPPT)</h5>
+                <p>Fixação dos módulos de proteção elétrica, fonte chaveada 12V e controlador solar MPPT nos trilhos DIN internos e interligação ao barramento de cobre PE.</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 4</span>
               <div>
-                <h5>Encaixe do Computador Acoplado (OPS) ou Mini-PC</h5>
-                <p>Deslizamento do módulo PC OPS no slot traseiro da própria tela touch (ou fixação do Mini-PC no rack) e conexão da telemetria solar RS485.</p>
+                <h5>Ligação do Painel Solar 35Wp do Topo e Bateria LiFePO4 na Base</h5>
+                <p>Descida do cabo solar pelo prensa-cabo IP68 do teto plano até o controlador MPPT e conexão da bateria estacionária LiFePO4 12,8V 40Ah no compartimento inferior.</p>
               </div>
             </div>
 
             <div class="step-item">
               <span class="step-badge">Etapa 5</span>
               <div>
-                <h5>Integração do Painel Solar 35Wp, MPPT e Bateria LiFePO4</h5>
-                <p>Conexão dos conectores solares MC4 no teto plano, parametrização do controlador de carga MPPT e teste de autonomia da bateria no-break na zona fria.</p>
-              </div>
-            </div>
-
-            <div class="step-item">
-              <span class="step-badge">Etapa 6</span>
-              <div>
-                <h5>Comissionamento, Aterramento PE e Teste Hipot (NR-10)</h5>
-                <p>Medição da resistência de aterramento (< 10 ohms), teste de fuga de corrente do DR 30mA e burn-in de 72 horas em operação contínua.</p>
+                <h5>Chumbação no Piso (6 Parabolts M16) e Comissionamento NR-10</h5>
+                <p>Fixação da flange da base no concreto da praça, conexão do cabo subterrâneo 220V + haste de aterramento e validação do toque + LIBRAS + modo Baixar Tela.</p>
               </div>
             </div>
           </div>
@@ -2004,12 +2376,12 @@
           <div class="standards-banner">
             <h5>📜 Normas Técnicas Rigorosamente Atendidas:</h5>
             <div class="standards-tags">
-              <span class="std-pill">♿ ABNT NBR 9050 (Acessibilidade)</span>
-              <span class="std-pill">🌧️ IEC 60529 (Proteção IP65)</span>
-              <span class="std-pill">🔨 IEC 62262 (Resistência IK10)</span>
+              <span class="std-pill">♿ ABNT NBR 9050 (Acessibilidade + LIBRAS)</span>
+              <span class="std-pill">🌧️ IEC 60529 (Gabinete Selado IP66)</span>
+              <span class="std-pill">🔨 IEC 62262 (Antivandalismo IK10)</span>
               <span class="std-pill">⚡ NR-10 (Segurança Elétrica)</span>
-              <span class="std-pill">🔌 ABNT NBR 5410 (Instalações Elétricas BT)</span>
-              <span class="std-pill">🌱 Lei 12.305/2010 (PNRS Paperless & ESG)</span>
+              <span class="std-pill">🔌 ABNT NBR 5410 (Baixa Tensão & DPS/DR)</span>
+              <span class="std-pill">🌱 Lei 12.305/2010 (100% Paperless & Solar ESG)</span>
             </div>
           </div>
         </div>
@@ -2157,29 +2529,29 @@
                 <rect x="423" y="240" width="12" height="450" fill="#cbd5e1" stroke="#64748b" stroke-width="1"/>
                 <text x="429" y="465" text-anchor="middle" transform="rotate(90 429,465)" font-size="11" font-weight="800" fill="#334155">LATERAL DIREITA (0,35m x 2,20m) — DOBRA 90°</text>
 
-                <!-- 5. Costa / Ferro Traseiro -->
+                <!-- 5. Costa / Porta Traseira Limpa (Sem Plaquinhas / Sem Alça Saliente / Sem Venezianas Abertas) -->
                 <rect x="473" y="190" width="175" height="550" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
                 <rect x="485" y="220" width="151" height="455" fill="#f1f5f9" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,3"/>
-                <g fill="#dc2626">
-                  <rect x="505" y="236" width="110" height="4" rx="1"/><rect x="505" y="245" width="110" height="4" rx="1"/>
-                  <rect x="505" y="254" width="110" height="4" rx="1"/><rect x="505" y="263" width="110" height="4" rx="1"/>
-                  <rect x="505" y="272" width="110" height="4" rx="1"/>
-                </g>
-                <text x="560" y="232" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F3] RASGOS EXAUSTÃO AR QUENTE</text>
-                <circle cx="497" cy="365" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
-                <circle cx="497" cy="540" r="5.5" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2"/>
-                <text x="560" y="368" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F4] FECHADURA SUP. Ø19mm</text>
-                <text x="560" y="543" text-anchor="middle" font-size="7.5" font-weight="700" fill="#dc2626">⬅ [F4] FECHADURA INF. Ø19mm</text>
-                <rect x="505" y="395" width="112" height="115" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
-                <text x="561" y="438" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">TAMPÃO TRASEIRO</text>
-                <text x="561" y="452" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">PORTA DE MANUTENÇÃO</text>
-                <text x="561" y="466" text-anchor="middle" font-size="7.2" fill="#475569">Recorte: 60 x 180 cm</text>
-                <g fill="#dc2626">
-                  <rect x="505" y="610" width="110" height="4" rx="1"/><rect x="505" y="619" width="110" height="4" rx="1"/>
-                  <rect x="505" y="628" width="110" height="4" rx="1"/><rect x="505" y="637" width="110" height="4" rx="1"/>
-                </g>
-                <text x="560" y="655" text-anchor="middle" font-size="7.2" font-weight="700" fill="#dc2626">[F5] ENTRADA AR FRIO (BASE)</text>
-                <text x="560" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">COSTA / TAMPÃO TRASEIRO (0,70m x 2,20m)</text>
+
+                <!-- Dobradiças à esquerda da porta -->
+                <rect x="481" y="275" width="7" height="22" fill="#475569" rx="1"/>
+                <rect x="481" y="435" width="7" height="22" fill="#475569" rx="1"/>
+                <rect x="481" y="595" width="7" height="22" fill="#475569" rx="1"/>
+
+                <!-- [F3] Recorte Único p/ Fechadura Blindada Escamoteável em Aço Inox 316 (Flush-Mount Dirak/Kaba WK2) -->
+                <rect x="616" y="425" width="14" height="44" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2" rx="2"/>
+                <circle cx="623" cy="437" r="3.5" fill="#0f172a" stroke="#dc2626" stroke-width="1.2"/>
+                <text x="550" y="438" text-anchor="middle" font-size="7.5" font-weight="800" fill="#dc2626">[F3] FECHADURA BLINDADA INOX 316 ➡️</text>
+                <text x="550" y="449" text-anchor="middle" font-size="6.8" font-weight="700" fill="#0f172a">Dirak WK2 / Cilindro Anti-Broca Kaba</text>
+
+                <!-- Indicação de Porta 100% Limpa (Sem Plaquinhas / Sem Escrituras / Sem Frestas Abertas) -->
+                <text x="555" y="325" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">PORTA TRASEIRA LIMPA (CEGA)</text>
+                <text x="555" y="340" text-anchor="middle" font-size="7.5" font-weight="700" fill="#15803d">✓ Sem Plaquinhas e Sem Escrituras</text>
+                <text x="555" y="353" text-anchor="middle" font-size="7.5" font-weight="700" fill="#15803d">✓ Sem Alça Saliente (100% Embutida)</text>
+                <text x="555" y="366" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0284c7">✓ Sem Rasgos Abertos (À Prova d'Água)</text>
+                <text x="555" y="535" text-anchor="middle" font-size="7.5" fill="#475569">Vão da Porta: 60 x 180 cm (Vedação EPDM)</text>
+                <text x="555" y="548" text-anchor="middle" font-size="7.2" font-weight="700" fill="#0c326f">Trava Cremona Interna de 3 Pontos</text>
+                <text x="560" y="728" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">COSTA / PORTA LIMPA (0,70m x 2,20m)</text>
 
                 <!-- 6. Base Flangeada -->
                 <rect x="210" y="740" width="175" height="88" fill="#cbd5e1" stroke="#0f172a" stroke-width="2.5"/>
@@ -2189,7 +2561,7 @@
                 </g>
                 <circle cx="297" cy="784" r="14" fill="url(#estCutoutHatch)" stroke="#dc2626" stroke-width="2.2"/>
                 <text x="297" y="787" text-anchor="middle" font-size="7.5" font-weight="800" fill="#dc2626">Ø50mm</text>
-                <text x="297" y="770" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">BASE CHUMBADA + [F6] 6 FUROS Ø16mm</text>
+                <text x="297" y="770" text-anchor="middle" font-size="8" font-weight="800" fill="#0f172a">BASE CHUMBADA + [F4] 6 FUROS Ø16mm</text>
 
                 <!-- Linhas Azuis de Dobra a 90° -->
                 <line x1="210" y1="190" x2="210" y2="740" stroke="#0284c7" stroke-width="3" stroke-dasharray="7,5"/>
@@ -2226,14 +2598,14 @@
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num" style="background:#dc2626;">F</span>
-                  <h5>Onde Furar e Recortar (Frente Limpa "Só Tela" — Sem Mosca de Som)</h5>
+                  <h5>Onde Furar e Recortar (Frente "Só Tela" & Porta Traseira Limpa Blindada IP66)</h5>
                 </div>
                 <ul>
                   <li><strong>[F1] Placa Superior de Jaú:</strong> 4 furos de fixação (Ø 5 mm) para a Placa de Identificação de Jaú no topo (58 × 22 cm).</li>
-                  <li><strong>[F2] Tela Touch 43" Vertical (Único Recorte Frontal):</strong> Grande recorte central vazado de <strong>55 × 96 cm reais</strong> (<strong>5,5 × 9,6 cm no papel</strong>).</li>
-                  <li><strong>✓ Frente Inferior 100% Cega (IP65):</strong> Como a máquina não tem saída de som, <strong>não há "mosca de som" (furos de alto-falante), nem portas USB ou botões físicos na chapa frontal</strong>, eliminando infiltrações e vandalismo.</li>
-                  <li><strong>[F3], [F4] e [F5] Costa / Tampão Traseiro:</strong> Recorte do tampão traseiro de acesso (60 × 180 cm), 2 furos (Ø 19 mm) das fechaduras tubulares e rasgos das venezianas traseiras superior e inferior.</li>
-                  <li><strong>[F6] e [F7] Base:</strong> 6 furos (Ø 16 mm) dos chumbadores Parabolt no chão + 1 furo central (Ø 50 mm) para entrada subterrânea do cabo 220V e dados.</li>
+                  <li><strong>[F2] Tela Touch 43" Vertical (Único Recorte Frontal):</strong> Grande recorte central vazado de <strong>55 × 96 cm reais</strong> (<strong>5,5 × 9,6 cm no papel</strong>). Sem saída de som e sem sensores na frente.</li>
+                  <li><strong>[F3] Porta Traseira Limpa + Fechadura Blindada em Inox 316:</strong> Porta traseira (60 × 180 cm) <strong>totalmente limpa, sem plaquinhas, sem escrituras, sem alça saliente e sem rasgos de ventilação</strong>. Possui apenas o recorte retangular padrão <strong>Dirak / Kaba WK2 (25 × 130 mm)</strong> para a <strong>Fechadura Escamoteável Blindada em Aço Inox 316</strong>.</li>
+                  <li><strong>🛡️ Gabinete 100% Selado Passivo (IP66 no Tempo):</strong> Zero frestas ou venezianas abertas na porta traseira! O calor do módulo PC OPS Fanless é dissipado passivamente pela estrutura metálica e vidro frontal, impedindo 100% a entrada de água de chuva e poeira.</li>
+                  <li><strong>[F4/F5] Base no Chão:</strong> 6 furos (Ø 16 mm) dos chumbadores Parabolt + 1 furo central (Ø 50 mm) para entrada subterrânea do cabo 220V e dados.</li>
                 </ul>
               </div>
             </div>
@@ -2245,8 +2617,8 @@
              =============================================================== -->
         <div id="est-tab-content-est-internal" class="est-tab-pane hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>⚙️ Prancha 02/03 — Raio-X da Estrutura Interna ("O que vai lá dentro")</h4>
-            <p>Desenhos técnicos em corte (<strong>Corte A-A Frontal</strong> e <strong>Corte B-B Lateral</strong>) mostrando a carcaça oca, o esqueleto interno e a estrutura sem alto-falantes ("Só Tela"):</p>
+            <h4>⚙️ Prancha 02/03 — Raio-X da Estrutura Interna Enxuta ("O que vai lá dentro")</h4>
+            <p>Desenhos técnicos em corte (<strong>Corte A-A Frontal</strong> e <strong>Corte B-B Lateral</strong>) mostrando o gabinete 100% selado passivo (IP66), sem coolers/venezianas externas e com a Tela Touch 43" All-in-One (PC Acoplado):</p>
           </div>
 
           <div style="display:grid; grid-template-columns: 1.35fr 1fr; gap:16px; align-items:start;">
@@ -2254,7 +2626,7 @@
             <div style="background:#ffffff; border:2px solid #38bdf8; border-radius:10px; padding:10px;">
               <svg viewBox="0 0 820 860" style="width:100%; height:auto; max-height:640px;" xmlns="http://www.w3.org/2000/svg">
                 <text x="235" y="24" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">CORTE A-A: RAIO-X FRONTAL INTERNO</text>
-                <text x="635" y="24" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">CORTE B-B: PERFIL LATERAL INTERNO</text>
+                <text x="635" y="24" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">CORTE B-B: PERFIL LATERAL SELADO IP66</text>
 
                 <!-- Esquerda: Vista Frontal Raio-X -->
                 <rect x="75" y="50" width="320" height="720" fill="#f1f5f9" stroke="#0f172a" stroke-width="3" rx="6"/>
@@ -2265,45 +2637,45 @@
                 <rect x="101" y="535" width="268" height="12" fill="#64748b" stroke="#1e293b" stroke-width="1.2"/>
                 <rect x="101" y="625" width="268" height="14" fill="#d97706" stroke="#78350f" stroke-width="1.5"/>
 
-                <!-- Zona 1: Topo -->
+                <!-- Zona 1: Topo Solar Selado (Sem Coolers) -->
                 <rect x="105" y="78" width="260" height="82" fill="#dbeafe" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,2"/>
-                <circle cx="165" cy="115" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="165" cy="115" r="8" fill="#38bdf8"/>
-                <circle cx="305" cy="115" r="26" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="305" cy="115" r="8" fill="#38bdf8"/>
-                <text x="235" y="152" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0c326f">[1] 2x COOLERS EXAUSTORES IP54 + MANTA TÉRMICA</text>
+                <rect x="135" y="92" width="200" height="36" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" rx="4"/>
+                <text x="235" y="114" text-anchor="middle" font-size="8.5" font-weight="800" fill="#38bdf8">☀️ PAINEL SOLAR 35Wp + PRENSA-CABO IP68</text>
+                <text x="235" y="148" text-anchor="middle" font-size="8" font-weight="800" fill="#0c326f">[1] TOPO SELADO PASSIVO (SEM FUROS DE VENTILAÇÃO)</text>
 
-                <!-- Zona 2: Corpo Central (Tela 43" + PC Acoplado OPS ou Mini-PC) -->
+                <!-- Zona 2: Corpo Central (Tela 43" All-in-One com PC Acoplado OPS) -->
                 <rect x="115" y="192" width="240" height="328" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
                 <rect x="145" y="230" width="180" height="250" fill="none" stroke="#475569" stroke-width="4" stroke-dasharray="10,4"/>
                 <circle cx="165" cy="255" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
                 <circle cx="305" cy="255" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
                 <circle cx="165" cy="455" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
                 <circle cx="305" cy="455" r="6" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
-                <text x="235" y="214" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">[2] DISPLAY INDUSTRIAL 43" FULL HD (1500 NITS)</text>
-                <text x="235" y="227" text-anchor="middle" font-size="8" font-weight="700" fill="#dc2626">Fixado em Chassi VESA Interno (4 Parafusos M8)</text>
+                <text x="235" y="214" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0f172a">[2] TELA TOUCH 43" ALL-IN-ONE (1500 NITS)</text>
+                <text x="235" y="227" text-anchor="middle" font-size="8" font-weight="700" fill="#dc2626">Fixada nas Travessas VESA Internas (4 Parafusos M8)</text>
 
                 <rect x="152" y="280" width="166" height="82" fill="#0f172a" stroke="#10b981" stroke-width="2" rx="4"/>
-                <text x="235" y="306" text-anchor="middle" font-size="8.5" font-weight="800" fill="#10b981">[3] PC ACOPLADO (SLOT OPS) OU MINI-PC</text>
+                <text x="235" y="306" text-anchor="middle" font-size="8.5" font-weight="800" fill="#10b981">[3] MÓDULO PC ACOPLADO (SLOT OPS)</text>
                 <text x="235" y="322" text-anchor="middle" font-size="7.5" fill="#e2e8f0">Encaixado direto atrás da Tela Touch (Zero Cabos)</text>
-                <text x="235" y="336" text-anchor="middle" font-size="7.2" fill="#38bdf8">Core i5 Fanless • SSD 512GB • Watchdog Auto-Reboot</text>
+                <text x="235" y="336" text-anchor="middle" font-size="7.2" fill="#38bdf8">Core i5 Fanless Passivo • SSD 512GB • Watchdog</text>
 
-                <!-- Vão estrutural inferior limpo (Sem alto-falantes e sem chave SOS física) -->
+                <!-- Vão estrutural inferior limpo (Sem alto-falantes e sem grelha) -->
                 <rect x="115" y="553" width="240" height="62" fill="#f8fafc" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,3" rx="4"/>
-                <text x="235" y="576" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[4] VÃO ESTRUTURAL ESTANQUE (SEM SAÍDA DE SOM)</text>
-                <text x="235" y="593" text-anchor="middle" font-size="7.2" fill="#334155">Chapa Frontal Cega IP65 • Sem Mosca de Som / Sem USB Externo</text>
+                <text x="235" y="576" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[4] CHAPA FRONTAL E TRASEIRA CEGAS (IP66)</text>
+                <text x="235" y="593" text-anchor="middle" font-size="7.2" fill="#334155">Zero Saída de Som • Zero Sensores • Zero Venezianas Abertas</text>
 
-                <text x="235" y="635" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff">═══ CHAPA DEFLETORA / BARREIRA TÉRMICA ═══</text>
+                <text x="235" y="635" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff">═══ CHAPA DIVISÓRIA / BARREIRA TÉRMICA ═══</text>
 
                 <!-- Zona 3: Base Fria -->
                 <rect x="108" y="646" width="122" height="104" fill="#f0fdf4" stroke="#15803d" stroke-width="1.8" rx="4"/>
                 <text x="169" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#15803d">[5] ELÉTRICA & MPPT</text>
                 <text x="169" y="682" text-anchor="middle" font-size="7.2" fill="#1e293b">• Controlador MPPT 20A</text>
-                <text x="169" y="696" text-anchor="middle" font-size="7.2" fill="#1e293b">• Fonte 220V ➔ 12V/24V</text>
+                <text x="169" y="696" text-anchor="middle" font-size="7.2" fill="#1e293b">• Fonte 220V ➔ 12V DC</text>
                 <text x="169" y="710" text-anchor="middle" font-size="7.2" fill="#1e293b">• Disjuntor + DPS + DR</text>
 
                 <rect x="238" y="646" width="124" height="104" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2" rx="4"/>
                 <text x="300" y="666" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1e3a8a">[6] BATERIA LiFePO4</text>
                 <text x="300" y="682" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0f172a">12,8V 40Ah (Zona Fria)</text>
-                <text x="300" y="698" text-anchor="middle" font-size="7" fill="#15803d">15cm do solo • Isolada</text>
+                <text x="300" y="698" text-anchor="middle" font-size="7" fill="#15803d">Isolada na Base + Terra PE</text>
 
                 <rect x="55" y="770" width="360" height="22" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
                 <rect x="75" y="758" width="8" height="45" fill="#dc2626"/>
@@ -2311,30 +2683,21 @@
                 <rect x="387" y="758" width="8" height="45" fill="#dc2626"/>
                 <text x="235" y="818" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">[7] FLANGE DE BASE + 6 CHUMBADORES PARABOLT Ø16mm + ELETRODUTO Ø50mm</text>
 
-                <!-- Direita: Corte Lateral B-B -->
+                <!-- Direita: Corte Lateral B-B (Gabinete 100% Selado Passivo IP66) -->
                 <path d="M 540,770 L 720,770 L 720,105 Q 720,50 664,50 L 540,50 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>
                 <rect x="548" y="54" width="112" height="10" fill="#1d4ed8" stroke="#38bdf8" stroke-width="1.5"/>
                 <rect x="548" y="66" width="112" height="6" fill="#f59e0b"/>
                 <text x="604" y="42" text-anchor="middle" font-size="8" font-weight="700" fill="#0c326f">☀️ PAINEL SOLAR (PARTE PLANA)</text>
                 <text x="726" y="76" text-anchor="start" font-size="8" font-weight="800" fill="#d97706">⬅ QUINA CURVA</text>
-                <g stroke="#dc2626" stroke-width="2.5">
-                  <line x1="534" y1="95" x2="548" y2="102"/><line x1="534" y1="110" x2="548" y2="117"/><line x1="534" y1="125" x2="548" y2="132"/>
-                </g>
-                <text x="526" y="115" text-anchor="end" font-size="8" font-weight="700" fill="#dc2626">SAÍDA AR QUENTE 💨</text>
+                <text x="532" y="210" text-anchor="end" font-size="8" font-weight="700" fill="#15803d">COSTA CEGA IP66 🛡️</text>
                 <rect x="712" y="195" width="8" height="320" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
                 <rect x="682" y="205" width="28" height="300" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
                 <rect x="658" y="290" width="24" height="80" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
-                <path d="M 580,690 L 580,120" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6,4"/>
-                <polygon points="580,112 574,124 586,124" fill="#0284c7"/>
-                <text x="594" y="430" text-anchor="middle" transform="rotate(-90 594,430)" font-size="8.5" font-weight="800" fill="#0284c7">FLUXO DE VENTILAÇÃO INTERNA (EFEITO CHAMINÉ)</text>
+                <text x="594" y="380" text-anchor="middle" transform="rotate(-90 594,380)" font-size="8.5" font-weight="800" fill="#0284c7">GABINETE 100% SELADO PASSIVO (SEM ENTRADA DE ÁGUA)</text>
                 <rect x="543" y="625" width="174" height="10" fill="#d97706"/>
                 <rect x="610" y="655" width="85" height="95" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
                 <text x="652" y="700" text-anchor="middle" font-size="8" font-weight="800" fill="#1e3a8a">BATERIA</text>
                 <text x="652" y="714" text-anchor="middle" font-size="7.2" fill="#0f172a">ZONA FRIA</text>
-                <g stroke="#0284c7" stroke-width="2.5">
-                  <line x1="534" y1="675" x2="548" y2="668"/><line x1="534" y1="690" x2="548" y2="683"/><line x1="534" y1="705" x2="548" y2="698"/>
-                </g>
-                <text x="526" y="692" text-anchor="end" font-size="8" font-weight="700" fill="#0284c7">ENTRADA AR FRIO ❄️</text>
                 <rect x="520" y="770" width="220" height="22" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
               </svg>
             </div>
@@ -2344,35 +2707,35 @@
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num">1</span>
-                  <h5>Topo (1,95m a 2,20m) — Captação & Exaustão</h5>
+                  <h5>Topo Selado (1,95m a 2,20m) — Captação Solar IP68</h5>
                 </div>
                 <ul>
                   <li><strong>Placa Solar 35Wp (64×21cm):</strong> Embutida na parte plana do topo para ficar invisível a quem olha de frente.</li>
-                  <li><strong>Manta Térmica Isolante + 2 Coolers 120mm:</strong> Isola o calor do teto e sopra o ar quente para fora pelas venezianas superiores traseiras sempre que passar de 35°C.</li>
+                  <li><strong>Gabinete Selado (Zero Coolers Externos):</strong> Sem venezianas abertas e sem ventoinhas que acumulem poeira ou deixem entrar chuva de vento.</li>
                 </ul>
               </div>
 
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num">2</span>
-                  <h5>Corpo Central (0,65m a 1,75m) — Tela 43" & PC Acoplado</h5>
+                  <h5>Corpo Central (0,65m a 1,75m) — Tela 43" All-in-One (PC Acoplado)</h5>
                 </div>
                 <ul>
-                  <li><strong>Esqueleto Interno em Metalon 40×40mm:</strong> Estrutura tubular interna soldada com <strong>4 furos M8 padrão VESA (400×400mm)</strong> que seguram o Monitor Industrial 43" atrás do vidro temperado 8mm (IK10).</li>
-                  <li><strong>PC Acoplado (Slot OPS) ou Mini-PC Fanless:</strong> Encaixado diretamente atrás da tela touch (sem cabos soltos) ou no trilho central.</li>
-                  <li><strong>Frente Sem Mosca de Som:</strong> Abaixo da tela a chapa frontal é 100% fechada, eliminando alto-falantes, amplificadores e portas USB externas que poderiam oxidar ou sofrer vandalismo.</li>
+                  <li><strong>Travessas Estruturais VESA (400×400mm):</strong> Seguram a Tela Touch Industrial 43" atrás do vidro laminado 8mm (IK10) com 4 parafusos M8.</li>
+                  <li><strong>Módulo PC Acoplado na Tela (Slot OPS Fanless):</strong> Encaixado diretamente nas costas da própria tela touch, eliminando Mini-PC separado, cabos HDMI/USB soltos e racks pesados.</li>
+                  <li><strong>Frente 100% Cega:</strong> Sem saída de som, sem câmeras e sem sensores externos — operação pura por toque e LIBRAS.</li>
                 </ul>
               </div>
 
               <div class="bom-card">
                 <div class="bom-header">
                   <span class="bom-num">3</span>
-                  <h5>Base Fria (0,00m a 0,60m) — Energia & Bateria</h5>
+                  <h5>Base Fria (0,00m a 0,60m) — Energia, MPPT & Bateria</h5>
                 </div>
                 <ul>
-                  <li><strong>Chapa Defletora Térmica (c/ 2 furos passa-cabo Ø 32mm):</strong> Separa o calor do monitor da base inferior.</li>
-                  <li><strong>Quadro Elétrico em Trilho DIN:</strong> Controlador Solar MPPT 20A, Fonte Híbrida 220V/12V, Disjuntor Bipolar, DPS anti-raios e DR.</li>
-                  <li><strong>Bateria LiFePO4 (12,8V 40Ah):</strong> Posicionada a 15 cm do solo (zona mais fresca), recebendo ar frio pelas venezianas inferiores.</li>
+                  <li><strong>Chapa Divisória Térmica:</strong> Separa o compartimento inferior do restante da carcaça.</li>
+                  <li><strong>Trilho DIN Elétrico:</strong> Controlador Solar MPPT 20A, Fonte Industrial 12V, Disjuntor Bipolar, DPS anti-raios, DR 30mA e Barramento de Terra PE.</li>
+                  <li><strong>Bateria LiFePO4 (12,8V 40Ah):</strong> Alojada na base fria junto ao piso de concreto para máxima vida útil.</li>
                 </ul>
               </div>
             </div>
@@ -2384,8 +2747,8 @@
              =============================================================== -->
         <div id="est-tab-content-est-table" class="est-tab-pane hw-tab-pane">
           <div class="hw-pane-intro">
-            <h4>📏 Prancha 03/03 — Tabela de Coordenadas de Furação (Estrutura Limpa "Só Tela") e Guia do Mockup no Papel</h4>
-            <p>Medidas exatas na escala real (<strong>1:1 em Metal</strong>) e na escala reduzida (<strong>1:10 para Maquete em Papel</strong>), já sem furos de som ("mosca de som") ou recortes desnecessários:</p>
+            <h4>📏 Prancha 03/03 — Tabela de Coordenadas de Furação (Estrutura Selada IP66) e Guia do Mockup no Papel</h4>
+            <p>Medidas exatas na escala real (<strong>1:1 em Metal</strong>) e na escala reduzida (<strong>1:10 para Maquete em Papel</strong>), sem furos de som e sem rasgos de ventilação:</p>
           </div>
 
           <div class="table-responsive" style="margin-bottom:16px;">
@@ -2422,42 +2785,33 @@
                 </tr>
                 <tr>
                   <td><strong style="color:#10b981;">—</strong></td>
-                  <td>Frente (Abaixo da Tela)</td>
-                  <td>Chapa Frontal Cega Estanque (IP65)</td>
-                  <td>Sem Furos (Zero Mosca de Som / USB)</td>
+                  <td>Frente e Costas</td>
+                  <td>Chapas Cegas Estanques (Gabinete Selado IP66)</td>
+                  <td>Zero Furos de Som / Zero Venezianas</td>
                   <td>Chapa Contínua 2,5 mm</td>
                   <td>Chapa Lisa</td>
-                  <td>Y = 0 a 70 cm</td>
+                  <td>Corpo Inteiro</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F3 / F5</strong></td>
-                  <td>Costa (Traseira)</td>
-                  <td>Venezianas de Exaustão (Topo) e Admissão (Base)</td>
-                  <td>17 Rasgos Horizontais Inclinados</td>
-                  <td>340 × 10 mm cada aleta</td>
-                  <td>3,4 × 0,1 cm cada rasgo</td>
-                  <td>Y = 195 cm e Y = 35 cm</td>
-                </tr>
-                <tr>
-                  <td><strong style="color:#f87171;">F4</strong></td>
-                  <td>Costa (Tampão)</td>
-                  <td>Tampão Traseiro de Acesso + 2 Fechaduras Tubulares</td>
-                  <td>Recorte Porta + 2 Cilindros</td>
-                  <td>Porta 60×180cm + 2× Ø 19mm</td>
-                  <td>Porta 6,0×18,0cm + 2× Ø 2mm</td>
-                  <td>Y = 145 cm e Y = 75 cm</td>
+                  <td><strong style="color:#f87171;">F3</strong></td>
+                  <td>Costa (Porta Traseira)</td>
+                  <td>Porta Traseira Limpa + Fechadura Embutida Inox 316</td>
+                  <td>Vão da Porta + Rasgo Flush-Mount WK2</td>
+                  <td>Porta 60×180cm + Rasgo 25×130mm</td>
+                  <td>Porta 6,0×18,0cm + 0,25×1,3cm</td>
+                  <td>Y = 110,0 cm (11,0 cm)</td>
                 </tr>
                 <tr>
                   <td><strong style="color:#f87171;">SOLAR</strong></td>
                   <td>Topo Plano</td>
-                  <td>Berço do Painel Solar 35Wp + Passa-Cabo IP68</td>
-                  <td>Rebaixo Retangular + 2 Furos</td>
+                  <td>Berço do Painel Solar 35Wp + Prensa-Cabo IP68</td>
+                  <td>Rebaixo Retangular + Furo Cabo</td>
                   <td>640 × 210 mm + Furo Ø 16mm</td>
                   <td>6,4 × 2,1 cm + Furo Ø 1,6mm</td>
                   <td>Y = 220,0 cm (Topo)</td>
                 </tr>
                 <tr>
-                  <td><strong style="color:#f87171;">F6 / F7</strong></td>
+                  <td><strong style="color:#f87171;">F4 / F5</strong></td>
                   <td>Base (Chão)</td>
                   <td>6 Chumbadores Parabolt + Eletroduto Central</td>
                   <td>6 Furos Periféricos + 1 Central</td>
@@ -2477,7 +2831,7 @@
               </div>
               <ul>
                 <li><strong>1. Imprima a Prancha 01:</strong> Use Papel Cartão, Couchê 180g ou cole a folha impressa sobre cartolina.</li>
-                <li><strong>2. Abra o Recorte Vermelho da Tela Primeiro:</strong> Com estilete e régua, recorte apenas a janela da <strong>Tela 43" [F2]</strong> na frente e o furo central da base <strong>[F7]</strong> antes de soltar o molde (não há furos de som na frente!).</li>
+                <li><strong>2. Abra o Recorte Vermelho da Tela Primeiro:</strong> Com estilete e régua, recorte apenas a janela da <strong>Tela 43" [F2]</strong> na frente e o furo central da base <strong>[F5]</strong> antes de soltar o molde (não há furos de som nem venezianas!).</li>
                 <li><strong>3. Recorte o Contorno Externo (Linha Preta):</strong> Recorte em volta da cruz planificada preservando as <strong>Abas 1 a 7</strong>.</li>
                 <li><strong>4. Vinque as Dobras Azuis a 90°:</strong> Passe uma caneta sem tinta com régua sobre as linhas tracejadas azuis para dobrar com precisão.</li>
                 <li><strong>5. Curva da Quina Superior Frontal:</strong> Enrole suavemente a faixa laranja (1,1 cm) sobre um lápis para criar a quina arredondada da frente, deixando os 2,4 cm de trás retos (onde fica o painel solar).</li>
@@ -2492,7 +2846,7 @@
               <ul>
                 <li><strong>Tampão Traseiro que Abre de Verdade:</strong> Na face da <em>Costa</em>, corte apenas <strong>3 lados</strong> do pontilhado vermelho da porta (topo, base e direita) e dobre o lado esquerdo como dobradiça.</li>
                 <li><strong>Prateleira da Barreira Térmica:</strong> Cole um retângulo de papel cartão (7,0 × 3,5 cm) por dentro a 3,5 cm da base para separar a Bateria LiFePO4 (embaixo, no frio) da Tela 43" com PC acoplado (no meio).</li>
-                <li><strong>Cole o Raio-X da Prancha 02 por Dentro:</strong> Recorte o desenho do <em>Corte A-A Frontal</em> da Prancha 02 e cole na parede interna da maquete — ao abrir o tampão traseiro, a banca verá todos os componentes internos posicionados!</li>
+                <li><strong>Cole o Raio-X da Prancha 02 por Dentro:</strong> Recorte o desenho do <em>Corte A-A Frontal</em> da Prancha 02 e cole na parede interna da maquete — ao abrir o tampão traseiro, a banca verá os componentes internos essenciais!</li>
               </ul>
             </div>
           </div>
@@ -2501,7 +2855,7 @@
       </div>
 
       <div class="modal-foot">
-        <span class="foot-disclaimer">Arquivo: <strong>estrutura</strong> • Plano de Construção, Corte/Dobra/Furação (Frente Limpa Só Tela) e Estrutura Interna do Totem de Jaú</span>
+        <span class="foot-disclaimer">Arquivo: <strong>estrutura</strong> • Plano de Construção, Corte/Dobra/Furação (Gabinete Selado IP66 Só Tela) e Estrutura Interna do Totem de Jaú</span>
         <div style="display:flex; gap:10px; align-items:center;">
           <a href="estrutura.html" target="_blank" class="btn-primary-blue" style="background:#dc2626; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">📥 Abrir / Baixar estrutura.pdf (Pronto p/ Impressão)</a>
           <button id="btn-close-estrutura-foot" class="btn-primary-blue">Fechar Estrutura</button>
@@ -2510,7 +2864,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261012_v7"></script>
-  <script src="app.js?v=20261012_v7"></script>
+  <script src="totem3d.js?v=20261012_v12"></script>
+  <script src="app.js?v=20261012_v12"></script>
 </body>
 </html>
