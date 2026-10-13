@@ -37,6 +37,7 @@ class Totem3DViewer {
     this.showHotspots = false;   // Pontos 1 a 6 iniciam ocultos
     this.designTheme = 'dossie';
     this.screenState = 'home';
+    this.currentCity = 'jau'; // 'jau' ou 'itapui'
     this.isWheelchair = false;
     this.isHighContrast = false;
     this.showVLibrasBox = false; // VLibras inicia oculto por padrão (só aparece quando solicitado)
@@ -80,9 +81,16 @@ class Totem3DViewer {
 
     this.lowerConsoleCanvas = document.createElement('canvas');
     this.lowerConsoleCanvas.width = 512;
-    this.lowerConsoleCanvas.height = 420;
+    this.lowerConsoleCanvas.height = 512;
     this.lowerConsoleCtx = this.lowerConsoleCanvas.getContext('2d');
     this.lowerTexture = null;
+
+    this.lowerBumpCanvas = document.createElement('canvas');
+    this.lowerBumpCanvas.width = 512;
+    this.lowerBumpCanvas.height = 512;
+    this.lowerBumpCtx = this.lowerBumpCanvas.getContext('2d');
+    this.lowerBumpTexture = null;
+    this.crestDepthCache = {};
 
     this.rearCanvas = document.createElement('canvas');
     this.rearCanvas.width = 512;
@@ -439,7 +447,7 @@ class Totem3DViewer {
     const curveDepthZ = 0.11; // Largura da faixa arredondada vista de cima
     const zCurveStart = zFront - curveDepthZ; // z = +0.065m
 
-    // Traçado 2D da Vista de Lado (X_shape = Z_world, Y_shape = Y_world)
+    // Traçado 2D Completo das Colunas Laterais (X_shape = Z_world, Y_shape = Y_world)
     sideProfile.moveTo(zBack, yBottom);
     sideProfile.lineTo(zFront, yBottom);
     sideProfile.lineTo(zFront, yTop - curveDropY);
@@ -459,88 +467,168 @@ class Totem3DViewer {
       curveSegments: 32
     };
 
-    const mainCabinetGeo = new THREE.ExtrudeGeometry(sideProfile, extrudeSettings);
-    const mainCabinet = new THREE.Mesh(mainCabinetGeo, bodyMat);
-    mainCabinet.rotation.y = -Math.PI / 2;
+    const sidePillarExtrudeSettings = {
+      depth: 0.048,
+      bevelEnabled: true,
+      bevelSegments: 4,
+      steps: 1,
+      bevelSize: 0.004,
+      bevelThickness: 0.004,
+      curveSegments: 32
+    };
+
+    // Perfil Superior (y = 1.71 a 2.20) inteiriço em toda a largura (0,70m) com a curva redonda do topo
+    const upperFrontShape = new THREE.Shape();
+    upperFrontShape.moveTo(zBack, 1.71);
+    upperFrontShape.lineTo(zFront, 1.71);
+    upperFrontShape.lineTo(zFront, yTop - curveDropY);
+    upperFrontShape.quadraticCurveTo(zFront, yTop, zCurveStart, yTop);
+    upperFrontShape.lineTo(zBack, yTop);
+    upperFrontShape.lineTo(zBack, 1.71);
+
+    // Perfil Inferior (y = 0.12 a 0.65) inteiriço em toda a largura (0,70m) abaixo da tela
+    const lowerFrontShape = new THREE.Shape();
+    lowerFrontShape.moveTo(zBack, yBottom);
+    lowerFrontShape.lineTo(zFront, yBottom);
+    lowerFrontShape.lineTo(zFront, 0.65);
+    lowerFrontShape.lineTo(zBack, 0.65);
+    lowerFrontShape.lineTo(zBack, yBottom);
+
+    const pillarSideGeo = new THREE.ExtrudeGeometry(sideProfile, sidePillarExtrudeSettings);
+    const upperCabinetGeo = new THREE.ExtrudeGeometry(upperFrontShape, extrudeSettings);
+    const lowerCabinetGeo = new THREE.ExtrudeGeometry(lowerFrontShape, extrudeSettings);
+
+    // Grupo do Gabinete Fechado com Rebaixo Frontal de 3 cm (Nicho Embutido da Tela 43")
+    const mainCabinet = new THREE.Group();
     mainCabinet.position.set(0.346, 0, 0);
-    mainCabinet.castShadow = true;
-    mainCabinet.receiveShadow = true;
+
+    const upperSolidMesh = new THREE.Mesh(upperCabinetGeo, bodyMat);
+    upperSolidMesh.rotation.y = -Math.PI / 2;
+    upperSolidMesh.castShadow = true;
+    upperSolidMesh.receiveShadow = true;
+    mainCabinet.add(upperSolidMesh);
+
+    const lowerSolidMesh = new THREE.Mesh(lowerCabinetGeo, bodyMat);
+    lowerSolidMesh.rotation.y = -Math.PI / 2;
+    lowerSolidMesh.castShadow = true;
+    lowerSolidMesh.receiveShadow = true;
+    mainCabinet.add(lowerSolidMesh);
+
+    const rightSolidPillar = new THREE.Mesh(pillarSideGeo, bodyMat);
+    rightSolidPillar.rotation.y = -Math.PI / 2;
+    rightSolidPillar.position.set(0, 0, 0);
+    rightSolidPillar.castShadow = true;
+    rightSolidPillar.receiveShadow = true;
+    mainCabinet.add(rightSolidPillar);
+
+    const leftSolidPillar = new THREE.Mesh(pillarSideGeo, bodyMat);
+    leftSolidPillar.rotation.y = -Math.PI / 2;
+    leftSolidPillar.position.set(-0.644, 0, 0);
+    leftSolidPillar.castShadow = true;
+    leftSolidPillar.receiveShadow = true;
+    mainCabinet.add(leftSolidPillar);
+
+    // Miolo Central Rebaixado 3 cm para dentro na região da Tela 43" (z frontal recuado de 0.179 para 0.149)
+    const middleRecessedCore = new THREE.Mesh(
+      new THREE.BoxGeometry(0.608, 1.07, 0.328),
+      bodyMat
+    );
+    middleRecessedCore.position.set(-0.346, 1.18, -0.015);
+    middleRecessedCore.castShadow = true;
+    middleRecessedCore.receiveShadow = true;
+    mainCabinet.add(middleRecessedCore);
+
     this.mainCabinetMesh = mainCabinet;
     this.totemGroup.add(mainCabinet);
 
     // -----------------------------------------------------------------------
-    // 2B. CARCAÇA METÁLICA OCA REAL (PAREDES LATERAIS, TETO, BASE E VÃO TRASEIRO)
-    //     Exibida quando o Tampão Traseiro é aberto ou no Modo Raio-X para mostrar
-    //     exatamente a espessura da chapa dobrada e o vão de acesso traseiro!
+    // 2B. CARCAÇA METÁLICA OCA REAL (PAREDES LATERAIS, TETO REDONDO, BASE E NICHO REBAIXADO)
+    //     Usa EXATAMENTE a mesma curva superior arredondada e o mesmo rebaixo frontal de 3cm
     // -----------------------------------------------------------------------
     this.hollowCabinetGroup = new THREE.Group();
     this.hollowCabinetGroup.visible = false;
 
-    const wallExtrudeSettings = {
-      depth: 0.042,
-      bevelEnabled: true,
-      bevelSegments: 2,
-      steps: 1,
-      bevelSize: 0.002,
-      bevelThickness: 0.002,
-      curveSegments: 24
-    };
-    const sideWallGeo = new THREE.ExtrudeGeometry(sideProfile, wallExtrudeSettings);
+    const sideWallGeo = pillarSideGeo;
 
-    // Parede Lateral Direita da Carcaça
+    // Parede Lateral Direita da Carcaça (com a mesma curva redonda no topo e borda de 5cm do nicho)
     const rightWallMesh = new THREE.Mesh(sideWallGeo, bodyMat);
     rightWallMesh.rotation.y = -Math.PI / 2;
     rightWallMesh.position.set(0.346, 0, 0);
+    rightWallMesh.castShadow = true;
+    rightWallMesh.receiveShadow = true;
     this.hollowCabinetGroup.add(rightWallMesh);
 
-    // Parede Lateral Esquerda da Carcaça
+    // Parede Lateral Esquerda da Carcaça (com a mesma curva redonda no topo e borda de 5cm do nicho)
     const leftWallMesh = new THREE.Mesh(sideWallGeo, bodyMat);
     leftWallMesh.rotation.y = -Math.PI / 2;
-    leftWallMesh.position.set(-0.304, 0, 0);
+    leftWallMesh.position.set(-0.298, 0, 0);
+    leftWallMesh.castShadow = true;
+    leftWallMesh.receiveShadow = true;
     this.hollowCabinetGroup.add(leftWallMesh);
 
-    // Fechamento Superior (Capô Curvo e Teto Solar da Carcaça)
-    const topHoodBox = new THREE.Mesh(new THREE.BoxGeometry(0.612, 0.17, 0.348), bodyMat);
-    topHoodBox.position.set(0, 2.115, 0);
-    this.hollowCabinetGroup.add(topHoodBox);
+    // Fechamento Superior Curvo Oco por Dentro (mesma curva redonda por fora, com teto interno oco em y = 2.184 sob a Placa Solar)
+    const topHoodShape = new THREE.Shape();
+    topHoodShape.moveTo(zBack, 2.01);
+    topHoodShape.lineTo(zBack + 0.016, 2.01);
+    topHoodShape.lineTo(zBack + 0.016, yTop - 0.016);
+    topHoodShape.lineTo(zCurveStart, yTop - 0.016);
+    topHoodShape.quadraticCurveTo(zFront - 0.016, yTop - 0.016, zFront - 0.016, yTop - curveDropY);
+    topHoodShape.lineTo(zFront - 0.016, 2.01);
+    topHoodShape.lineTo(zFront, 2.01);
+    topHoodShape.lineTo(zFront, yTop - curveDropY);
+    topHoodShape.quadraticCurveTo(zFront, yTop, zCurveStart, yTop);
+    topHoodShape.lineTo(zBack, yTop);
+    topHoodShape.lineTo(zBack, 2.01);
 
-    // Fechamento Inferior (Zócalo / Pedestal da Carcaça)
-    const bottomPedestalBox = new THREE.Mesh(new THREE.BoxGeometry(0.612, 0.09, 0.348), bodyMat);
-    bottomPedestalBox.position.set(0, 0.165, 0);
+    const topHoodGeo = new THREE.ExtrudeGeometry(topHoodShape, extrudeSettings);
+    const topHoodMesh = new THREE.Mesh(topHoodGeo, bodyMat);
+    topHoodMesh.rotation.y = -Math.PI / 2;
+    topHoodMesh.position.set(0.346, 0, 0);
+    topHoodMesh.castShadow = true;
+    topHoodMesh.receiveShadow = true;
+    this.hollowCabinetGroup.add(topHoodMesh);
+
+    // Fechamento Inferior (Zócalo / Pedestal da Carcaça alinhado com o perfil externo)
+    const bottomPedestalBox = new THREE.Mesh(new THREE.BoxGeometry(0.700, 0.074, 0.358), bodyMat);
+    bottomPedestalBox.position.set(0, 0.153, 0);
     this.hollowCabinetGroup.add(bottomPedestalBox);
 
-    // Chapa Estrutural Frontal (onde a Tela Touch 43" e a Placa Jaú são fixadas)
-    const frontBackingWall = new THREE.Mesh(new THREE.BoxGeometry(0.612, 1.82, 0.016), bodyMat);
-    frontBackingWall.position.set(0, 1.11, 0.166);
-    this.hollowCabinetGroup.add(frontBackingWall);
+    // Chapa Frontal Superior (atrás da Placa de Jaú, y = 1.71 a 2.02) e Inferior (atrás do Brasão, y = 0.18 a 0.65)
+    const frontUpperWall = new THREE.Mesh(new THREE.BoxGeometry(0.608, 0.31, 0.014), bodyMat);
+    frontUpperWall.position.set(0, 1.865, 0.172);
+    this.hollowCabinetGroup.add(frontUpperWall);
 
-    // Batente Metálico Traseiro + Borracha de Vedação EPDM Preta (Grau IP65) onde o Tampão fecha
+    const frontLowerWall = new THREE.Mesh(new THREE.BoxGeometry(0.608, 0.47, 0.014), bodyMat);
+    frontLowerWall.position.set(0, 0.415, 0.172);
+    this.hollowCabinetGroup.add(frontLowerWall);
+
+    // Batente Metálico Traseiro + Borracha de Vedação EPDM Preta (Grau IP66) onde a Porta Traseira fecha
     const epdmGasketMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.85, metalness: 0.1 });
     // Trilhos verticais e horizontais da borracha de vedação do vão traseiro (0,62m x 1,82m)
     const gasketLeft = new THREE.Mesh(new THREE.BoxGeometry(0.018, 1.84, 0.014), epdmGasketMat);
-    gasketLeft.position.set(-0.302, 1.10, -0.172);
+    gasketLeft.position.set(-0.302, 1.10, -0.174);
     this.hollowCabinetGroup.add(gasketLeft);
 
     const gasketRight = new THREE.Mesh(new THREE.BoxGeometry(0.018, 1.84, 0.014), epdmGasketMat);
-    gasketRight.position.set(0.302, 1.10, -0.172);
+    gasketRight.position.set(0.302, 1.10, -0.174);
     this.hollowCabinetGroup.add(gasketRight);
 
     const gasketTop = new THREE.Mesh(new THREE.BoxGeometry(0.622, 0.018, 0.014), epdmGasketMat);
-    gasketTop.position.set(0, 2.012, -0.172);
+    gasketTop.position.set(0, 2.012, -0.174);
     this.hollowCabinetGroup.add(gasketTop);
 
     const gasketBottom = new THREE.Mesh(new THREE.BoxGeometry(0.622, 0.018, 0.014), epdmGasketMat);
-    gasketBottom.position.set(0, 0.188, -0.172);
+    gasketBottom.position.set(0, 0.188, -0.174);
     this.hollowCabinetGroup.add(gasketBottom);
 
     this.totemGroup.add(this.hollowCabinetGroup);
 
-    // Chanfro sutil na junção superior em metal cru (sem detalhes amarelos ou LEDs laterais)
+    // Chanfro sutil na junção superior em metal cru (sempre acima de y = 2.204)
     const dividerBar = new THREE.Mesh(
       new THREE.BoxGeometry(0.696, 0.004, 0.008),
       rawSeamMat
     );
-    dividerBar.position.set(0, 2.201, zCurveStart);
+    dividerBar.position.set(0, 2.205, zCurveStart);
     this.totemGroup.add(dividerBar);
 
     // -----------------------------------------------------------------------
@@ -591,16 +679,16 @@ class Totem3DViewer {
       roughness: 0.14
     });
 
-    // Placa Solar de 64cm x 21cm (35Wp) embutida de forma plana no topo (y = 2.203m)
+    // Placa Solar de 64cm x 21cm (35Wp) assentada no topo plano (y = 2.206m, sem nunca afundar na malha)
     const solarPanelMesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.64, 0.008, 0.21),
       solarPanelMat
     );
-    solarPanelMesh.position.set(0, 2.203, -0.055);
+    solarPanelMesh.position.set(0, 2.206, -0.055);
     this.totemGroup.add(solarPanelMesh);
 
     // -----------------------------------------------------------------------
-    // 4. FACE FRONTAL: PLACA SUPERIOR DE IDENTIFICAÇÃO DA MARCA (JAÚ, SP)
+    // 4. FACE FRONTAL: PLACA SUPERIOR DE IDENTIFICAÇÃO DA MARCA (JAÚ, SP) EM CHAPA 3D SÓLIDA
     // -----------------------------------------------------------------------
     this.headerTexture = new THREE.CanvasTexture(this.headerCanvas);
     const headerSignMat = new THREE.MeshStandardMaterial({
@@ -610,21 +698,59 @@ class Totem3DViewer {
     });
     this.dynamicMaterials.headerSign = headerSignMat;
 
+    const headerEdgeMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      metalness: 0.45,
+      roughness: 0.35
+    });
     const headerPanel = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.58, 0.22),
-      headerSignMat
+      new THREE.BoxGeometry(0.58, 0.22, 0.006),
+      [
+        headerEdgeMat, // dir
+        headerEdgeMat, // esq
+        headerEdgeMat, // topo
+        headerEdgeMat, // base
+        headerSignMat, // frente (+Z) com brasão e título de Jaú
+        headerEdgeMat  // verso (-Z) sólido
+      ]
     );
-    headerPanel.position.set(0, 1.88, 0.180);
+    headerPanel.position.set(0, 1.88, 0.181);
+    headerPanel.castShadow = true;
     this.totemGroup.add(headerPanel);
 
     // -----------------------------------------------------------------------
-    // 5. TELA TOUCHSCREEN 43" FULL HD (VIDRO TEMPERADO 8mm)
+    // 5. TELA-COMPUTADOR TOUCHSCREEN 43" ALL-IN-ONE REBAIXADA ~2,5 CM PARA DENTRO
+    //    Nicho protetor embutido de 3,0 cm de profundidade contra sol direto e chuva
     // -----------------------------------------------------------------------
+    const recessTrimMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.65,
+      roughness: 0.32
+    });
+
+    // Abas internas de 3 cm de profundidade do nicho frontal (pingadeira superior, peitoril inferior e laterais)
+    const recessTopLip = new THREE.Mesh(new THREE.BoxGeometry(0.598, 0.008, 0.030), recessTrimMat);
+    recessTopLip.position.set(0, 1.706, 0.164);
+    this.totemGroup.add(recessTopLip);
+
+    const recessBottomSill = new THREE.Mesh(new THREE.BoxGeometry(0.598, 0.008, 0.030), recessTrimMat);
+    recessBottomSill.position.set(0, 0.654, 0.164);
+    this.totemGroup.add(recessBottomSill);
+
+    const recessLeftJamb = new THREE.Mesh(new THREE.BoxGeometry(0.008, 1.06, 0.030), recessTrimMat);
+    recessLeftJamb.position.set(-0.295, 1.18, 0.164);
+    this.totemGroup.add(recessLeftJamb);
+
+    const recessRightJamb = new THREE.Mesh(new THREE.BoxGeometry(0.008, 1.06, 0.030), recessTrimMat);
+    recessRightJamb.position.set(0.295, 1.18, 0.164);
+    this.totemGroup.add(recessRightJamb);
+
+    // Moldura fina da Tela-Computador 43" All-in-One assentada no fundo do rebaixo (z = 0.150, ~2,5 cm para dentro!)
     const screenBezel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.60, 1.06, 0.014),
+      new THREE.BoxGeometry(0.588, 1.048, 0.010),
       darkPanelMat
     );
-    screenBezel.position.set(0, 1.18, 0.176);
+    screenBezel.position.set(0, 1.18, 0.150);
     this.totemGroup.add(screenBezel);
 
     this.screenTexture = new THREE.CanvasTexture(this.screenCanvas);
@@ -639,48 +765,68 @@ class Totem3DViewer {
     });
     this.dynamicMaterials.screenDisplay = screenDisplayMat;
 
+    // Vidro Temperado 8mm da Tela 43" em z = 0.156 (~2,3 cm rebaixado para dentro da face frontal z = 0.179)
     const screenMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(0.55, 1.00),
       screenDisplayMat
     );
-    screenMesh.position.set(0, 1.18, 0.184);
+    screenMesh.position.set(0, 1.18, 0.156);
     this.totemGroup.add(screenMesh);
 
     // -----------------------------------------------------------------------
-    // 7. TAMPÃO TRASEIRO / PORTA DE ACESSO TÉCNICO ARTICULADA EM AÇO
-    //    Com Moldura de Vedação, 3 Dobradiças Externas, Puxador, 2 Fechaduras
-    //    e Pistão a Gás (abre 105° para acesso completo ao interior da máquina)
+    // 6. BRASÃO DA PREFEITURA EM BAIXO-RELEVO NA CHAPA INFERIOR FRONTAL (JAÚ / ITAPUÍ)
+    //    Localizado exatamente na região quadrada inferior abaixo da tela 43" (y ≈ 0.40m)
     // -----------------------------------------------------------------------
-    // Fresta / Moldura perimetral externa do Tampão Traseiro (visível mesmo fechado)
+    this.lowerTexture = new THREE.CanvasTexture(this.lowerConsoleCanvas);
+    this.lowerTexture.minFilter = THREE.LinearFilter;
+    this.lowerBumpTexture = new THREE.CanvasTexture(this.lowerBumpCanvas);
+    this.lowerBumpTexture.minFilter = THREE.LinearFilter;
+
+    const lowerCrestMat = new THREE.MeshStandardMaterial({
+      map: this.lowerTexture,
+      bumpMap: this.lowerBumpTexture,
+      bumpScale: 0.015,
+      transparent: true,
+      alphaTest: 0.01,
+      roughness: 0.36,
+      metalness: 0.36,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
+    });
+    this.dynamicMaterials.lowerCrest = lowerCrestMat;
+
+    const lowerCrestMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.43, 0.43),
+      lowerCrestMat
+    );
+    lowerCrestMesh.position.set(0, 0.402, 0.1802);
+    lowerCrestMesh.receiveShadow = true;
+    this.lowerCrestMesh = lowerCrestMesh;
+    this.totemGroup.add(lowerCrestMesh);
+
+    // -----------------------------------------------------------------------
+    // 7. PORTA TRASEIRA DE ACESSO TÉCNICO ARTICULADA EM AÇO (ABRE PARA FORA C/ 2 CLIQUES)
+    // -----------------------------------------------------------------------
+    // Fresta / Moldura perimetral externa da Porta Traseira (visível mesmo fechada)
     const rearSeamFrame = new THREE.Group();
     const seamTop = new THREE.Mesh(new THREE.BoxGeometry(0.636, 0.010, 0.006), epdmGasketMat);
-    seamTop.position.set(0, 2.015, -0.177);
+    seamTop.position.set(0, 2.015, -0.179);
     rearSeamFrame.add(seamTop);
     const seamBot = new THREE.Mesh(new THREE.BoxGeometry(0.636, 0.010, 0.006), epdmGasketMat);
-    seamBot.position.set(0, 0.185, -0.177);
+    seamBot.position.set(0, 0.185, -0.179);
     rearSeamFrame.add(seamBot);
     const seamLeft = new THREE.Mesh(new THREE.BoxGeometry(0.010, 1.84, 0.006), epdmGasketMat);
-    seamLeft.position.set(-0.315, 1.10, -0.177);
+    seamLeft.position.set(-0.315, 1.10, -0.179);
     rearSeamFrame.add(seamLeft);
     const seamRight = new THREE.Mesh(new THREE.BoxGeometry(0.010, 1.84, 0.006), epdmGasketMat);
-    seamRight.position.set(0.315, 1.10, -0.177);
+    seamRight.position.set(0.315, 1.10, -0.179);
     rearSeamFrame.add(seamRight);
     this.totemGroup.add(rearSeamFrame);
 
-    // 3 Dobradiças Industriais Externas na quina traseira esquerda (mostram onde o tampão gira)
-    const hingeMetalMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.75, roughness: 0.28 });
-    [0.42, 1.10, 1.78].forEach(hy => {
-      const hingeBarrel = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.012, 0.012, 0.065, 14),
-        hingeMetalMat
-      );
-      hingeBarrel.position.set(-0.315, hy, -0.182);
-      this.totemGroup.add(hingeBarrel);
-    });
-
-    // Grupo Articulado do Tampão Traseiro (pivô nas 3 dobradiças da esquerda)
+    // Grupo Articulado da Porta Traseira (pivô em dobradiça interna oculta na esquerda, protegida contra chuva e vandalismo)
     this.rearDoorHingeGroup = new THREE.Group();
-    this.rearDoorHingeGroup.position.set(-0.31, 1.10, -0.178);
+    this.rearDoorHingeGroup.position.set(-0.31, 1.10, -0.179);
 
     this.rearTexture = new THREE.CanvasTexture(this.rearCanvas);
     const rearDoorMat = new THREE.MeshStandardMaterial({
@@ -691,7 +837,7 @@ class Totem3DViewer {
     });
     this.dynamicMaterials.rearDoor = rearDoorMat;
 
-    // Chapa 3D de espessura real do Tampão Traseiro (18mm de aba dobrada)
+    // Chapa 3D de espessura real da Porta Traseira (16mm de aba dobrada c/ vedação EPDM)
     const doorInnerMetalMat = new THREE.MeshStandardMaterial({
       color: 0x64748b,
       metalness: 0.45,
@@ -704,15 +850,15 @@ class Totem3DViewer {
         doorInnerMetalMat, // borda esq
         doorInnerMetalMat, // borda sup
         doorInnerMetalMat, // borda inf
-        doorInnerMetalMat, // face interna (voltada para dentro da máquina)
-        rearDoorMat        // face externa (voltada para trás com venezianas e plaqueta)
+        doorInnerMetalMat, // face interna (+Z, voltada para dentro da máquina)
+        rearDoorMat        // face externa (-Z, voltada para trás, 100% limpa e cega)
       ]
     );
-    rearDoorBox.position.set(0.31, 0, -0.008);
+    rearDoorBox.position.set(0.31, 0, -0.004);
     rearDoorBox.castShadow = true;
     this.rearDoorHingeGroup.add(rearDoorBox);
 
-    // Nervuras Internas de Reforço Estrutural (Omega Ribs) na parte de dentro do Tampão
+    // 2 Travessas Internas de Reforço Estrutural na parte de dentro da Porta
     [-0.52, 0.52].forEach(ry => {
       const rib = new THREE.Mesh(
         new THREE.BoxGeometry(0.54, 0.032, 0.014),
@@ -722,59 +868,68 @@ class Totem3DViewer {
       this.rearDoorHingeGroup.add(rib);
     });
 
-    // Puxador Metálico Vertical Externo (Alça para puxar e abrir o Tampão Traseiro)
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.65, roughness: 0.25 });
-    const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.18, 14), handleMat);
-    handleBar.position.set(0.57, 0.0, -0.032);
-    this.rearDoorHingeGroup.add(handleBar);
-    [-0.075, 0.075].forEach(hpy => {
-      const handlePost = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.014, 0.022), handleMat);
-      handlePost.position.set(0.57, hpy, -0.020);
-      this.rearDoorHingeGroup.add(handlePost);
-    });
+    // FECHADURA BLINDADA ESCAMOTEÁVEL EM AÇO INOX 316 (FLUSH-MOUNT ANTI-ALAVANCA / SEM ALÇA SALIENTE)
+    const inox316Mat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.94, roughness: 0.16 });
+    const inoxDarkCavityMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.80, roughness: 0.32 });
+    const inoxHardenedMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.98, roughness: 0.10 });
 
-    // 2 Fechaduras tubulares antivandalismo (lado direito, perto do puxador) + Linguetas internas
-    [0.75 - 1.10, 1.45 - 1.10].forEach(ly => {
-      const lockCylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.016, 0.016, 0.022, 16),
-        boltMat
-      );
-      lockCylinder.rotation.x = Math.PI / 2;
-      lockCylinder.position.set(0.56, ly, -0.012);
-      this.rearDoorHingeGroup.add(lockCylinder);
+    const armoredLockGroup = new THREE.Group();
+    armoredLockGroup.position.set(0.545, 0.0, -0.011);
 
-      // Lingueta interna giratória da tranca
-      const latchCam = new THREE.Mesh(
-        new THREE.BoxGeometry(0.045, 0.016, 0.006),
-         new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 })
-      );
-      latchCam.position.set(0.58, ly, 0.008);
-      this.rearDoorHingeGroup.add(latchCam);
-    });
+    const lockBezel = new THREE.Mesh(new THREE.BoxGeometry(0.056, 0.19, 0.005), inox316Mat);
+    lockBezel.position.set(0, 0, -0.001);
+    armoredLockGroup.add(lockBezel);
 
-    // Bolsa interna metálica para manual técnico e esquema elétrico na face interna do Tampão
-    const doorDocPocket = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.30, 0.016),
-      darkPanelMat
+    const lockPocket = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.15, 0.006), inoxDarkCavityMat);
+    lockPocket.position.set(0, 0, -0.002);
+    armoredLockGroup.add(lockPocket);
+
+    const flushSwingInsert = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.095, 0.005), inox316Mat);
+    flushSwingInsert.position.set(0, -0.018, -0.003);
+    armoredLockGroup.add(flushSwingInsert);
+
+    const antiDrillShroud = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.015, 0.019, 0.008, 24),
+      inoxHardenedMat
     );
-    doorDocPocket.position.set(0.31, -0.08, 0.008);
-    this.rearDoorHingeGroup.add(doorDocPocket);
+    antiDrillShroud.rotation.x = Math.PI / 2;
+    antiDrillShroud.position.set(0, 0.052, -0.004);
+    armoredLockGroup.add(antiDrillShroud);
 
-    // Amortecedor hidráulico / pistão a gás no topo segurando o Tampão Traseiro aberto
-    const pistonGroup = new THREE.Group();
-    pistonGroup.position.set(0.16, 0.82, 0.012);
-    const pCyl = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.008, 0.008, 0.26, 12),
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 })
+    const keywayRecess = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.008, 0.008, 0.009, 20),
+      inoxDarkCavityMat
     );
-    pCyl.rotation.z = Math.PI / 3;
-    pistonGroup.add(pCyl);
-    this.rearDoorHingeGroup.add(pistonGroup);
+    keywayRecess.rotation.x = Math.PI / 2;
+    keywayRecess.position.set(0, 0.052, -0.005);
+    armoredLockGroup.add(keywayRecess);
+
+    const centerGuidePin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.003, 0.003, 0.010, 14),
+      inoxHardenedMat
+    );
+    centerGuidePin.rotation.x = Math.PI / 2;
+    centerGuidePin.position.set(0, 0.052, -0.0055);
+    armoredLockGroup.add(centerGuidePin);
+
+    const dustCapHinge = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.008, 0.006), inox316Mat);
+    dustCapHinge.position.set(0, 0.072, -0.004);
+    armoredLockGroup.add(dustCapHinge);
+
+    this.rearDoorHingeGroup.add(armoredLockGroup);
+
+    // Lingueta interna compacta da fechadura
+    const centerLatchCam = new THREE.Mesh(
+      new THREE.BoxGeometry(0.048, 0.022, 0.008),
+      inoxHardenedMat
+    );
+    centerLatchCam.position.set(0.575, 0.0, 0.012);
+    this.rearDoorHingeGroup.add(centerLatchCam);
 
     this.totemGroup.add(this.rearDoorHingeGroup);
 
     // -----------------------------------------------------------------------
-    // 8. ARQUITETURA INTERNA DE HARDWARE & MÁQUINA ABERTA (ABA 3)
+    // 8. ARQUITETURA INTERNA ENXUTA E SELADA (100% PASSIVA IP66 PARA FICAR NO TEMPO)
     // -----------------------------------------------------------------------
     this.createInternalHardware();
 
@@ -782,484 +937,292 @@ class Totem3DViewer {
   }
 
   // =========================================================================
-  // ARQUITETURA COMPLETA DE HARDWARE, RACK 19" E FIAÇÃO INTERNA 3D (ABA 3)
+  // ARQUITETURA INTERNA ULTRA-ENXUTA: A PRÓPRIA TELA 43" JÁ É O COMPUTADOR (ALL-IN-ONE)
+  // Sem computador externo, sem gaveta OPS saliente, sem coolers e apenas 1 Trilho DIN inferior
   // =========================================================================
   createInternalHardware() {
     this.internalHardwareGroup = new THREE.Group();
-    this.internalHardwareGroup.visible = false; // Inicia oculto, visível na Aba 3
+    this.internalHardwareGroup.visible = false; // Inicia oculto, visível no Raio-X / Porta Aberta
 
     // Materiais dos Componentes de Hardware
     const aluRailMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.22 });
     const dinRailMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.18 });
-    const pvcTrunkMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65, metalness: 0.15 });
-    const ipcBodyMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.75, roughness: 0.30 });
-    const goldPortMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.90, roughness: 0.20 });
     const smpsMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.80, roughness: 0.28 });
-    const pcbGreenMat = new THREE.MeshStandardMaterial({ color: 0x166534, metalness: 0.35, roughness: 0.40 });
-    const pcbBlueMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, metalness: 0.40, roughness: 0.35 });
     const dinWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.50, metalness: 0.10 });
     const dinOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.45, metalness: 0.10 });
     const batteryMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.40, metalness: 0.30 });
     const copperGroundMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.90, roughness: 0.25 });
 
-    // Materiais dos Chicotes de Cabos (com emissive controlável para destaque)
+    // Materiais dos Chicotes de Cabos Essenciais
     this.hardwareWiringMaterials = {
       acLive: new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.4 }),
       acNeutral: new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 }),
       groundPE: new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.4 }),
       dc12vPos: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 }),
-      dc12vNeg: new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 }),
       solarPos: new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.35 }),
-      hdmi: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.3 }),
-      usb: new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.35 }),
-      ethernet: new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.35 }),
       batteryLead: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 })
     };
 
-    // 1. RACK ESTRUTURAL 19" (4 Colunas verticais em T-Slot de Alumínio)
-    [
-      [-0.27, -0.09], [0.27, -0.09],
-      [-0.27, 0.10], [0.27, 0.10]
-    ].forEach(([rx, rz]) => {
-      const col = new THREE.Mesh(new THREE.BoxGeometry(0.024, 1.82, 0.024), aluRailMat);
-      col.position.set(rx, 1.10, rz);
-      this.internalHardwareGroup.add(col);
-    });
-
-    // Travessas horizontais de reforço
-    [0.35, 0.72, 1.05, 1.35, 1.70, 1.95].forEach(ty => {
-      const crossF = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.018, 0.018), aluRailMat);
-      crossF.position.set(0, ty, 0.10);
-      this.internalHardwareGroup.add(crossF);
-
-      const crossB = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.018, 0.018), aluRailMat);
-      crossB.position.set(0, ty, -0.09);
-      this.internalHardwareGroup.add(crossB);
-    });
-
-    // 3 Trilhos DIN TS-35 Galvanizados
-    [0.76, 1.05, 1.35].forEach(dy => {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.035, 0.008), dinRailMat);
-      rail.position.set(0, dy, -0.04);
-      this.internalHardwareGroup.add(rail);
-    });
-
-    // 2 Canaletas aletadas de PVC cinza para organização dos cabos
-    [-0.27, 0.27].forEach(cx => {
-      const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.038, 1.65, 0.045), pvcTrunkMat);
-      trunk.position.set(cx, 1.12, 0.0);
-      this.internalHardwareGroup.add(trunk);
-
-      for (let sl = -0.75; sl <= 0.75; sl += 0.08) {
-        const slot = new THREE.Mesh(
-          new THREE.BoxGeometry(0.040, 0.012, 0.047),
-          new THREE.MeshBasicMaterial({ color: 0x1e293b })
-        );
-        slot.position.set(cx, 1.12 + sl, 0.0);
-        this.internalHardwareGroup.add(slot);
-      }
-    });
-
-    // =======================================================================
-    // 2A. OPÇÃO A: MINI-PC INDUSTRIAL SEPARADO NO RACK (PADRÃO MODULAR)
-    // =======================================================================
-    this.separateMiniPcGroup = new THREE.Group();
-    const ipcBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.068), ipcBodyMat);
-    ipcBox.position.set(0.06, 1.38, 0.03);
-    this.separateMiniPcGroup.add(ipcBox);
-
-    // 10 Aletas dissipadoras passivas de alumínio
-    for (let f = -0.10; f <= 0.10; f += 0.02) {
-      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.16, 0.024), ipcBodyMat);
-      fin.position.set(0.06 + f, 1.38, 0.076);
-      this.separateMiniPcGroup.add(fin);
-    }
-
-    // Painel I/O do Mini-PC voltado para quem abre a porta (z = -0.005)
-    const ledIpc = new THREE.Mesh(
-      new THREE.SphereGeometry(0.005, 12, 12),
-      new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.9 })
-    );
-    ledIpc.position.set(-0.03, 1.43, -0.005);
-    this.separateMiniPcGroup.add(ledIpc);
-
-    for (let u = 0; u < 4; u++) {
-      const usbPort = new THREE.Mesh(
-        new THREE.BoxGeometry(0.016, 0.010, 0.008),
-        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 })
-      );
-      usbPort.position.set(-0.01 + u * 0.022, 1.43, -0.005);
-      this.separateMiniPcGroup.add(usbPort);
-    }
-
-    for (let l = 0; l < 2; l++) {
-      const rj45 = new THREE.Mesh(
-        new THREE.BoxGeometry(0.018, 0.016, 0.008),
-        new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.4 })
-      );
-      rj45.position.set(0.10 + l * 0.025, 1.43, -0.005);
-      this.separateMiniPcGroup.add(rj45);
-    }
-
-    const hdmiPort = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.008, 0.008), goldPortMat);
-    hdmiPort.position.set(0.10, 1.36, -0.005);
-    this.separateMiniPcGroup.add(hdmiPort);
-
-    const dcJack = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.010, 16), dinRailMat);
-    dcJack.rotation.x = Math.PI / 2;
-    dcJack.position.set(-0.03, 1.34, -0.005);
-    this.separateMiniPcGroup.add(dcJack);
-    this.internalHardwareGroup.add(this.separateMiniPcGroup);
-
-    // =======================================================================
-    // 2B. OPÇÃO B: TELA TOUCH ALL-IN-ONE COM COMPUTADOR ACOPLADO (MÓDULO OPS)
-    // =======================================================================
+    // 1. TELA-COMPUTADOR TOUCH 43" ALL-IN-ONE (REBAIXADA 2,5 CM • DORSO LISO E SLIM, SEM CAIXA PC EXTERNA)
     this.allInOnePcGroup = new THREE.Group();
-    const opsFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.82, roughness: 0.25 });
-    const opsAccentMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.70, roughness: 0.25 });
 
-    // Gaveta/Slot OPS acoplada diretamente no chassi traseiro da tela Touch 43" (z = 0.132, sem ocupar o rack!)
-    const opsCradle = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.19, 0.016), aluRailMat);
-    opsCradle.position.set(0.0, 1.26, 0.144);
-    this.allInOnePcGroup.add(opsCradle);
+    // Dorso metálico fino e selado da Tela-Computador 43" (acompanha o rebaixo frontal de ~2,5 cm em z = 0.136)
+    const screenBackMetal = new THREE.Mesh(new THREE.BoxGeometry(0.56, 1.02, 0.016), aluRailMat);
+    screenBackMetal.position.set(0, 1.18, 0.136);
+    this.internalHardwareGroup.add(screenBackMetal);
 
-    const opsModule = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.034), opsFrameMat);
-    opsModule.position.set(0.0, 1.26, 0.125);
-    this.allInOnePcGroup.add(opsModule);
-
-    // Faixa azul identificadora "ALL-IN-ONE TOUCH PC / SLOT OPS 80-PIN"
-    const opsStripe = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.018, 0.004), opsAccentMat);
-    opsStripe.position.set(0.0, 1.32, 0.107);
-    this.allInOnePcGroup.add(opsStripe);
-
-    // Aletas dissipadoras passivas direto no módulo acoplado à tela
-    for (let af = -0.08; af <= 0.08; af += 0.02) {
-      const opsFin = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.10, 0.008), opsFrameMat);
-      opsFin.position.set(af, 1.24, 0.105);
-      this.allInOnePcGroup.add(opsFin);
-    }
-
-    // 2 Parafusos recartilhados (Thumbscrews) de saque rápido do módulo OPS
-    [-0.10, 0.10].forEach(tx => {
-      const thumbScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.014, 16), goldPortMat);
-      thumbScrew.rotation.x = Math.PI / 2;
-      thumbScrew.position.set(tx, 1.26, 0.104);
-      this.allInOnePcGroup.add(thumbScrew);
+    // 2 Travessas Horizontais VESA que prendem a Tela-Computador All-in-One direto nas laterais
+    [0.95, 1.45].forEach(ty => {
+      const vesaBar = new THREE.Mesh(new THREE.BoxGeometry(0.59, 0.028, 0.020), aluRailMat);
+      vesaBar.position.set(0, ty, 0.118);
+      this.internalHardwareGroup.add(vesaBar);
     });
 
-    // LEDs de status integrados na traseira da tela All-in-One
-    const opsLed = new THREE.Mesh(
+    // Plaqueta Técnica Laser no dorso liso da Tela-Computador (mostrando que o sistema já é integrado na própria tela)
+    const badgeCanvas = document.createElement('canvas');
+    badgeCanvas.width = 512;
+    badgeCanvas.height = 256;
+    const bctx = badgeCanvas.getContext('2d');
+    bctx.fillStyle = '#0f172a';
+    bctx.fillRect(0, 0, 512, 256);
+    bctx.strokeStyle = '#38bdf8';
+    bctx.lineWidth = 6;
+    bctx.strokeRect(6, 6, 500, 244);
+
+    bctx.fillStyle = '#38bdf8';
+    bctx.font = '900 22px sans-serif';
+    bctx.textAlign = 'center';
+    bctx.fillText('TELA-COMPUTADOR 43" ALL-IN-ONE', 256, 54);
+
+    bctx.fillStyle = '#f8fafc';
+    bctx.font = 'bold 18px sans-serif';
+    bctx.fillText('CPU + RAM + SSD + TOUCH NA PRÓPRIA TELA', 256, 98);
+
+    bctx.fillStyle = '#4ade80';
+    bctx.font = 'bold 17px sans-serif';
+    bctx.fillText('✓ SEM COMPUTADOR EXTERNO • REBAIXO 2,5 CM', 256, 142);
+
+    bctx.fillStyle = '#94a3b8';
+    bctx.font = 'bold 15px sans-serif';
+    bctx.fillText('DISSIPAÇÃO 100% PASSIVA • CONECTOR ÚNICO 12V DC', 256, 186);
+    bctx.fillText('GRAU INDUSTRIAL IP65/IP66 • ESTÂNCIA DE JAÚ', 256, 218);
+
+    const badgeTex = new THREE.CanvasTexture(badgeCanvas);
+    const badgeMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.32, 0.16),
+      new THREE.MeshBasicMaterial({ map: badgeTex })
+    );
+    badgeMesh.rotation.y = Math.PI;
+    badgeMesh.position.set(0, 1.20, 0.127);
+    this.allInOnePcGroup.add(badgeMesh);
+
+    // Conector único selado de energia 12V DC na borda inferior da própria Tela-Computador
+    const powerPlug = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.028, 0.016),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 })
+    );
+    powerPlug.position.set(-0.12, 0.72, 0.122);
+    this.allInOnePcGroup.add(powerPlug);
+
+    const statusLed = new THREE.Mesh(
       new THREE.SphereGeometry(0.005, 12, 12),
       new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.95 })
     );
-    opsLed.position.set(-0.07, 1.32, 0.106);
-    this.allInOnePcGroup.add(opsLed);
+    statusLed.position.set(-0.08, 0.72, 0.118);
+    this.allInOnePcGroup.add(statusLed);
 
     this.internalHardwareGroup.add(this.allInOnePcGroup);
 
-    // 3. QUADRO ELÉTRICO DIN (QDE) NO TRILHO INTERMEDIÁRIO (y = 1.05)
-    // Disjuntor Bipolar 16A
-    const disjuntor = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinWhiteMat);
-    disjuntor.position.set(-0.18, 1.05, -0.01);
+    // 2. TRILHO DIN ÚNICO INFERIOR (y = 0.74): PROTEÇÃO ELÉTRICA + FONTE 12V + CONTROLADOR SOLAR
+    const singleDinRail = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.035, 0.008), dinRailMat);
+    singleDinRail.position.set(0, 0.74, 0.02);
+    this.internalHardwareGroup.add(singleDinRail);
+
+    // Disjuntor 16A + DPS Anti-Raio 40kA + DR 30mA (à esquerda do Trilho DIN único)
+    const disjuntor = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.075, 0.055), dinWhiteMat);
+    disjuntor.position.set(-0.21, 0.74, 0.00);
     this.internalHardwareGroup.add(disjuntor);
 
     const djLever = new THREE.Mesh(
-      new THREE.BoxGeometry(0.026, 0.018, 0.016),
+      new THREE.BoxGeometry(0.024, 0.016, 0.014),
       new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 })
     );
-    djLever.position.set(-0.18, 1.06, -0.042);
+    djLever.position.set(-0.21, 0.75, -0.030);
     this.internalHardwareGroup.add(djLever);
 
-    // Protetor de Surtos DPS 40kA
-    const dpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinOrangeMat);
-    dpsBox.position.set(-0.13, 1.05, -0.01);
+    const dpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.075, 0.055), dinOrangeMat);
+    dpsBox.position.set(-0.165, 0.74, 0.00);
     this.internalHardwareGroup.add(dpsBox);
 
     const dpsStatus = new THREE.Mesh(
       new THREE.BoxGeometry(0.014, 0.010, 0.004),
       new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.6 })
     );
-    dpsStatus.position.set(-0.13, 1.07, -0.041);
+    dpsStatus.position.set(-0.165, 0.76, -0.029);
     this.internalHardwareGroup.add(dpsStatus);
 
-    // Interruptor DR 30mA
-    const drBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.060), dinWhiteMat);
-    drBox.position.set(-0.08, 1.05, -0.01);
+    const drBox = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.075, 0.055), dinWhiteMat);
+    drBox.position.set(-0.12, 0.74, 0.00);
     this.internalHardwareGroup.add(drBox);
 
     const drTestBtn = new THREE.Mesh(
       new THREE.BoxGeometry(0.010, 0.010, 0.008),
       new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 })
     );
-    drTestBtn.position.set(-0.08, 1.075, -0.042);
+    drTestBtn.position.set(-0.12, 0.765, -0.030);
     this.internalHardwareGroup.add(drTestBtn);
 
-    // Bornes de passagem Sakit/Wago
-    for (let b = 0; b < 6; b++) {
-      const borneColor = b < 2 ? 0x94a3b8 : (b < 4 ? 0x0284c7 : 0x84cc16);
-      const borne = new THREE.Mesh(
-        new THREE.BoxGeometry(0.009, 0.060, 0.048),
-        new THREE.MeshStandardMaterial({ color: borneColor, roughness: 0.5 })
-      );
-      borne.position.set(-0.02 + b * 0.011, 1.05, -0.015);
-      this.internalHardwareGroup.add(borne);
-    }
-
-    // 4. FONTE CHAVEADA INDUSTRIAL SMPS MEANWELL 12V 20A (y = 0.76)
-    const smpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.11, 0.052), smpsMat);
-    smpsBox.position.set(-0.14, 0.76, 0.02);
+    // 3. FONTE CHAVEADA INDUSTRIAL 12V (no centro do Trilho DIN único, y = 0.74)
+    const smpsBox = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.10, 0.050), smpsMat);
+    smpsBox.position.set(-0.01, 0.74, 0.00);
     this.internalHardwareGroup.add(smpsBox);
 
     const ledSmps = new THREE.Mesh(
       new THREE.SphereGeometry(0.004, 10, 10),
       new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.8 })
     );
-    ledSmps.position.set(-0.08, 0.79, -0.008);
+    ledSmps.position.set(0.035, 0.77, -0.026);
     this.internalHardwareGroup.add(ledSmps);
 
-    // 5. CONTROLADOR SOLAR MPPT 20A (y = 0.76)
+    // 4. CONTROLADOR SOLAR MPPT 20A — CAIXINHA AZUL (à direita do Trilho DIN único, y = 0.74)
     const mpptBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.15, 0.12, 0.050),
+      new THREE.BoxGeometry(0.13, 0.10, 0.048),
       new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.5, roughness: 0.35 })
     );
-    mpptBox.position.set(0.12, 0.76, 0.02);
+    mpptBox.position.set(0.15, 0.74, 0.00);
     this.internalHardwareGroup.add(mpptBox);
 
     const mpptLcd = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.058, 0.030),
+      new THREE.PlaneGeometry(0.054, 0.028),
       new THREE.MeshBasicMaterial({ color: 0x0284c7 })
     );
-    mpptLcd.position.set(0.12, 0.78, -0.006);
+    mpptLcd.position.set(0.15, 0.76, -0.025);
     mpptLcd.rotation.y = Math.PI;
     this.internalHardwareGroup.add(mpptLcd);
 
-    // 6. BANCO DE BATERIAS LiFePO4 12,8V 40Ah NA BASE (y = 0.28)
-    const batBox = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.18, 0.18), batteryMat);
-    batBox.position.set(0.0, 0.28, 0.0);
+    // Conector / Borne de Entrada Solar (MC4 Laranja) no topo da Caixinha Azul (MPPT)
+    const mpptSolarInputPlug = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.008, 0.008, 0.018, 14),
+      this.hardwareWiringMaterials.solarPos
+    );
+    mpptSolarInputPlug.position.set(0.18, 0.796, -0.008);
+    this.internalHardwareGroup.add(mpptSolarInputPlug);
+
+    // Base Interna da Placa Solar no Teto + Caixa de Junção / Prensa-Cabo IP68 sob a Placa Solar
+    const solarUnderBase = new THREE.Mesh(
+      new THREE.BoxGeometry(0.58, 0.010, 0.19),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.6, roughness: 0.3 })
+    );
+    solarUnderBase.position.set(0, 2.183, -0.055);
+    this.internalHardwareGroup.add(solarUnderBase);
+
+    const solarJunctionBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.065, 0.026, 0.050),
+      new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.5, roughness: 0.35 })
+    );
+    solarJunctionBox.position.set(0.18, 2.172, -0.030);
+    this.internalHardwareGroup.add(solarJunctionBox);
+
+    const solarGlandNut = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.009, 0.009, 0.022, 14),
+      this.hardwareWiringMaterials.solarPos
+    );
+    solarGlandNut.position.set(0.18, 2.155, -0.020);
+    this.internalHardwareGroup.add(solarGlandNut);
+
+    // 5. BATERIA COMPACTA LiFePO4 12,8V DA PLACA SOLAR (NA BASE FRIA, y = 0.27)
+    const batBox = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.15, 0.15), batteryMat);
+    batBox.position.set(0.06, 0.27, 0.0);
     this.internalHardwareGroup.add(batBox);
 
     const batHandle = new THREE.Mesh(
-      new THREE.BoxGeometry(0.22, 0.014, 0.020),
+      new THREE.BoxGeometry(0.18, 0.012, 0.018),
       new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 })
     );
-    batHandle.position.set(0.0, 0.375, 0.0);
+    batHandle.position.set(0.06, 0.35, 0.0);
     this.internalHardwareGroup.add(batHandle);
 
     const batTermPos = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.012, 0.012, 0.018, 16),
+      new THREE.CylinderGeometry(0.010, 0.010, 0.016, 16),
       new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.7, roughness: 0.3 })
     );
-    batTermPos.position.set(-0.11, 0.375, 0.05);
+    batTermPos.position.set(-0.02, 0.35, 0.04);
     this.internalHardwareGroup.add(batTermPos);
 
     const batTermNeg = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.012, 0.012, 0.018, 16),
+      new THREE.CylinderGeometry(0.010, 0.010, 0.016, 16),
       new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7, roughness: 0.3 })
     );
-    batTermNeg.position.set(0.11, 0.375, 0.05);
+    batTermNeg.position.set(0.14, 0.35, 0.04);
     this.internalHardwareGroup.add(batTermNeg);
 
-    // 7. VERSO DO MONITOR 43" & PLACAS AD E TOUCH (z = 0.12 a 0.16)
-    const screenBackMetal = new THREE.Mesh(new THREE.BoxGeometry(0.56, 1.02, 0.015), aluRailMat);
-    screenBackMetal.position.set(0, 1.18, 0.155);
-    this.internalHardwareGroup.add(screenBackMetal);
-
-    const pcbAd = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.008), pcbGreenMat);
-    pcbAd.position.set(-0.06, 1.36, 0.14);
-    this.separateMiniPcGroup.add(pcbAd);
-
-    const heatSinkAd = new THREE.Mesh(
-      new THREE.BoxGeometry(0.045, 0.045, 0.015),
-      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 })
-    );
-    heatSinkAd.position.set(-0.06, 1.36, 0.13);
-    this.separateMiniPcGroup.add(heatSinkAd);
-
-    const pcbTouch = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.006), pcbBlueMat);
-    pcbTouch.position.set(0.14, 1.15, 0.14);
-    this.internalHardwareGroup.add(pcbTouch);
-
-    const pcbLedDriver = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 0.008), pcbGreenMat);
-    pcbLedDriver.position.set(-0.06, 0.95, 0.14);
-    this.internalHardwareGroup.add(pcbLedDriver);
-
-    // 8. SISTEMA DE EXAUSTÃO DUPLA 120mm (y = 1.95)
-    [-0.14, 0.14].forEach(fx => {
-      const fanFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(0.12, 0.12, 0.026),
-        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })
-      );
-      fanFrame.position.set(fx, 1.95, -0.06);
-      this.internalHardwareGroup.add(fanFrame);
-
-      const fanGrill = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.003, 8, 24), dinRailMat);
-      fanGrill.position.set(fx, 1.95, -0.075);
-      this.internalHardwareGroup.add(fanGrill);
-    });
-
-    const thermoBox = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.055, 0.040), dinWhiteMat);
-    thermoBox.position.set(0.22, 1.05, -0.01);
-    this.internalHardwareGroup.add(thermoBox);
-
-    const thermoKnob = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.010, 0.010, 0.008, 16),
-      new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 })
-    );
-    thermoKnob.rotation.x = Math.PI / 2;
-    thermoKnob.position.set(0.22, 1.05, -0.032);
-    this.internalHardwareGroup.add(thermoKnob);
-
-    // 9. MÓDULO DE COMUNICAÇÃO SOLAR & GESTÃO MPPT (y = 1.75)
-    // Interliga diretamente o painel solar fotovoltaico, controlador e bateria ao Mini-PC
-    const solarCommBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.16, 0.10, 0.045),
-      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, metalness: 0.65, roughness: 0.35 })
-    );
-    solarCommBox.position.set(0.0, 1.75, 0.0);
-    this.internalHardwareGroup.add(solarCommBox);
-
-    for (let m = 0; m < 4; m++) {
-      const ledM = new THREE.Mesh(
-        new THREE.SphereGeometry(0.003, 8, 8),
-        new THREE.MeshBasicMaterial({ color: m === 0 ? 0x22c55e : (m === 1 ? 0xeab308 : 0x38bdf8) })
-      );
-      ledM.position.set(-0.04 + m * 0.025, 1.78, -0.024);
-      this.internalHardwareGroup.add(ledM);
-    }
-
-    // 10. BARRAMENTO PE EM COBRE MACIÇO (y = 0.55)
-    const groundBar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.016, 0.006), copperGroundMat);
-    groundBar.position.set(-0.08, 0.55, -0.03);
+    // 6. BARRAMENTO PE DE ATERRAMENTO EM COBRE MACIÇO (y = 0.48)
+    const groundBar = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.016, 0.006), copperGroundMat);
+    groundBar.position.set(-0.14, 0.48, 0.0);
     this.internalHardwareGroup.add(groundBar);
 
-    for (let p = -0.11; p <= 0.11; p += 0.036) {
-      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.008, 12), dinRailMat);
+    for (let p = -0.08; p <= 0.08; p += 0.032) {
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.008, 12), dinRailMat);
       screw.rotation.x = Math.PI / 2;
-      screw.position.set(-0.08 + p, 0.55, -0.034);
+      screw.position.set(-0.14 + p, 0.48, -0.004);
       this.internalHardwareGroup.add(screw);
     }
 
-    // 11. CHICOTES DE CABOS FÍSICOS CURVOS 3D
-    const createWire = (pts, mat, r = 0.004, targetGroup = this.internalHardwareGroup) => {
+    // 7. FIAÇÃO MÍNIMA ESSENCIAL (1 ÚNICO CABO DE ENERGIA P/ A TELA ALL-IN-ONE)
+    const createWire = (pts, mat, r = 0.004, targetGroup = this.internalHardwareGroup, segments = 48) => {
       const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
-      const geo = new THREE.TubeGeometry(curve, 28, r, 7, false);
+      const geo = new THREE.TubeGeometry(curve, segments, r, 8, false);
       const mesh = new THREE.Mesh(geo, mat);
       targetGroup.add(mesh);
       return mesh;
     };
 
-    // AC 220V Subterrâneo -> Disjuntor
+    // AC 220V Subterrâneo -> Disjuntor DIN
     createWire([
-      [-0.18, 0.12, 0.0],
-      [-0.26, 0.40, -0.01],
-      [-0.27, 0.85, -0.02],
-      [-0.20, 1.01, -0.02],
-      [-0.18, 1.02, -0.02]
-    ], this.hardwareWiringMaterials.acLive, 0.0065);
+      [-0.21, 0.14, 0.0],
+      [-0.21, 0.45, 0.0],
+      [-0.21, 0.70, 0.0]
+    ], this.hardwareWiringMaterials.acLive, 0.0055);
 
-    // AC Fase Marrom do Disjuntor -> DR -> DPS -> Fonte SMPS
+    // Cabo único 12V DC da Fonte/MPPT direto para o conector da Tela-Computador 43" All-in-One
     createWire([
-      [-0.18, 1.08, -0.02],
-      [-0.13, 1.08, -0.02],
-      [-0.08, 1.08, -0.02],
-      [-0.26, 1.00, 0.0],
-      [-0.26, 0.78, 0.0],
-      [-0.15, 0.72, 0.0]
-    ], this.hardwareWiringMaterials.acLive, 0.004);
-
-    // AC Neutro Azul -> Fonte SMPS
-    createWire([
-      [-0.07, 1.08, -0.02],
-      [-0.25, 0.98, 0.01],
-      [-0.25, 0.76, 0.01],
-      [-0.13, 0.72, 0.0]
-    ], this.hardwareWiringMaterials.acNeutral, 0.004);
-
-    // --- Cabos exclusivos da Opção A (Mini-PC Separado no Rack) ---
-    // DC 12V Positivo Vermelho -> Mini-PC Separado
-    createWire([
-      [-0.12, 0.72, 0.0],
-      [-0.25, 0.74, 0.01],
-      [-0.25, 1.30, 0.01],
-      [-0.03, 1.34, 0.01]
-    ], this.hardwareWiringMaterials.dc12vPos, 0.005, this.separateMiniPcGroup);
-
-    // DC 12V Negativo Preto -> Mini-PC Separado
-    createWire([
-      [-0.11, 0.72, 0.0],
-      [-0.24, 0.73, 0.01],
-      [-0.24, 1.32, 0.01],
-      [-0.03, 1.34, 0.01]
-    ], this.hardwareWiringMaterials.dc12vNeg, 0.005, this.separateMiniPcGroup);
-
-    // Cabo de Vídeo HDMI 2.1 (Azul Escuro) -> Placa AD
-    createWire([
-      [0.10, 1.36, 0.01],
-      [0.08, 1.36, 0.07],
-      [-0.04, 1.36, 0.08],
-      [-0.06, 1.36, 0.13]
-    ], this.hardwareWiringMaterials.hdmi, 0.0055, this.separateMiniPcGroup);
-
-    // Cabo USB Touchscreen (Amarelo) -> Mini-PC Separado
-    createWire([
-      [0.14, 1.15, 0.13],
-      [0.18, 1.15, 0.08],
-      [0.18, 1.40, 0.04],
-      [0.04, 1.43, 0.01]
-    ], this.hardwareWiringMaterials.usb, 0.0045, this.separateMiniPcGroup);
-
-    // Cabo de Telemetria Solar RS485 (Verde) -> Mini-PC Separado
-    createWire([
-      [0.11, 1.43, 0.01],
-      [0.24, 1.48, 0.01],
-      [0.24, 1.72, 0.01],
-      [0.08, 1.75, 0.01]
-    ], this.hardwareWiringMaterials.ethernet, 0.0045, this.separateMiniPcGroup);
-
-    // --- Cabos enxutos da Opção B (Tela Touch All-in-One c/ PC Acoplado OPS) ---
-    // Alimentação única DC 12V/24V direto na Tela All-in-One (sem HDMI e sem USB externo!)
-    createWire([
-      [-0.12, 0.72, 0.0],
-      [-0.25, 0.74, 0.04],
-      [-0.25, 1.24, 0.09],
-      [-0.09, 1.24, 0.12]
+      [-0.01, 0.78, 0.01],
+      [-0.12, 0.80, 0.06],
+      [-0.12, 0.72, 0.12]
     ], this.hardwareWiringMaterials.dc12vPos, 0.005, this.allInOnePcGroup);
 
-    // Telemetria Solar RS485 ligada direto no Módulo OPS Acoplado
+    // Cabo Solar (Laranja Contínuo) ligando diretamente a Placa Solar no Teto -> Caixinha Azul (Controlador MPPT)
+    // Pontos intermediários alinhados em x = 0.225 (longe da parede lateral em x = 0.298) para nunca entrar na parede!
     createWire([
-      [0.08, 1.28, 0.12],
-      [0.24, 1.35, 0.08],
-      [0.24, 1.72, 0.02],
-      [0.08, 1.75, 0.01]
-    ], this.hardwareWiringMaterials.ethernet, 0.0045, this.allInOnePcGroup);
+      [0.18, 2.202, -0.035],
+      [0.18, 2.155, -0.020],
+      [0.20, 2.02, -0.012],
+      [0.225, 1.88, -0.008],
+      [0.225, 1.62, -0.008],
+      [0.225, 1.35, -0.008],
+      [0.225, 1.08, -0.008],
+      [0.220, 0.88, -0.008],
+      [0.195, 0.82, -0.008],
+      [0.180, 0.796, -0.008],
+      [0.175, 0.76, -0.005]
+    ], this.hardwareWiringMaterials.solarPos, 0.006, this.internalHardwareGroup, 64);
 
-    // Cabos Solares (Laranja) -> MPPT
+    // Cabo da Bateria Solar LiFePO4 -> Controlador MPPT
     createWire([
-      [0.0, 2.18, -0.05],
-      [0.25, 2.05, -0.02],
-      [0.25, 0.80, 0.01],
-      [0.13, 0.76, 0.01]
-    ], this.hardwareWiringMaterials.solarPos, 0.005);
-
-    // Cabos Bateria LiFePO4 (Vermelho Grosso) -> MPPT
-    createWire([
-      [0.12, 0.72, 0.01],
-      [0.12, 0.50, 0.02],
-      [-0.10, 0.40, 0.04],
-      [-0.11, 0.38, 0.05]
-    ], this.hardwareWiringMaterials.batteryLead, 0.007);
+      [0.15, 0.69, 0.01],
+      [0.15, 0.50, 0.02],
+      [-0.02, 0.39, 0.04],
+      [-0.02, 0.35, 0.04]
+    ], this.hardwareWiringMaterials.batteryLead, 0.0055);
 
     // Aterramento PE Equipotencial (Verde) -> Barramento
     createWire([
-      [-0.08, 0.55, -0.03],
-      [-0.26, 0.55, -0.02],
-      [-0.26, 1.05, -0.02],
-      [-0.01, 1.05, -0.02]
-    ], this.hardwareWiringMaterials.groundPE, 0.005);
+      [-0.14, 0.14, 0.0],
+      [-0.14, 0.48, 0.0],
+      [-0.14, 0.70, 0.0]
+    ], this.hardwareWiringMaterials.groundPE, 0.0045);
 
-    // Define arquitetura inicial (All-in-One Touch c/ PC Acoplado ou Mini-PC Separado)
     this.pcArchitecture = 'allinone';
-    this.separateMiniPcGroup.visible = false;
     this.allInOnePcGroup.visible = true;
 
     this.totemGroup.add(this.internalHardwareGroup);
@@ -1390,7 +1353,8 @@ class Totem3DViewer {
       ctx.textAlign = 'center';
       ctx.fillStyle = titleColor;
       ctx.font = '800 62px sans-serif';
-      ctx.fillText('JAÚ', w / 2, 104);
+      const headerCityLabel = this.currentCity === 'itapui' ? 'ITAPUÍ' : (this.currentCity === 'bauru' ? 'BAURU' : 'JAÚ');
+      ctx.fillText(headerCityLabel, w / 2, 104);
       ctx.fillStyle = subTitleColor;
       ctx.font = 'bold 23px sans-serif';
       ctx.fillText('SP • CONECTADA COM VOCÊ', w / 2, 152);
@@ -1399,18 +1363,14 @@ class Totem3DViewer {
     }
 
     // -----------------------------------------------------------------------
-    // 2. CHAPA INFERIOR FRONTAL CEGA E ESTANQUE (Sem Mosca de Som / Só Tela)
+    // 2. BRASÃO DA PREFEITURA EM BAIXO-RELEVO NA CHAPA INFERIOR FRONTAL (JAÚ / ITAPUÍ / BAURU)
     // -----------------------------------------------------------------------
     {
-      const lctx = this.lowerConsoleCtx;
-      lctx.fillStyle = metalBase;
-      lctx.fillRect(0, 0, 512, 420);
-      this.drawBrushedGrain(lctx, 0, 0, 512, 420, 0.06, 0.08);
-      if (this.lowerTexture) this.lowerTexture.needsUpdate = true;
+      this.renderDebossedCrestFromDepth(this.currentCity || 'jau', metalBase);
     }
 
     // -----------------------------------------------------------------------
-    // 3. PARTE DE FERRO DAS COSTAS (TAMPÃO TRASEIRO DE ACESSO + VENEZIANAS + PLAQUETA)
+    // 3. PARTE DE FERRO DAS COSTAS (PORTA TRASEIRA 100% LIMPA SEM ESCRITURAS/PLAQUINHAS)
     // -----------------------------------------------------------------------
     {
       const rctx = this.rearCtx;
@@ -1422,7 +1382,7 @@ class Totem3DViewer {
       rctx.fillRect(0, 0, 512, 1400);
       this.drawBrushedGrain(rctx, 0, 0, 512, 1400, 0.06, 0.09);
 
-      // Fresta/contorno de vedação de borracha EPDM do Tampão Traseiro (Porta de Acesso)
+      // Fresta/contorno de vedação de borracha EPDM da Porta Traseira (100% limpa)
       rctx.strokeStyle = '#0f172a';
       rctx.lineWidth = 10;
       rctx.strokeRect(22, 24, 468, 1352);
@@ -1430,77 +1390,936 @@ class Totem3DViewer {
       rctx.lineWidth = 2.5;
       rctx.strokeRect(32, 34, 448, 1332);
 
-      // Venezianas / Grelhas de ventilação superior estampadas no tampão de ferro
-      for (let i = 0; i < 9; i++) {
-        rctx.fillStyle = '#1e293b';
-        rctx.fillRect(86, 85 + i * 22, 340, 10);
-        rctx.fillStyle = metalLight;
-        rctx.fillRect(86, 82 + i * 22, 340, 3);
+      if (this.rearTexture) this.rearTexture.needsUpdate = true;
+    }
+  }
+
+  // =========================================================================
+  // MOTOR DE BAIXO-RELEVO METÁLICO (HEIGHTMAP + BEVEL NORMAL + BUMP MAP 3D)
+  // Gera os Brasões Oficiais de Jaú (Lei nº 77/1949), Itapuí e Bauru (Lei nº 3.393/1991)
+  // estampados em baixo-relevo diretamente na chapa frontal inferior do Totem
+  // =========================================================================
+  buildCityCrestDepthMap(cityKey = 'jau') {
+    const key = cityKey === 'itapui' ? 'itapui' : (cityKey === 'bauru' ? 'bauru' : 'jau');
+    if (this.crestDepthCache && this.crestDepthCache[key]) {
+      return this.crestDepthCache[key];
+    }
+
+    const W = 512;
+    const H = 512;
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const ctx = c.getContext('2d');
+
+    // Profundidade 0 = chapa metálica lisa original; 1.0 = entalhe profundo do baixo-relevo
+    const gray = (d) => {
+      const v = Math.round(Math.max(0, Math.min(1, d)) * 255);
+      return `rgb(${v},${v},${v})`;
+    };
+
+    ctx.fillStyle = gray(0);
+    ctx.fillRect(0, 0, W, H);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // -----------------------------------------------------------------------
+    // 1. SUPORTES LATERAIS (RAMOS DE CAFEEIRO / CANA-DE-AÇÚCAR E LAVOURA)
+    // -----------------------------------------------------------------------
+    const drawBranch = (side, mode) => {
+      ctx.save();
+      if (side === 'right') {
+        ctx.translate(W, 0);
+        ctx.scale(-1, 1);
       }
 
-      // Plaqueta Institucional & Técnica do Tampão Traseiro em Aço Escovado Natural
-      const rearPlateGrad = rctx.createLinearGradient(64, 330, 448, 775);
-      rearPlateGrad.addColorStop(0, metalLight);
-      rearPlateGrad.addColorStop(1, metalMid);
-      rctx.fillStyle = rearPlateGrad;
-      rctx.fillRect(64, 330, 384, 445);
-      this.drawBrushedGrain(rctx, 64, 330, 384, 445, 0.07, 0.07);
+      // Haste principal curvada abraçando o escudo português
+      ctx.strokeStyle = gray(0.84);
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.moveTo(256, 408);
+      ctx.bezierCurveTo(150, 404, 72, 326, 68, 224);
+      ctx.bezierCurveTo(66, 174, 84, 132, 114, 102);
+      ctx.stroke();
 
-      rctx.strokeStyle = metalBorder;
-      rctx.lineWidth = 3.5;
-      rctx.strokeRect(64, 330, 384, 445);
-      this.drawCornerRivets(rctx, 64, 330, 384, 445, 16);
+      // Relevo interno da haste
+      ctx.strokeStyle = gray(0.45);
+      ctx.lineWidth = 4;
+      ctx.stroke();
 
-      rctx.fillStyle = titleColor;
-      rctx.font = 'bold 21px sans-serif';
-      rctx.textAlign = 'center';
-      rctx.fillText('PREFEITURA DE JAÚ • CARCAÇA IP65', 256, 388);
-      rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 26px sans-serif';
-      rctx.fillText('TAMPÃO TRASEIRO DE ACESSO', 256, 430);
-      rctx.fillStyle = greenBadgeColor;
-      rctx.font = 'bold 15.5px sans-serif';
-      rctx.fillText('🚪 PORTA DE MANUTENÇÃO C/ 3 DOBRADIÇAS', 256, 472);
-
-      const specs = [
-        '• Carcaça: Chapa de Aço Dobrado 2,5mm (Oca)',
-        '• Tampão Traseiro: Abertura 105° c/ Puxador',
-        '• Trava Dupla: 2 Fechaduras Tubulares + Lingueta',
-        '• Vedação: Borracha EPDM Perimetral anti-chuva',
-        '• Computador: Touch All-in-One (OPS) ou Mini-PC',
-        '• Energia: Híbrida Solar 35Wp + Rede 220V + LiFePO4',
-        '• Dimensões: 2,20m (A) x 0,70m (L) x 0,35m (P)'
+      const nodes = [
+        { x: 170, y: 392, ang: -2.45, scale: 0.92 },
+        { x: 122, y: 362, ang: -2.15, scale: 1.00 },
+        { x: 90,  y: 318, ang: -1.85, scale: 1.06 },
+        { x: 73,  y: 266, ang: -1.55, scale: 1.08 },
+        { x: 69,  y: 212, ang: -1.28, scale: 1.04 },
+        { x: 78,  y: 162, ang: -1.02, scale: 0.96 },
+        { x: 98,  y: 120, ang: -0.78, scale: 0.86 }
       ];
-      rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 14px sans-serif';
-      rctx.textAlign = 'left';
-      specs.forEach((line, idx) => {
-        rctx.fillText(line, 82, 522 + idx * 29, 348);
+
+      if (mode === 'cana') {
+        // Gomos de cana-de-açúcar e folhas agrícolas alongadas (Itapuí lado direito)
+        nodes.forEach((n, idx) => {
+          ctx.save();
+          ctx.translate(n.x, n.y);
+          ctx.rotate(n.ang);
+          // Gomo entalhado na haste
+          ctx.fillStyle = gray(0.92);
+          ctx.fillRect(-7, -3, 14, 6);
+
+          // Folha longa lanceolada externa e interna
+          [-0.65, 0.58].forEach((dir) => {
+            ctx.save();
+            ctx.rotate(dir);
+            ctx.fillStyle = gray(0.66);
+            ctx.strokeStyle = gray(0.94);
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(-18 * n.scale, -24 * n.scale, -5 * n.scale, -52 * n.scale);
+            ctx.quadraticCurveTo(14 * n.scale, -24 * n.scale, 0, 0);
+            ctx.fill();
+            ctx.stroke();
+            // Nervura central
+            ctx.beginPath();
+            ctx.moveTo(0, -3);
+            ctx.lineTo(-3 * n.scale, -44 * n.scale);
+            ctx.stroke();
+            ctx.restore();
+          });
+          ctx.restore();
+        });
+      } else {
+        // Ramo de Cafeeiro Frutificado (Folhas ovais nervuradas + cachos de grãos de café)
+        nodes.forEach((n) => {
+          ctx.save();
+          ctx.translate(n.x, n.y);
+          ctx.rotate(n.ang);
+
+          [-0.78, 0.72].forEach((leafAng) => {
+            ctx.save();
+            ctx.rotate(leafAng);
+            ctx.fillStyle = gray(0.64);
+            ctx.strokeStyle = gray(0.94);
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-18 * n.scale, -12 * n.scale, -18 * n.scale, -34 * n.scale, 0, -44 * n.scale);
+            ctx.bezierCurveTo(18 * n.scale, -34 * n.scale, 18 * n.scale, -12 * n.scale, 0, 0);
+            ctx.fill();
+            ctx.stroke();
+
+            // Nervura central e nervuras secundárias da folha de café
+            ctx.strokeStyle = gray(0.95);
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.moveTo(0, -3);
+            ctx.lineTo(0, -38 * n.scale);
+            ctx.moveTo(0, -15 * n.scale);
+            ctx.lineTo(-8 * n.scale, -22 * n.scale);
+            ctx.moveTo(0, -15 * n.scale);
+            ctx.lineTo(8 * n.scale, -22 * n.scale);
+            ctx.moveTo(0, -26 * n.scale);
+            ctx.lineTo(-7 * n.scale, -32 * n.scale);
+            ctx.moveTo(0, -26 * n.scale);
+            ctx.lineTo(7 * n.scale, -32 * n.scale);
+            ctx.stroke();
+            ctx.restore();
+          });
+
+          // Cachos de frutos/grãos de café junto ao nó
+          [[-9, -4], [9, -4], [0, -10]].forEach(([bx, by]) => {
+            ctx.fillStyle = gray(0.92);
+            ctx.beginPath();
+            ctx.arc(bx, by, 5.5 * n.scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = gray(0.32);
+            ctx.beginPath();
+            ctx.arc(bx, by, 2.6 * n.scale, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          ctx.restore();
+        });
+      }
+      ctx.restore();
+    };
+
+    drawBranch('left', 'cafe');
+    drawBranch('right', key === 'itapui' ? 'cana' : 'cafe');
+
+    // Laço de cruzamento dos ramos sob a ponta do escudo
+    ctx.fillStyle = gray(0.88);
+    ctx.strokeStyle = gray(0.96);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(236, 394, 40, 18, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    // -----------------------------------------------------------------------
+    // 2. COROA MURAL MUNICIPAL FORTIFICADA (5 TORRES VISÍVEIS EM PERSPECTIVA)
+    // -----------------------------------------------------------------------
+    const towers = [
+      { x: 132, w: 38, y: 44, h: 64, gate: true },
+      { x: 174, w: 46, y: 34, h: 74, gate: true },
+      { x: 224, w: 64, y: 24, h: 84, gate: true, main: true },
+      { x: 292, w: 46, y: 34, h: 74, gate: true },
+      { x: 342, w: 38, y: 44, h: 64, gate: true }
+    ];
+
+    // Base mural unindo as 5 torres
+    ctx.fillStyle = gray(0.60);
+    ctx.strokeStyle = gray(0.95);
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.roundRect(128, 56, 256, 56, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    towers.forEach((t) => {
+      // Corpo da torre
+      ctx.fillStyle = gray(t.main ? 0.44 : 0.54);
+      ctx.strokeStyle = gray(0.95);
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.rect(t.x, t.y + 12, t.w, t.h - 12);
+      ctx.fill();
+      ctx.stroke();
+
+      // 3 Ameias (merlões) no topo de cada torre
+      const mW = (t.w - 8) / 3;
+      for (let m = 0; m < 3; m++) {
+        const mx = t.x + m * (mW + 4);
+        ctx.fillStyle = gray(0.46);
+        ctx.fillRect(mx, t.y, mW, 14);
+        ctx.strokeRect(mx, t.y, mW, 14);
+      }
+
+      // Linhas de cantaria (pedras da muralha)
+      ctx.strokeStyle = gray(0.88);
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(t.x + 3, t.y + 28);
+      ctx.lineTo(t.x + t.w - 3, t.y + 28);
+      ctx.moveTo(t.x + 3, t.y + 44);
+      ctx.lineTo(t.x + t.w - 3, t.y + 44);
+      ctx.stroke();
+
+      // Portão arqueado profundo (em Jaú destaca o Portal da Padroeira N. Sra. do Patrocínio; em Itapuí os 5 portões)
+      const gw = t.main ? 22 : 14;
+      const gh = t.main ? 32 : 24;
+      const gx = t.x + t.w / 2;
+      const gy = t.y + t.h - 4;
+      ctx.fillStyle = gray(0.98);
+      ctx.beginPath();
+      ctx.moveTo(gx - gw / 2, gy);
+      ctx.lineTo(gx - gw / 2, gy - gh + gw / 2);
+      ctx.arc(gx, gy - gh + gw / 2, gw / 2, Math.PI, 0, false);
+      ctx.lineTo(gx + gw / 2, gy);
+      ctx.closePath();
+      ctx.fill();
+    });
+
+    // Cinturão de base da Coroa Mural
+    ctx.fillStyle = gray(0.88);
+    ctx.fillRect(126, 104, 260, 10);
+
+    // -----------------------------------------------------------------------
+    // 3. ESCUDO PORTUGUÊS CLÁSSICO (CONTORNO CHANFRADO EM BAIXO-RELEVO)
+    // -----------------------------------------------------------------------
+    const shieldPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(132, 118);
+      ctx.lineTo(380, 118);
+      ctx.lineTo(380, 264);
+      ctx.arc(256, 264, 124, 0, Math.PI, false);
+      ctx.closePath();
+    };
+
+    // Cavidade principal do escudo
+    ctx.save();
+    shieldPath();
+    ctx.fillStyle = gray(0.54);
+    ctx.fill();
+    ctx.lineWidth = 16;
+    ctx.strokeStyle = gray(0.95);
+    ctx.stroke();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = gray(0.24);
+    ctx.stroke();
+    ctx.clip();
+
+    if (key === 'jau') {
+      // =====================================================================
+      // HERÁLDICA OFICIAL DE JAÚ (LEI MUNICIPAL Nº 77/1949 - ROBERTO THUT)
+      // 1) Chefe: Águia + Hélice do Hidroavião "Jahu" (João Ribeiro de Barros)
+      // 2) Centro: Perobeira (Mata Original) + Sol e Riqueza da Terra Roxa
+      // 3) Base: Ondas do Rio Jaú + Grande Peixe Jaú (Figura Parlante)
+      // =====================================================================
+
+      // Divisas horizontais do escudo
+      ctx.fillStyle = gray(0.92);
+      ctx.fillRect(130, 194, 252, 7);
+      ctx.fillRect(130, 278, 252, 7);
+
+      // --- CAMPO 1 (TOPO): ÁGUIA DE ASAS ABERTAS + HÉLICE DO "JAHU" ---
+      // Asas abertas da Águia em relevo dentro da cavidade
+      [-1, 1].forEach((dir) => {
+        for (let p = 0; p < 5; p++) {
+          const len = 88 - p * 13;
+          const py = 136 + p * 9;
+          ctx.fillStyle = gray(0.22);
+          ctx.strokeStyle = gray(0.92);
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(256 + dir * 12, py);
+          ctx.quadraticCurveTo(256 + dir * (len * 0.65), py - 8, 256 + dir * len, py + 2);
+          ctx.quadraticCurveTo(256 + dir * (len * 0.65), py + 8, 256 + dir * 12, py + 6);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
       });
 
-      // Plaqueta de Aviso de Abertura do Tampão Traseiro
-      rctx.fillStyle = metalLight;
-      rctx.fillRect(86, 805, 340, 82);
-      rctx.strokeStyle = metalBorder;
-      rctx.lineWidth = 2.5;
-      rctx.strokeRect(86, 805, 340, 82);
-      rctx.fillStyle = bodyTextColor;
-      rctx.font = 'bold 14.5px sans-serif';
-      rctx.textAlign = 'center';
-      rctx.fillText('🔑 DESTRAVAR FECHADURAS À DIREITA', 256, 836);
-      rctx.fillStyle = mutedTextColor;
-      rctx.font = 'bold 11.5px sans-serif';
-      rctx.fillText('PUXE A ALÇA PARA ABRIR O TAMPÃO E ACESSAR A MÁQUINA', 256, 864, 320);
+      // Corpo central da Águia + Hélice Bipá de Avião cruzada
+      ctx.fillStyle = gray(0.18);
+      ctx.strokeStyle = gray(0.94);
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.ellipse(256, 158, 66, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-      // Venezianas de ventilação inferior no ferro traseiro
-      for (let i = 0; i < 8; i++) {
-        rctx.fillStyle = '#1e293b';
-        rctx.fillRect(86, 1080 + i * 22, 340, 10);
-        rctx.fillStyle = metalLight;
-        rctx.fillRect(86, 1077 + i * 22, 340, 3);
+      ctx.beginPath();
+      ctx.ellipse(256, 158, 10, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cubo central da hélice
+      ctx.fillStyle = gray(0.95);
+      ctx.beginPath();
+      ctx.arc(256, 158, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- CAMPO 2 (CENTRO): A PEROBEIRA (ESQUERDA) & SOL DA TERRA ROXA (DIREITA) ---
+      ctx.fillStyle = gray(0.90);
+      ctx.fillRect(253, 198, 6, 82);
+
+      // Esquerda: A Grande Perobeira (Árvore símbolo da mata original de Jaú)
+      ctx.fillStyle = gray(0.22);
+      ctx.strokeStyle = gray(0.94);
+      ctx.lineWidth = 3.5;
+      // Tronco e raízes
+      ctx.beginPath();
+      ctx.moveTo(182, 276);
+      ctx.lineTo(190, 244);
+      ctx.lineTo(202, 244);
+      ctx.lineTo(210, 276);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Copa frondosa da Perobeira em 5 lóbulos esculturais
+      [
+        [196, 224, 24],
+        [174, 232, 18],
+        [218, 232, 18],
+        [184, 214, 18],
+        [208, 214, 18]
+      ].forEach(([cx, cy, r]) => {
+        ctx.fillStyle = gray(0.24);
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = gray(0.90);
+        ctx.lineWidth = 2.8;
+        ctx.stroke();
+      });
+
+      // Direita: Sol Radiante e Lavoura da Terra Roxa
+      const sunX = 314;
+      const sunY = 236;
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 3.5;
+      for (let a = 0; a < 12; a++) {
+        const rad = (a * Math.PI) / 6;
+        ctx.beginPath();
+        ctx.moveTo(sunX + Math.cos(rad) * 16, sunY + Math.sin(rad) * 16);
+        ctx.lineTo(sunX + Math.cos(rad) * 32, sunY + Math.sin(rad) * 32);
+        ctx.stroke();
       }
+      ctx.fillStyle = gray(0.20);
+      ctx.strokeStyle = gray(0.94);
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(sunX, sunY, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-      if (this.rearTexture) this.rearTexture.needsUpdate = true;
+      // --- CAMPO 3 (INFERIOR): O RIO JAÚ E O GRANDE PEIXE JAÚ (PAULICEA LUETKENI) ---
+      // Faixas onduladas profundas do Rio Jaú ao fundo
+      [296, 326, 356, 378].forEach((wy) => {
+        ctx.strokeStyle = gray(0.90);
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(130, wy);
+        for (let wx = 130; wx <= 382; wx += 42) {
+          ctx.quadraticCurveTo(wx + 10.5, wy - 8, wx + 21, wy);
+          ctx.quadraticCurveTo(wx + 31.5, wy + 8, wx + 42, wy);
+        }
+        ctx.stroke();
+      });
+
+      // O GRANDE PEIXE JAÚ esculpido em relevo no centro do rio
+      ctx.save();
+      // Nadadeira dorsal e adiposa
+      ctx.fillStyle = gray(0.26);
+      ctx.strokeStyle = gray(0.96);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(226, 312);
+      ctx.quadraticCurveTo(246, 286, 272, 310);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Nadadeira ventral/peitoral
+      ctx.beginPath();
+      ctx.moveTo(212, 336);
+      ctx.quadraticCurveTo(228, 362, 250, 342);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Corpo hidrodinâmico robusto + Cauda bifurcada do Peixe Jaú
+      ctx.fillStyle = gray(0.16);
+      ctx.strokeStyle = gray(0.96);
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(164, 326); // Focinho largo à esquerda
+      ctx.bezierCurveTo(182, 298, 258, 298, 314, 320); // Dorso
+      ctx.lineTo(346, 298); // Lobo superior da cauda
+      ctx.lineTo(332, 326); // Centro da cauda bifurcada
+      ctx.lineTo(346, 354); // Lobo inferior da cauda
+      ctx.lineTo(314, 332); // Pedúnculo caudal
+      ctx.bezierCurveTo(258, 352, 182, 350, 164, 326); // Ventre
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Olho, Opérculo (guelra), Linha Lateral e Barbilhões (bigodes típicos do Peixe Jaú)
+      ctx.fillStyle = gray(0.96);
+      ctx.beginPath();
+      ctx.arc(184, 321, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      // Guelra curva
+      ctx.arc(198, 326, 14, -0.7, 0.7);
+      // Linha lateral até a cauda
+      ctx.moveTo(212, 326);
+      ctx.lineTo(316, 326);
+      ctx.stroke();
+
+      // Barbilhões característicos do Jaú
+      ctx.strokeStyle = gray(0.95);
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(167, 324);
+      ctx.quadraticCurveTo(148, 312, 142, 300);
+      ctx.moveTo(168, 330);
+      ctx.quadraticCurveTo(150, 344, 144, 356);
+      ctx.stroke();
+      ctx.restore();
+    } else if (key === 'itapui') {
+      // =====================================================================
+      // HERÁLDICA OFICIAL DE ITAPUÍ (ANTIGA "BICA DE PEDRA" - 11/09/1913)
+      // 1) Chefe: Sol Radiante do Progresso ladeado por 2 Estrelas
+      // 2) Centro: A "Bica de Pedra" (Rocha jorrando fonte de água em cascata)
+      // 3) Base: Águas Onduladas do Rio Tietê (Prainha & Hidrovia)
+      // =====================================================================
+
+      // Divisas horizontais do escudo
+      ctx.fillStyle = gray(0.92);
+      ctx.fillRect(130, 198, 252, 7);
+      ctx.fillRect(130, 298, 252, 7);
+
+      // --- CAMPO 1 (TOPO): SOL NASCENTE RADIANTE + 2 ESTRELAS DE 5 PONTAS ---
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 3.8;
+      for (let a = 0; a < 12; a++) {
+        const rad = (a * Math.PI) / 6;
+        ctx.beginPath();
+        ctx.moveTo(256 + Math.cos(rad) * 18, 158 + Math.sin(rad) * 18);
+        ctx.lineTo(256 + Math.cos(rad) * 34, 158 + Math.sin(rad) * 34);
+        ctx.stroke();
+      }
+      ctx.fillStyle = gray(0.18);
+      ctx.strokeStyle = gray(0.95);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(256, 158, 17, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 2 Estrelas heráldicas laterais (178, 158) e (334, 158)
+      const drawStar = (sx, sy, rOut, rIn) => {
+        ctx.fillStyle = gray(0.18);
+        ctx.strokeStyle = gray(0.95);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? rOut : rIn;
+          const a = (i * Math.PI) / 5 - Math.PI / 2;
+          const px = sx + Math.cos(a) * r;
+          const py = sy + Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      };
+      drawStar(178, 158, 18, 8);
+      drawStar(334, 158, 18, 8);
+
+      // --- CAMPO 2 (CENTRO): A "BICA DE PEDRA" JORRANDO ÁGUA EM CASCATA (TOPÔNIMO ITAPUÍ) ---
+      // Rochas escalonadas à esquerda/centro (Itá = Pedra)
+      const rocks = [
+        [142, 258, 62, 40],
+        [152, 228, 54, 34],
+        [188, 244, 52, 52],
+        [168, 210, 48, 28]
+      ];
+      rocks.forEach(([rx, ry, rw, rh]) => {
+        ctx.fillStyle = gray(0.24);
+        ctx.strokeStyle = gray(0.94);
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, 8);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // Calha da Bica de Pedra projetada da rocha
+      ctx.fillStyle = gray(0.16);
+      ctx.strokeStyle = gray(0.96);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.roundRect(216, 232, 42, 14, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Jato d'Água jorrando da Bica de Pedra em cascata até o Rio Tietê
+      [0, 1, 2].forEach((s) => {
+        ctx.strokeStyle = s === 1 ? gray(0.18) : gray(0.94);
+        ctx.lineWidth = s === 1 ? 8 : 4;
+        ctx.beginPath();
+        ctx.moveTo(254, 239 + s * 2);
+        ctx.quadraticCurveTo(296 + s * 6, 242, 304 + s * 5, 296);
+        ctx.stroke();
+      });
+
+      // Espuma / bacia da fonte na base da cascata
+      [288, 304, 320].forEach((bx, bi) => {
+        ctx.fillStyle = gray(0.22);
+        ctx.strokeStyle = gray(0.92);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(bx, 292 - (bi % 2) * 5, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // Colina / Palmeira da Prainha à direita
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(346, 296);
+      ctx.quadraticCurveTo(342, 260, 348, 234);
+      ctx.stroke();
+      [-22, -10, 12, 24].forEach((dx) => {
+        ctx.beginPath();
+        ctx.moveTo(348, 234);
+        ctx.quadraticCurveTo(348 + dx * 0.6, 222, 348 + dx, 242);
+        ctx.stroke();
+      });
+
+      // --- CAMPO 3 (INFERIOR): AS ONDAS DO RIO TIETÊ ---
+      [318, 342, 366].forEach((wy) => {
+        ctx.strokeStyle = gray(0.94);
+        ctx.lineWidth = 9;
+        ctx.beginPath();
+        ctx.moveTo(130, wy);
+        for (let wx = 130; wx <= 382; wx += 42) {
+          ctx.quadraticCurveTo(wx + 10.5, wy - 9, wx + 21, wy);
+          ctx.quadraticCurveTo(wx + 31.5, wy + 9, wx + 42, wy);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = gray(0.20);
+        ctx.lineWidth = 4;
+        ctx.stroke();
+      });
+    } else if (key === 'bauru') {
+      // =====================================================================
+      // BRASÃO OFICIAL DO MUNICÍPIO DE BAURU (1929 / Lei Municipal nº 3.393/1991)
+      // - Chefe Superior: As 3 Estrelas de 5 Pontas (Entroncamento das 3 Ferrovias:
+      //   Noroeste do Brasil, Companhia Paulista e Sorocabana)
+      // - Campo Central: A Onça Suçuarana (Puma concolor) Passante sobre colina
+      //   ("Sentinela do Sertão Paulista" — Custos Vigilat)
+      // - Campanha Inferior: Trilhos Ferroviários & Ondas do Rio Bauru / Batalha
+      // =====================================================================
+
+      // Divisórias horizontais em baixo-relevo (Chefe y=184 e Campanha y=312)
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 6.5;
+      ctx.beginPath();
+      ctx.moveTo(126, 184);
+      ctx.lineTo(386, 184);
+      ctx.moveTo(130, 312);
+      ctx.lineTo(382, 312);
+      ctx.stroke();
+
+      // --- CHEFE SUPERIOR: AS 3 ESTRELAS DAS FERROVIAS HISTÓRICAS ---
+      const drawFivePointStar = (cx, cy, outerR, innerR) => {
+        ctx.fillStyle = gray(0.20);
+        ctx.strokeStyle = gray(0.96);
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? outerR : innerR;
+          const ang = -Math.PI / 2 + (i * Math.PI) / 5;
+          const sx = cx + Math.cos(ang) * r;
+          const sy = cy + Math.sin(ang) * r;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Faceta central piramidal da estrela em baixo-relevo
+        ctx.fillStyle = gray(0.88);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      // Linhas de entroncamento ligando as 3 estrelas (Noroeste • Paulista • Sorocabana)
+      ctx.strokeStyle = gray(0.78);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(156, 148);
+      ctx.lineTo(356, 148);
+      ctx.stroke();
+
+      drawFivePointStar(184, 148, 22, 9.5);
+      drawFivePointStar(256, 145, 25, 10.8);
+      drawFivePointStar(328, 148, 22, 9.5);
+
+      // --- CAMPO CENTRAL: A SUÇUARANA / ONÇA-PARDA PASSANTE (SENTINELA DO SERTÃO) ---
+      // Terrado / colina sertaneja na base do campo central
+      ctx.fillStyle = gray(0.56);
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(132, 310);
+      ctx.quadraticCurveTo(256, 286, 380, 310);
+      ctx.lineTo(380, 312);
+      ctx.lineTo(132, 312);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Silhueta heráldica muscular da Onça Suçuarana Passante (voltada à destra heráldica / esquerda)
+      ctx.fillStyle = gray(0.22);
+      ctx.strokeStyle = gray(0.96);
+      ctx.lineWidth = 5;
+
+      // Cauda longa curvada em S (típica da Suçuarana)
+      ctx.beginPath();
+      ctx.moveTo(314, 240);
+      ctx.bezierCurveTo(348, 232, 364, 202, 348, 196);
+      ctx.bezierCurveTo(338, 194, 344, 220, 314, 248);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Pata dianteira esquerda levantada em marcha (passante) e pata traseira direita
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      // Pata dianteira erguida (vigilante)
+      ctx.moveTo(208, 254);
+      ctx.lineTo(176, 266);
+      ctx.lineTo(168, 278);
+      // Pata dianteira de apoio no solo
+      ctx.moveTo(222, 258);
+      ctx.lineTo(214, 298);
+      // Pata traseira avançada
+      ctx.moveTo(294, 256);
+      ctx.lineTo(278, 298);
+      // Pata traseira recuada
+      ctx.moveTo(308, 252);
+      ctx.lineTo(322, 298);
+      ctx.stroke();
+
+      // Corpo felino esguio e musculoso (tronco + peito + pescoço + cabeça da Suçuarana)
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      // Topo da cabeça e orelha arredondada
+      ctx.moveTo(178, 212);
+      ctx.quadraticCurveTo(188, 200, 198, 206);
+      ctx.quadraticCurveTo(206, 198, 212, 210);
+      // Nuca, cernelha e dorso arqueado até a garupa
+      ctx.bezierCurveTo(224, 220, 244, 228, 276, 226);
+      ctx.bezierCurveTo(302, 224, 320, 232, 318, 250);
+      // Ventre esguio e tórax forte
+      ctx.bezierCurveTo(294, 264, 252, 260, 218, 264);
+      ctx.bezierCurveTo(200, 264, 192, 246, 192, 234);
+      // Mandíbula e focinho felino alerta
+      ctx.lineTo(174, 232);
+      ctx.quadraticCurveTo(166, 224, 178, 212);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Detalhes anatômicos internos (olho vigilante e relevo muscular)
+      ctx.fillStyle = gray(0.96);
+      ctx.beginPath();
+      ctx.arc(186, 218, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = gray(0.84);
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.arc(218, 244, 12, -0.6, 1.4);
+      ctx.moveTo(256, 236);
+      ctx.quadraticCurveTo(268, 246, 292, 242);
+      ctx.stroke();
+
+      // --- CAMPANHA INFERIOR: DORMENTES FERROVIÁRIOS & ONDAS DO RIO BAURU ---
+      // Linha férrea simbólica (entroncamento ferroviário) no topo da campanha
+      ctx.strokeStyle = gray(0.92);
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(138, 326);
+      ctx.lineTo(374, 326);
+      for (let tx = 152; tx <= 360; tx += 26) {
+        ctx.moveTo(tx, 320);
+        ctx.lineTo(tx, 332);
+      }
+      ctx.stroke();
+
+      // Duas faixas de ondas do Rio Bauru / Rio Batalha na ponta do escudo
+      [348, 370].forEach((wy) => {
+        ctx.strokeStyle = gray(0.94);
+        ctx.lineWidth = 8.5;
+        ctx.beginPath();
+        ctx.moveTo(140, wy);
+        for (let wx = 140; wx <= 372; wx += 42) {
+          ctx.quadraticCurveTo(wx + 10.5, wy - 8, wx + 21, wy);
+          ctx.quadraticCurveTo(wx + 31.5, wy + 8, wx + 42, wy);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = gray(0.20);
+        ctx.lineWidth = 3.8;
+        ctx.stroke();
+      });
+    }
+
+    ctx.restore();
+
+    // Re-traça a borda do escudo por cima para acabamento chanfrado impecável
+    shieldPath();
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = gray(0.94);
+    ctx.stroke();
+    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = gray(0.22);
+    ctx.stroke();
+
+    // -----------------------------------------------------------------------
+    // 4. LISTEL / FAIXA HERÁLDICA INFERIOR COM INSCRIÇÃO EM BAIXO-RELEVO
+    // -----------------------------------------------------------------------
+    // Pontas dobradas do listel (esquerda e direita)
+    const drawRibbonEnd = (isRight) => {
+      ctx.save();
+      if (isRight) {
+        ctx.translate(W, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.fillStyle = gray(0.68);
+      ctx.strokeStyle = gray(0.95);
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(112, 428);
+      ctx.lineTo(58, 438);
+      ctx.lineTo(74, 458);
+      ctx.lineTo(58, 478);
+      ctx.lineTo(118, 470);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    };
+    drawRibbonEnd(false);
+    drawRibbonEnd(true);
+
+    // Corpo central do listel curvado
+    ctx.fillStyle = gray(0.46);
+    ctx.strokeStyle = gray(0.95);
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(98, 420);
+    ctx.quadraticCurveTo(256, 438, 414, 420);
+    ctx.lineTo(406, 472);
+    ctx.quadraticCurveTo(256, 490, 106, 472);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Filete interno do listel
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = gray(0.22);
+    ctx.stroke();
+
+    // Texto oficial gravado em baixo-relevo profundo no listel
+    ctx.fillStyle = gray(0.98);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = key === 'bauru' ? '900 22px Georgia, serif' : '900 28px Georgia, serif';
+    const listelText = key === 'itapui'
+      ? '1913 • ITAPUÍ • SP'
+      : (key === 'bauru' ? 'CUSTOS VIGILAT • BAURU' : '1853 • JAHU • SP');
+    ctx.fillText(listelText, 256, 456);
+
+    // -----------------------------------------------------------------------
+    // 5. CONVERSÃO PARA MAPA DE PROFUNDIDADE SUAVIZADO (CHANFRO 45° REALISTA)
+    // -----------------------------------------------------------------------
+    const imgData = ctx.getImageData(0, 0, W, H).data;
+    let rawDepth = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      rawDepth[i] = imgData[i * 4] / 255.0;
+    }
+
+    // 2 passadas de suavização 3x3 para criar paredes chanfradas de estampagem metálica
+    const smoothPass = (src) => {
+      const dst = new Float32Array(W * H);
+      for (let y = 1; y < H - 1; y++) {
+        const row = y * W;
+        for (let x = 1; x < W - 1; x++) {
+          const idx = row + x;
+          dst[idx] = (
+            src[idx] * 4 +
+            (src[idx - 1] + src[idx + 1] + src[idx - W] + src[idx + W]) * 2 +
+            (src[idx - W - 1] + src[idx - W + 1] + src[idx + W - 1] + src[idx + W + 1])
+          ) / 16.0;
+        }
+      }
+      return dst;
+    };
+
+    const smoothed = smoothPass(smoothPass(rawDepth));
+    if (this.crestDepthCache) {
+      this.crestDepthCache[key] = smoothed;
+    }
+    return smoothed;
+  }
+
+  renderDebossedCrestFromDepth(cityKey = 'jau', metalBaseHex = '#8e96a0') {
+    if (!this.lowerConsoleCtx || !this.lowerConsoleCanvas) return;
+    const W = this.lowerConsoleCanvas.width;
+    const H = this.lowerConsoleCanvas.height;
+    const depth = this.buildCityCrestDepthMap(cityKey);
+
+    const { r: baseR, g: baseG, b: baseB } = this.hexToRgbObj(metalBaseHex);
+    const lctx = this.lowerConsoleCtx;
+    const outImg = lctx.createImageData(W, H);
+    const out = outImg.data;
+
+    const bctx = this.lowerBumpCtx;
+    const bumpImg = bctx ? bctx.createImageData(W, H) : null;
+    const bumpOut = bumpImg ? bumpImg.data : null;
+
+    // Direção da luz principal de estúdio (topo-esquerda) para sombreamento de baixo-relevo (deboss)
+    const lx = -0.66;
+    const ly = -0.75;
+
+    for (let y = 3; y < H - 2; y++) {
+      const row = y * W;
+      // Micro-textura horizontal de aço escovado dentro da cavidade
+      const grain = Math.sin(y * 1.85) * 6.5 + Math.cos(y * 0.7) * 3.0;
+
+      for (let x = 3; x < W - 2; x++) {
+        const idx = row + x;
+        const d = depth[idx];
+
+        // Gradiente local (inclinação das paredes do baixo-relevo)
+        const gx = (depth[idx + 2] - depth[idx - 2]) * 0.5;
+        const gy = (depth[idx + W * 2] - depth[idx - W * 2]) * 0.5;
+        const gradMag = Math.hypot(gx, gy);
+
+        const p = idx * 4;
+
+        // Mapa de Relevo 3D (BumpMap: 255 = superfície plana, 0 = fundo entalhado)
+        if (bumpOut) {
+          const bVal = Math.max(0, Math.min(255, Math.round((1.0 - d) * 255)));
+          bumpOut[p] = bVal;
+          bumpOut[p + 1] = bVal;
+          bumpOut[p + 2] = bVal;
+          bumpOut[p + 3] = 255;
+        }
+
+        if (d < 0.012 && gradMag < 0.012) {
+          // Fora do brasão: 100% transparente para fundir sem costura na chapa frontal do totem
+          out[p + 3] = 0;
+          continue;
+        }
+
+        // Sombra projetada interna da borda superior-esquerda para dentro da cavidade (efeito baixo-relevo real)
+        const dUpLeft = depth[(y - 3) * W + (x - 2)];
+        const cavityDropShadow = Math.max(0, d - dUpLeft) * 115;
+
+        // Iluminação nas paredes chanfradas:
+        // Quando gx>0 ou gy>0 (descendo na cavidade pelo topo/esquerda) => parede em sombra escura
+        // Quando gx<0 ou gy<0 (subindo da cavidade pelo fundo/direita) => quina inferior brilha (specular bevel)
+        const bevelTerm = (gx * lx + gy * ly) * 255 * 2.35;
+
+        // Escurecimento natural do fundo rebaixado da chapa estampada
+        const recessDarken = d * 64;
+
+        const delta = bevelTerm - recessDarken - cavityDropShadow + grain;
+
+        // Se for brilho especular na quina inferior-direita, puxa suavemente para reflexo metálico claro
+        const specBoost = bevelTerm > 18 ? (bevelTerm - 18) * 0.45 : 0;
+
+        const r = Math.max(10, Math.min(255, Math.round(baseR + delta + specBoost)));
+        const g = Math.max(12, Math.min(255, Math.round(baseG + delta + specBoost)));
+        const b = Math.max(16, Math.min(255, Math.round(baseB + delta + specBoost)));
+
+        // Alpha suave nas bordas externas e 100% sólido dentro do baixo-relevo
+        const alpha = Math.max(0, Math.min(255, Math.round(Math.max(d * 2.4, gradMag * 5.2) * 255)));
+
+        out[p] = r;
+        out[p + 1] = g;
+        out[p + 2] = b;
+        out[p + 3] = alpha;
+      }
+    }
+
+    lctx.clearRect(0, 0, W, H);
+    lctx.putImageData(outImg, 0, 0);
+    if (this.lowerTexture) this.lowerTexture.needsUpdate = true;
+
+    if (bctx && bumpImg) {
+      bctx.putImageData(bumpImg, 0, 0);
+      if (this.lowerBumpTexture) this.lowerBumpTexture.needsUpdate = true;
     }
   }
 
@@ -1551,23 +2370,43 @@ class Totem3DViewer {
       ctx.fillStyle = idleGrad;
       ctx.fillRect(0, 0, w, h);
 
+      const isItapui = this.currentCity === 'itapui';
+      const isBauru = this.currentCity === 'bauru';
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(255,255,255,0.2)';
       ctx.fillRect(140, 180, 440, 54);
       ctx.fillStyle = '#f8fafc';
       ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('JAÚ CONECTADA • CIDADE INTELIGENTE', w / 2, 216);
+      ctx.fillText(
+        isItapui
+          ? 'ITAPUÍ CONECTADA • CIDADE INTELIGENTE'
+          : (isBauru ? 'BAURU CONECTADA • CIDADE INTELIGENTE' : 'JAÚ CONECTADA • CIDADE INTELIGENTE'),
+        w / 2,
+        216
+      );
 
       ctx.font = '800 56px sans-serif';
       ctx.fillText('BEM-VINDO A', w / 2, 370);
       ctx.fillStyle = '#38bdf8';
       ctx.font = '800 84px sans-serif';
-      ctx.fillText('JAÚ / SP', w / 2, 465);
+      ctx.fillText(isItapui ? 'ITAPUÍ / SP' : (isBauru ? 'BAURU / SP' : 'JAÚ / SP'), w / 2, 465);
 
       ctx.fillStyle = '#e0f2fe';
       ctx.font = '28px sans-serif';
-      ctx.fillText('Capital Nacional do Calçado Feminino', w / 2, 540);
-      ctx.fillText('Ônibus • Turismo • Comércio • Serviços', w / 2, 585);
+      ctx.fillText(
+        isItapui
+          ? 'Prainha do Rio Tietê • Festas Tradicionais'
+          : (isBauru ? 'Capital Regional • Cidade Sem Limites' : 'Capital Nacional do Calçado Feminino'),
+        w / 2,
+        540
+      );
+      ctx.fillText(
+        isItapui
+          ? 'Festa do Peão • Quermesse • Carnaval • Mapa Local'
+          : (isBauru ? 'Mapa Local • Calçadão • Zoo & Botânico • Poupatempo' : 'Mapa Local • Turismo • Comércio • Serviços'),
+        w / 2,
+        585
+      );
 
       ctx.font = '96px sans-serif';
       ctx.fillText('👆', w / 2, 820);
@@ -1579,9 +2418,8 @@ class Totem3DViewer {
       return;
     }
 
-    // 3. Interface Interativa Principal em Fundo Claro (Padrão Gov.br / Suporta Alto Contraste e Modo Cadeirante)
+    // 3. Interface Interativa Principal em Fundo Claro (Padrão Gov.br / Suporta Alto Contraste e Modo Baixar Tela)
     const hc = this.isHighContrast;
-    const wcOffset = this.isWheelchair ? 210 : 0;
 
     if (hc) {
       ctx.fillStyle = '#000000';
@@ -1594,21 +2432,25 @@ class Totem3DViewer {
       ctx.fillRect(0, 0, w, h);
     }
 
-    // Se Modo Cadeirante estiver ativo, exibe faixa informativa no topo
+    ctx.save();
+
+    // Se "Baixar Tela" estiver ativo: 1/3 superior fica 100% livre (sem informação) e os 2/3 inferiores recebem toda a tela enxugada/achatada
     if (this.isWheelchair) {
-      ctx.fillStyle = hc ? '#000' : '#ffffff';
-      ctx.fillRect(0, 0, w, wcOffset);
-      ctx.strokeStyle = hc ? '#ffff00' : '#1351b4';
+      const topThird = Math.round(h / 3);
+      ctx.fillStyle = hc ? '#000000' : '#f8f9fa';
+      ctx.fillRect(0, 0, w, topThird);
+      ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
       ctx.lineWidth = 3;
-      ctx.strokeRect(16, 16, w - 32, wcOffset - 32);
-      ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.fillText('♿ MODO ALCANCE ACESSÍVEL ATIVO', w / 2, 95);
-      ctx.fillStyle = hc ? '#ffff00' : '#475569';
-      ctx.font = '22px sans-serif';
-      ctx.fillText('Interface rebaixada para cadeirantes (NBR 9050)', w / 2, 140);
+      ctx.beginPath();
+      ctx.moveTo(0, topThird);
+      ctx.lineTo(w, topThird);
+      ctx.stroke();
+
+      ctx.translate(0, topThird);
+      ctx.scale(1, 2 / 3);
     }
+
+    const wcOffset = 0;
 
     // 1. Header da Tela Touch (Fundo Claro Institucional - 115px de altura)
     ctx.fillStyle = hc ? '#000000' : '#ffffff';
@@ -1620,27 +2462,39 @@ class Totem3DViewer {
     ctx.lineTo(w, wcOffset + 115);
     ctx.stroke();
 
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 28px sans-serif';
-    ctx.fillText('🏛️ PREFEITURA DE JAÚ', 28, wcOffset + 48);
+    ctx.fillText(
+      isItapui ? 'PREFEITURA DE ITAPUÍ' : (isBauru ? 'PREFEITURA DE BAURU' : 'PREFEITURA DE JAÚ'),
+      28,
+      wcOffset + 48
+    );
     ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
     ctx.font = 'bold 19px sans-serif';
-    ctx.fillText('Estância Turística • Terminal Oficial', 28, wcOffset + 80);
+    ctx.fillText(
+      isItapui
+        ? 'Praça da Matriz • Terminal de Utilidade Pública'
+        : (isBauru ? 'Praça Rui Barbosa • Terminal de Utilidade Pública' : 'Praça da República • Terminal de Utilidade Pública'),
+      28,
+      wcOffset + 80
+    );
 
-    // Relógio e Clima no canto direito
+    // Relógio Interno RTC e Status Offline no canto direito (sem previsão do tempo ao vivo)
     ctx.textAlign = 'right';
     ctx.fillStyle = hc ? '#ffff00' : '#1351b4';
     ctx.font = '800 34px sans-serif';
     ctx.fillText(timeStr, w - 28, wcOffset + 50);
-    ctx.fillStyle = hc ? '#ffff00' : '#334155';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('☀️ 28°C Jaú/SP', w - 28, wcOffset + 82);
+    ctx.fillStyle = hc ? '#ffff00' : '#168821';
+    ctx.font = 'bold 17px sans-serif';
+    ctx.fillText('100% OFFLINE', w - 28, wcOffset + 82);
 
     const footY = h - 130;
     const bodyY = wcOffset + 128;
 
-    // 2. MENU LATERAL DE ACESSIBILIDADE UNIVERSAL (ABNT NBR 9050 / GOV.BR)
+    // 2. MENU LATERAL DE ACESSIBILIDADE: 3 BOTÕES NO CANTO SUPERIOR (1º Libras, 2º Contraste, 3º Baixar Tela)
     const sbW = 152;
     const sbH = footY - (wcOffset + 115);
     ctx.fillStyle = hc ? '#000000' : '#0c326f';
@@ -1660,15 +2514,15 @@ class Totem3DViewer {
     ctx.textAlign = 'center';
     ctx.fillText('ACESSO', sbW / 2, wcOffset + 140);
 
-    // 3 Botões Principais em formato de QUADRADOS MAIORES (Sem Áudio — Máquina Só Tela)
+    // 3 Botões Principais no canto superior na ordem exata: 1. Libras, 2. Contraste, 3. Baixar Tela (dobro da altura = 220px)
     const mainSideBtns = [
-      { icon: '👁️', label: 'Contraste', active: hc },
-      { icon: '🦻', label: 'Libras', active: this.showVLibrasBox },
-      { icon: '♿', label: 'Alcance', active: this.isWheelchair }
+      { id: 'libras', label: 'Libras', active: this.showVLibrasBox },
+      { id: 'contrast', label: 'Contraste', active: hc },
+      { id: 'wheelchair', label: 'Baixar Tela', active: this.isWheelchair }
     ];
 
-    const squareBtnH = this.isWheelchair ? 92 : 112;
-    const squareBtnGap = 14;
+    const squareBtnH = 220;
+    const squareBtnGap = 16;
 
     mainSideBtns.forEach((b, idx) => {
       const by = wcOffset + 160 + idx * (squareBtnH + squareBtnGap);
@@ -1682,23 +2536,88 @@ class Totem3DViewer {
       ctx.lineWidth = 2;
       ctx.strokeRect(bx, by, bw, bh);
 
-      // Ícone grande centralizado em cima + Rótulo centralizado embaixo (Quadrado Grande)
-      ctx.fillStyle = b.active ? '#0c326f' : (hc ? '#ffff00' : '#ffffff');
-      ctx.font = '32px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(b.icon, bx + bw / 2, by + bh * 0.48);
+      const fgColor = b.active ? '#0c326f' : (hc ? '#ffff00' : '#ffffff');
+      const iconCX = bx + bw / 2;
+      const iconCY = by + bh * 0.43;
 
-      ctx.font = '800 15px sans-serif';
+      // Desenha ícone vetorial 1:1 sem distorção (compensa a escala vertical quando Baixar Tela está ativo)
+      ctx.save();
+      ctx.translate(iconCX, iconCY);
+      if (this.isWheelchair) {
+        ctx.scale(1.25, 1.25 * 1.5);
+      } else {
+        ctx.scale(1.25, 1.25);
+      }
+      ctx.strokeStyle = fgColor;
+      ctx.fillStyle = fgColor;
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (b.id === 'libras') {
+        // Mão aberta sinalizando + ondas de Libras (100% proporcional)
+        ctx.beginPath();
+        ctx.roundRect(-8, -4, 16, 15, 5);
+        ctx.stroke();
+        [-6, -2, 2, 6].forEach((fx, fi) => {
+          const fh = fi === 1 || fi === 2 ? 12 : 9;
+          ctx.beginPath();
+          ctx.moveTo(fx, -4);
+          ctx.lineTo(fx, -4 - fh);
+          ctx.stroke();
+        });
+        ctx.beginPath();
+        ctx.moveTo(8, 2);
+        ctx.lineTo(13, -3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-9, -8, 6, Math.PI * 1.1, Math.PI * 1.65);
+        ctx.stroke();
+      } else if (b.id === 'contrast') {
+        // Círculo de Alto Contraste meio preenchido (100% circular)
+        ctx.beginPath();
+        ctx.arc(0, 0, 13, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, 13, -Math.PI / 2, Math.PI / 2);
+        ctx.closePath();
+        ctx.fill();
+      } else if (b.id === 'wheelchair') {
+        // Cadeirante + Seta de Baixar Tela (100% proporcional)
+        ctx.beginPath();
+        ctx.arc(-3, -11, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-3, -6);
+        ctx.lineTo(-3, 2);
+        ctx.lineTo(5, 2);
+        ctx.lineTo(8, 9);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-5, 5, 6.5, 0.4, Math.PI * 1.55);
+        ctx.stroke();
+        // Seta para baixo à direita
+        ctx.beginPath();
+        ctx.moveTo(12, -10);
+        ctx.lineTo(12, 0);
+        ctx.moveTo(9, -3);
+        ctx.lineTo(12, 0);
+        ctx.lineTo(15, -3);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.fillStyle = fgColor;
+      ctx.font = '800 16px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(b.label, bx + bw / 2, by + bh * 0.80);
+      ctx.fillText(b.label, bx + bw / 2, by + bh * 0.68);
     });
 
-    // 2 Botões de Fonte (A+ Maior e A- Padrão) MENORES fixados no CANTO INFERIOR da barra azul
+    // 2 Botões de Fonte (A+ Maior e A- Normal) fixados no CANTO INFERIOR da barra azul
     const fontH = 34;
     const fontY = footY - fontH - 12;
     const fontW = (sbW - 26) / 2;
 
-    // Linha divisória sutil acima dos botões menores no canto inferior
     ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1706,7 +2625,6 @@ class Totem3DViewer {
     ctx.lineTo(sbW - 10, fontY - 6);
     ctx.stroke();
 
-    // A+ Maior (Menor, no canto inferior esquerdo da barra azul)
     ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.13)';
     ctx.fillRect(10, fontY, fontW, fontH);
     ctx.strokeStyle = 'rgba(255,255,255,0.28)';
@@ -1717,7 +2635,6 @@ class Totem3DViewer {
     ctx.font = '900 11.5px sans-serif';
     ctx.fillText('A+ Maior', 10 + fontW / 2, fontY + 21);
 
-    // A- Padrão (Menor, no canto inferior direito da barra azul)
     ctx.fillStyle = hc ? '#111827' : 'rgba(255,255,255,0.13)';
     ctx.fillRect(10 + fontW + 6, fontY, fontW, fontH);
     ctx.strokeStyle = 'rgba(255,255,255,0.28)';
@@ -1726,7 +2643,7 @@ class Totem3DViewer {
     ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
     ctx.textAlign = 'center';
     ctx.font = '900 11.5px sans-serif';
-    ctx.fillText('A- Padrão', 10 + fontW + 6 + fontW / 2, fontY + 21);
+    ctx.fillText('A- Normal', 10 + fontW + 6 + fontW / 2, fontY + 21);
 
     // 3. Conteúdo Central de acordo com a aba selecionada
     if (this.screenState === 'bus') {
@@ -1741,140 +2658,142 @@ class Totem3DViewer {
       this.drawHomeScreen(ctx, w, bodyY, hc);
     }
 
-    // 4. QUADRADINHO DO VLIBRAS NO CANTO INFERIOR DIREITO DA TELA (APENAS QUANDO SOLICITADO)
+    // 4. INTÉRPRETE DE LIBRAS EM CHROMA KEY (SEM QUADRADO BRANCO / DIRETO SOBRE A TELA)
     if (this.showVLibrasBox) {
-      const vBoxW = 150;
-      const vBoxH = 182;
-      const vBoxX = w - vBoxW - 14;
-      const vBoxY = footY - vBoxH - 14;
-
-      // Fundo Branco Puro e borda suave
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(vBoxX, vBoxY, vBoxW, vBoxH);
-      ctx.strokeStyle = this.isInterpretingLibras ? '#0284c7' : (hc ? '#ffff00' : '#cbd5e1');
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(vBoxX, vBoxY, vBoxW, vBoxH);
-
-      // Faixa superior do card
-      ctx.fillStyle = this.isInterpretingLibras ? '#0284c7' : '#f0f7ff';
-      ctx.fillRect(vBoxX + 1, vBoxY + 1, vBoxW - 2, 20);
-      ctx.fillStyle = this.isInterpretingLibras ? '#ffffff' : '#0c326f';
-      ctx.font = 'bold 8.5px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(this.isInterpretingLibras ? 'SINALIZANDO LIBRAS' : 'TRADUTOR DE LIBRAS', vBoxX + 8, vBoxY + 14);
-
-      // Botão ✕ discreto no topo direito
-      ctx.fillStyle = this.isInterpretingLibras ? '#ffffff' : '#64748b';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText('✕', vBoxX + vBoxW - 7, vBoxY + 15);
-
-      // Mascote Ícaro com braços e mãos sinalizando
-      const avX = vBoxX + vBoxW / 2;
-      const avY = vBoxY + 78;
+      const avX = w - 102;
+      const avY = footY - 118;
       const pose = this.librasPose || 0;
-      const offsetL = this.isInterpretingLibras ? (pose % 2 === 0 ? -8 : 4) : 0;
-      const offsetR = this.isInterpretingLibras ? (pose % 2 === 0 ? 4 : -8) : 0;
+      const offsetL = this.isInterpretingLibras ? (pose % 2 === 0 ? -12 : 6) : 0;
+      const offsetR = this.isInterpretingLibras ? (pose % 2 === 0 ? 6 : -12) : 0;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(8, 22, 54, 0.45)';
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 6;
+
+      // Tronco e Ombros (Camisa Polo Azul Marinho 3D)
+      ctx.beginPath();
+      ctx.moveTo(avX - 62, footY - 2);
+      ctx.quadraticCurveTo(avX - 58, avY + 18, avX - 36, avY + 10);
+      ctx.lineTo(avX + 36, avY + 10);
+      ctx.quadraticCurveTo(avX + 58, avY + 18, avX + 62, footY - 2);
+      ctx.closePath();
+      ctx.fillStyle = '#0f3478';
+      ctx.fill();
+
+      // Pescoço e Gola
+      ctx.fillStyle = '#e7ad89';
+      ctx.fillRect(avX - 11, avY - 12, 22, 24);
+      ctx.fillStyle = '#133d8a';
+      ctx.beginPath();
+      ctx.moveTo(avX - 18, avY + 8);
+      ctx.lineTo(avX, avY + 26);
+      ctx.lineTo(avX + 18, avY + 8);
+      ctx.fill();
+
+      // Cabeça Anatômica e Cabelo
+      ctx.beginPath();
+      ctx.ellipse(avX, avY - 34, 23, 28, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#f3be9c';
+      ctx.fill();
 
       ctx.beginPath();
-      ctx.arc(avX, avY, 38, 0, Math.PI * 2);
-      ctx.fillStyle = '#f1f5f9';
+      ctx.arc(avX, avY - 43, 23, Math.PI * 0.92, Math.PI * 2.08);
+      ctx.fillStyle = '#2c190e';
       ctx.fill();
 
-      // Tronco azul Gov.br
+      // Olhos, Sobrancelhas e Boca
+      ctx.fillStyle = '#1e110a';
       ctx.beginPath();
-      ctx.arc(avX, avY + 34, 28, Math.PI, 0, false);
-      ctx.fillStyle = '#0c326f';
+      ctx.arc(avX - 8, avY - 36, 2.4, 0, Math.PI * 2);
+      ctx.arc(avX + 8, avY - 36, 2.4, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#ffcd07';
-      ctx.fillRect(avX - 6, avY + 8, 12, 10);
 
-      // Cabeça e cabelo
+      ctx.strokeStyle = '#8c3f38';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(avX, avY - 6, 15, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffd1b3';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(avX, avY - 12, 15, Math.PI * 0.9, Math.PI * 2.1);
-      ctx.fillStyle = '#4a2c18';
-      ctx.fill();
-      ctx.fillStyle = '#1e293b';
-      ctx.fillRect(avX - 6, avY - 7, 3, 3);
-      ctx.fillRect(avX + 3, avY - 7, 3, 3);
-      ctx.strokeStyle = '#b91c1c';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(avX, avY, 4.5, 0, Math.PI);
+      if (this.isInterpretingLibras) {
+        ctx.ellipse(avX, avY - 20, 4.5, 3, 0, 0, Math.PI * 2);
+      } else {
+        ctx.arc(avX, avY - 22, 5.5, 0.15 * Math.PI, 0.85 * Math.PI);
+      }
       ctx.stroke();
 
-      // Braço e mão esquerda com dedos sinalizando Libras
-      const handLX = avX - 24;
-      const handLY = avY + 8 + offsetL;
-      ctx.strokeStyle = '#f4b393';
-      ctx.lineWidth = 6;
+      // Braços e Mãos Articuladas (Esquerda e Direita)
+      const handLX = avX - 36;
+      const handLY = avY + 4 + offsetL;
+      ctx.strokeStyle = '#e7ad89';
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(avX - 22, avY + 26);
+      ctx.moveTo(avX - 38, avY + 42);
       ctx.lineTo(handLX, handLY);
       ctx.stroke();
-      ctx.fillStyle = '#ffd1b3';
+      ctx.fillStyle = '#ffe0c8';
       ctx.beginPath();
-      ctx.arc(handLX, handLY, 7, 0, Math.PI * 2);
+      ctx.arc(handLX, handLY, 9.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#d99b7c';
-      ctx.lineWidth = 1.5;
-      for (let f = -4; f <= 4; f += 2.5) {
+      ctx.strokeStyle = '#c9845e';
+      ctx.lineWidth = 2;
+      for (let f = -5; f <= 5; f += 2.5) {
         ctx.beginPath();
-        ctx.moveTo(handLX + f, handLY - 4);
-        ctx.lineTo(handLX + f, handLY - 11);
+        ctx.moveTo(handLX + f, handLY - 5);
+        ctx.lineTo(handLX + f, handLY - 15);
         ctx.stroke();
       }
 
-      // Braço e mão direita com dedos sinalizando Libras
-      const handRX = avX + 24;
-      const handRY = avY + 8 + offsetR;
-      ctx.strokeStyle = '#f4b393';
-      ctx.lineWidth = 6;
+      const handRX = avX + 36;
+      const handRY = avY + 4 + offsetR;
+      ctx.strokeStyle = '#e7ad89';
+      ctx.lineWidth = 10;
       ctx.beginPath();
-      ctx.moveTo(avX + 22, avY + 26);
+      ctx.moveTo(avX + 38, avY + 42);
       ctx.lineTo(handRX, handRY);
       ctx.stroke();
-      ctx.fillStyle = '#ffd1b3';
+      ctx.fillStyle = '#ffe0c8';
       ctx.beginPath();
-      ctx.arc(handRX, handRY, 7, 0, Math.PI * 2);
+      ctx.arc(handRX, handRY, 9.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#d99b7c';
-      ctx.lineWidth = 1.5;
-      for (let f = -4; f <= 4; f += 2.5) {
+      ctx.strokeStyle = '#c9845e';
+      ctx.lineWidth = 2;
+      for (let f = -5; f <= 5; f += 2.5) {
         ctx.beginPath();
-        ctx.moveTo(handRX + f, handRY - 4);
-        ctx.lineTo(handRX + f, handRY - 11);
+        ctx.moveTo(handRX + f, handRY - 5);
+        ctx.lineTo(handRX + f, handRY - 15);
         ctx.stroke();
       }
 
-      // Caixa de Legenda Dinâmica Abaixo do Boneco
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(vBoxX, vBoxY + vBoxH - 42, vBoxW, 42);
-      ctx.strokeStyle = '#e2e8f0';
+      // Pílula Flutuante Discreta de Legenda na Base do Intérprete
+      const pillW = 168;
+      const pillH = 34;
+      const pillX = avX - pillW / 2;
+      const pillY = footY - pillH - 6;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(pillX, pillY, pillW, pillH);
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.45)';
       ctx.lineWidth = 1;
-      ctx.strokeRect(vBoxX, vBoxY + vBoxH - 42, vBoxW, 42);
+      ctx.strokeRect(pillX, pillY, pillW, pillH);
 
-      ctx.fillStyle = '#16a34a';
+      ctx.fillStyle = '#4ade80';
       ctx.beginPath();
-      ctx.arc(vBoxX + 18, vBoxY + vBoxH - 28, 3, 0, Math.PI * 2);
+      ctx.arc(pillX + 12, pillY + 11, 3, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#0c326f';
-      ctx.font = 'bold 9px sans-serif';
+      ctx.fillStyle = '#7dd3fc';
+      ctx.font = 'bold 8.5px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('LIBRAS • AO VIVO', vBoxX + 26, vBoxY + vBoxH - 25);
+      ctx.fillText(this.isInterpretingLibras ? 'SINALIZANDO LIBRAS' : 'LIBRAS AO VIVO', pillX + 20, pillY + 14);
 
-      ctx.fillStyle = '#1e293b';
-      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 10px sans-serif';
       ctx.textAlign = 'center';
-      const sub = this.vlibrasSub || 'Tradutor de Sinais';
-      const displaySub = sub.length > 20 ? sub.substring(0, 18) + '...' : sub;
-      ctx.fillText(displaySub, avX, vBoxY + vBoxH - 10);
+      const sub = this.vlibrasSub || 'Toque em qualquer texto';
+      const displaySub = sub.length > 22 ? sub.substring(0, 20) + '...' : sub;
+      ctx.fillText(displaySub, avX, pillY + 28);
+      ctx.restore();
     }
+
+    ctx.restore();
 
     if (this.screenTexture) this.screenTexture.needsUpdate = true;
   }
@@ -1883,115 +2802,218 @@ class Totem3DViewer {
     const offX = 166;
     const contentW = w - offX - 16;
 
-    // Banner Defesa Civil Claro
+    // Banner Fixo de Localização Offline (sem avisos de internet)
     ctx.fillStyle = hc ? '#000000' : '#fff8e6';
-    ctx.fillRect(offX, startY, contentW, 68);
+    ctx.fillRect(offX, startY, contentW, 58);
     ctx.strokeStyle = hc ? '#ffff00' : '#d9a400';
     ctx.lineWidth = 2;
-    ctx.strokeRect(offX, startY, contentW, 68);
+    ctx.strokeRect(offX, startY, contentW, 58);
     ctx.textAlign = 'left';
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.fillStyle = hc ? '#ffff00' : '#925400';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('⚠️ DEFESA CIVIL JAÚ • TEMPO ESTÁVEL', offX + 16, startY + 28);
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText(
+      isItapui
+        ? 'GUIA LOCAL FIXO • PRAÇA DA MATRIZ (CENTRO)'
+        : (isBauru ? 'GUIA LOCAL FIXO • PRAÇA RUI BARBOSA (CENTRO)' : 'GUIA LOCAL FIXO • PRAÇA DA REPÚBLICA (CENTRO)'),
+      offX + 16,
+      startY + 24
+    );
     ctx.fillStyle = hc ? '#ffff00' : '#593900';
-    ctx.font = '15px sans-serif';
-    ctx.fillText('Vacinação ativa até 17h nos postos municipais.', offX + 16, startY + 52);
+    ctx.font = '600 14.5px sans-serif';
+    ctx.fillText(
+      isItapui
+        ? 'Informações Fixas Locais • Sistema 100% Offline (Sem Internet)'
+        : (isBauru ? 'Informações Fixas Locais • Sistema 100% Offline (Sem Internet)' : 'Informações Fixas Locais • Sistema 100% Offline (Sem Internet)'),
+      offX + 16,
+      startY + 46
+    );
 
-    // Chamada Bem-vindo a Jaú
-    ctx.textAlign = 'center';
+    // Chamada Direta
+    ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 28px sans-serif';
-    ctx.fillText('COMO PODEMOS AJUDAR VOCÊ HOJE?', offX + contentW / 2, startY + 118);
+    ctx.font = '800 26px sans-serif';
+    ctx.fillText('O que você procura agora?', offX + 4, startY + 102);
 
-    // Grade dos 4 Pilares Estratégicos — Design Tátil de Quiosque Físico
-    const cards = [
+    // Grade dos 4 Módulos Fixos Locais (Sem horários de ônibus ao vivo)
+    const cards = isItapui ? [
       {
-        icon: '🚌',
-        tag: 'TEMPO REAL',
-        title: 'ÔNIBUS & MOBILIDADE',
-        sub: 'Linhas municipais e horários em tempo real',
-        action: 'CONSULTAR LINHAS',
+        icon: 'MAPA',
+        tag: 'DISTÂNCIAS A PÉ',
+        title: 'PONTOS DE REFERÊNCIA',
+        sub: 'Praça da Matriz, Hospital, Prainha e Balsa',
+        action: 'VER 4 PONTOS',
         color: '#1351b4',
         accentBg: '#e8f0fe',
         tagColor: '#0c326f',
         borderColor: '#93c5fd'
       },
       {
-        icon: '👠',
-        tag: 'POLO CALÇADISTA',
-        title: 'CIRCUITO DO CALÇADO',
-        sub: 'Lojas de fábrica, catálogo e rotas de compras',
-        action: 'VER LOJAS & ROTAS',
+        icon: 'LOJAS',
+        tag: 'A 2 MIN A PÉ',
+        title: 'COMÉRCIO & PRAÇA',
+        sub: 'Lojas na Matriz, Prainha e Confecções',
+        action: 'VER COMÉRCIO',
         color: '#ea580c',
         accentBg: '#fff7ed',
         tagColor: '#9a3412',
         borderColor: '#fed7aa'
       },
       {
-        icon: '🏛️',
-        tag: 'ESTÂNCIA TURÍSTICA',
-        title: 'TURISMO & LAZER',
-        sub: 'Parque do Rio Jaú, patrimônio e eventos',
-        action: 'EXPLORAR JAÚ',
+        icon: 'FESTAS',
+        tag: 'TRADIÇÕES',
+        title: 'TURISMO & FESTAS',
+        sub: 'Prainha, Festa do Peão, Quermesse e Carnaval',
+        action: 'VER EVENTOS',
         color: '#168821',
         accentBg: '#f0fdf4',
         tagColor: '#14532d',
         borderColor: '#bbf7d0'
       },
       {
-        icon: '📋',
-        tag: 'AUTOATENDIMENTO',
-        title: 'SERVIÇOS AO CIDADÃO',
-        sub: 'Ouvidoria, Telefones úteis e Farmácia',
-        action: 'ACESSAR SERVIÇOS',
+        icon: '156',
+        tag: 'NO CELULAR',
+        title: 'OUVIDORIA & SAÚDE',
+        sub: 'Paço Municipal e Hospital São José',
+        action: 'ABRIR SERVIÇOS',
         color: '#d97706',
         accentBg: '#fffbeb',
         tagColor: '#78350f',
         borderColor: '#fde68a'
       }
-    ];
+    ] : (isBauru ? [
+      {
+        icon: 'MAPA',
+        tag: 'DISTÂNCIAS A PÉ',
+        title: 'PONTOS DE REFERÊNCIA',
+        sub: 'Calçadão, Poupatempo, Saúde e Rodoviária',
+        action: 'VER 4 PONTOS',
+        color: '#1351b4',
+        accentBg: '#e8f0fe',
+        tagColor: '#0c326f',
+        borderColor: '#93c5fd'
+      },
+      {
+        icon: 'LOJAS',
+        tag: 'AO LADO',
+        title: 'CALÇADÃO & COMÉRCIO',
+        sub: 'Batista de Carvalho, Shoppings e Sanduíche Bauru',
+        action: 'VER POLOS',
+        color: '#ea580c',
+        accentBg: '#fff7ed',
+        tagColor: '#9a3412',
+        borderColor: '#fed7aa'
+      },
+      {
+        icon: 'LAZER',
+        tag: 'ZOO & PARQUES',
+        title: 'TURISMO E CULTURA',
+        sub: 'Zoo de Bauru, Jardim Botânico e Vitória Régia',
+        action: 'VER ATRAÇÕES',
+        color: '#168821',
+        accentBg: '#f0fdf4',
+        tagColor: '#14532d',
+        borderColor: '#bbf7d0'
+      },
+      {
+        icon: '156',
+        tag: 'POUPATEMPO',
+        title: 'SERVIÇOS & SAÚDE 24H',
+        sub: 'Palácio das Cerejeiras, DAE, Poupatempo e UPAs',
+        action: 'ABRIR SERVIÇOS',
+        color: '#d97706',
+        accentBg: '#fffbeb',
+        tagColor: '#78350f',
+        borderColor: '#fde68a'
+      }
+    ] : [
+      {
+        icon: 'MAPA',
+        tag: 'DISTÂNCIAS A PÉ',
+        title: 'PONTOS DE REFERÊNCIA',
+        sub: 'Rodoviária, Centro, Praças e Saúde 24h',
+        action: 'VER 4 PONTOS',
+        color: '#1351b4',
+        accentBg: '#e8f0fe',
+        tagColor: '#0c326f',
+        borderColor: '#93c5fd'
+      },
+      {
+        icon: 'LOJAS',
+        tag: 'A 3 MIN A PÉ',
+        title: 'POLO DO CALÇADO',
+        sub: 'Rua Major Prado, Shopping e fábricas',
+        action: 'COMO CHEGAR',
+        color: '#ea580c',
+        accentBg: '#fff7ed',
+        tagColor: '#9a3412',
+        borderColor: '#fed7aa'
+      },
+      {
+        icon: 'LAZER',
+        tag: 'LAZER GRÁTIS',
+        title: 'TURISMO E PARQUES',
+        sub: 'Matriz a 150m, Parque do Rio Jaú e Teatro',
+        action: 'VER LOCAIS',
+        color: '#168821',
+        accentBg: '#f0fdf4',
+        tagColor: '#14532d',
+        borderColor: '#bbf7d0'
+      },
+      {
+        icon: '156',
+        tag: 'NO CELULAR',
+        title: 'OUVIDORIA E SERVIÇOS',
+        sub: 'Ouvidoria 156, Farmácia 24h e Emergência',
+        action: 'ABRIR SERVIÇOS',
+        color: '#d97706',
+        accentBg: '#fffbeb',
+        tagColor: '#78350f',
+        borderColor: '#fde68a'
+      }
+    ]);
 
     const cw = Math.floor((contentW - 14) / 2);
     cards.forEach((c, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
       const cx = offX + col * (cw + 14);
-      const cy = startY + 142 + row * 252;
-      const ch = 236;
+      const cy = startY + 124 + row * 256;
+      const ch = 240;
 
-      // Card Background & Sombra Tátil Física
+      // Card Background
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.fillRect(cx, cy, cw, ch);
 
-      // Borda e chanfro mecânico
       ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
       ctx.lineWidth = 2.5;
       ctx.strokeRect(cx, cy, cw, ch);
 
-      // Barra tátil lateral esquerda sólida (identidade de cada módulo)
+      // Barra lateral esquerda
       ctx.fillStyle = hc ? '#ffff00' : c.color;
       ctx.fillRect(cx, cy, 8, ch);
 
-      // Topo: Badge de Ícone + Tag de Categoria
       // Box do ícone
       ctx.fillStyle = hc ? '#000000' : c.accentBg;
-      ctx.fillRect(cx + 16, cy + 16, 50, 50);
+      ctx.fillRect(cx + 16, cy + 16, 56, 46);
       ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(cx + 16, cy + 16, 50, 50);
+      ctx.strokeRect(cx + 16, cy + 16, 56, 46);
       ctx.textAlign = 'center';
-      ctx.font = '30px sans-serif';
-      ctx.fillText(c.icon, cx + 41, cy + 52);
+      ctx.fillStyle = hc ? '#ffff00' : c.color;
+      ctx.font = '900 12px sans-serif';
+      ctx.fillText(c.icon, cx + 44, cy + 44);
 
-      // Tag de Categoria
+      // Tag Fixa
       ctx.fillStyle = hc ? '#000000' : c.accentBg;
-      ctx.fillRect(cx + cw - 146, cy + 18, 132, 26);
+      ctx.fillRect(cx + cw - 142, cy + 18, 128, 26);
       ctx.strokeStyle = hc ? '#ffff00' : c.borderColor;
-      ctx.strokeRect(cx + cw - 146, cy + 18, 132, 26);
+      ctx.strokeRect(cx + cw - 142, cy + 18, 128, 26);
       ctx.fillStyle = hc ? '#ffff00' : c.tagColor;
       ctx.font = '800 11px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(c.tag, cx + cw - 80, cy + 36);
+      ctx.fillText(c.tag, cx + cw - 78, cy + 36);
 
       // Título do Card
       ctx.textAlign = 'left';
@@ -1999,82 +3021,83 @@ class Totem3DViewer {
       ctx.font = '800 19px sans-serif';
       ctx.fillText(c.title, cx + 16, cy + 98);
 
-      // Subtítulo descritivo
+      // Subtítulo curto
       ctx.fillStyle = hc ? '#ffff00' : '#475569';
       ctx.font = '600 14px sans-serif';
-      ctx.fillText(c.sub, cx + 16, cy + 124, cw - 32);
+      ctx.fillText(c.sub, cx + 16, cy + 126, cw - 32);
 
-      // Linha tracejada divisória
+      // Linha divisória
       ctx.strokeStyle = hc ? '#ffff00' : 'rgba(0,0,0,0.1)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
-      ctx.moveTo(cx + 16, cy + 175);
-      ctx.lineTo(cx + cw - 16, cy + 175);
+      ctx.moveTo(cx + 16, cy + 180);
+      ctx.lineTo(cx + cw - 16, cy + 180);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Barra de Ação Inferior (Feedback tátil: Toque para acessar + Círculo com seta)
+      // Ação inferior
       ctx.fillStyle = hc ? '#ffff00' : c.color;
       ctx.font = '800 12px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(c.action, cx + 16, cy + 206);
+      ctx.fillText(c.action, cx + 16, cy + 210);
 
       // Círculo com seta
       ctx.beginPath();
-      ctx.arc(cx + cw - 30, cy + 203, 14, 0, Math.PI * 2);
+      ctx.arc(cx + cw - 30, cy + 206, 14, 0, Math.PI * 2);
       ctx.fillStyle = hc ? '#ffff00' : c.color;
       ctx.fill();
       ctx.fillStyle = hc ? '#000000' : '#ffffff';
       ctx.font = '800 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('➔', cx + cw - 30, cy + 208);
+      ctx.fillText('➔', cx + cw - 30, cy + 211);
     });
 
-    // Faixa de Serviços Rápidos de Jaú
-    const qY = startY + 652;
+    // Faixa de Acesso Rápido de 1 Toque
+    const qY = startY + 650;
     ctx.fillStyle = hc ? '#000000' : '#ffffff';
-    ctx.fillRect(offX, qY, contentW, 42);
+    ctx.fillRect(offX, qY, contentW, 48);
     ctx.strokeStyle = hc ? '#ffff00' : '#cbd5e1';
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(offX, qY, contentW, 42);
+    ctx.strokeRect(offX, qY, contentW, 48);
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = 'bold 13.5px sans-serif';
+    ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('🚑 SAMU 192   •   🛡️ Guarda 153   •   📞 Ouvidoria 156   •   💊 Farmácia 24h', offX + contentW / 2, qY + 26);
-
-    // Faixa ESG Paperless com QR Code
-    const esgY = startY + 704;
-    if (esgY < 1040) {
-      ctx.fillStyle = hc ? '#000000' : '#f0fdf4';
-      ctx.fillRect(offX, esgY, contentW, 74);
-      ctx.strokeStyle = hc ? '#ffff00' : '#168821';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(offX, esgY, contentW, 74);
-      ctx.fillStyle = hc ? '#ffff00' : '#168821';
-      ctx.font = 'bold 18px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('🌱 PROJETO JAÚ CONECTADA (100% PAPERLESS ESG)', offX + 16, esgY + 30);
-      ctx.fillStyle = hc ? '#ffff00' : '#14532d';
-      ctx.font = '600 14px sans-serif';
-      ctx.fillText('Sem emissão de papel: envie rotas e serviços ao celular via QR Code.', offX + 16, esgY + 54);
-    }
+    ctx.fillText('SAMU 192   •   Guarda 153   •   Ouvidoria 156   •   Farmácia 24h', offX + contentW / 2, qY + 30);
   }
 
   drawBusScreen(ctx, w, startY, hc) {
     const offX = 166;
     const cw = w - offX - 16;
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
-    ctx.font = '800 28px sans-serif';
-    ctx.fillText('TRANSPORTE COLETIVO • ONDE É O PONTO', offX, startY + 40);
+    ctx.font = '800 25px sans-serif';
+    ctx.fillText(
+      isItapui
+        ? 'MAPA LOCAL & PONTOS DE REFERÊNCIA (ITAPUÍ)'
+        : (isBauru ? 'MAPA LOCAL & PONTOS DE REFERÊNCIA (BAURU)' : 'MAPA LOCAL & PONTOS DE REFERÊNCIA (JAÚ)'),
+      offX,
+      startY + 40
+    );
 
-    const lines = [
-      { badge: 'LINHA 01', name: 'Circular Centro ⇄ Pouso Alegre', stop: '📍 Ponto: Jardim de Baixo (Centro)', eta: '4 min', color: '#168821' },
-      { badge: 'LINHA 02', name: 'Matriz ⇄ Santa Casa / Vila Netinho', stop: '📍 Ponto: Praça da Matriz (Histórico)', eta: '8 min', color: '#168821' },
-      { badge: 'LINHA 03', name: 'Rodoviária ⇄ Distrito Industrial', stop: '📍 Ponto: Terminal Rodoviário Municipal', eta: '14 min', color: '#d97706' },
-      { badge: 'LINHA 04', name: 'Parque do Rio Jaú ⇄ Jd. Ometto', stop: '📍 Ponto: Parque do Rio Jaú (Ecológico)', eta: '6 min', color: '#168821' }
-    ];
+    const lines = isItapui ? [
+      { badge: '0m • AQUI', name: 'Praça da Matriz (Jardim das Topiarias)', stop: '📍 Você está aqui • Centro Histórico', dist: 'Neste Ponto', color: '#168821' },
+      { badge: '300m • 4m', name: 'Hospital São José & Paço Municipal', stop: '📍 Rua Santo Antônio, 285 — Centro', dist: '4 min a pé', color: '#168821' },
+      { badge: '2,5 km', name: 'Prainha Municipal do Rio Tietê', stop: '📍 Orla do Rio Tietê — Av. Beira-Rio', dist: '5 min carro', color: '#168821' },
+      { badge: '3,0 km', name: 'Porto da Balsa & Rodoviária Municipal', stop: '📍 Acesso Rodovia SP-225 e Rio Tietê', dist: '6 min carro', color: '#d97706' }
+    ] : (isBauru ? [
+      { badge: '0m • AQUI', name: 'Praça Rui Barbosa & Calçadão Central', stop: '📍 Você está aqui • Centro de Bauru', dist: 'Neste Ponto', color: '#168821' },
+      { badge: '450m • 6m', name: 'Pronto-Socorro Central & Poupatempo', stop: '📍 Rua Rubens Arruda / Av. Nações Unidas', dist: '6 min a pé', color: '#168821' },
+      { badge: '1,5 km', name: 'Terminal Rodoviário Municipal de Bauru', stop: '📍 Praça João Paulo II, 30 — Centro', dist: '18 min a pé', color: '#d97706' },
+      { badge: '2,4 km', name: 'Parque Vitória Régia & Prefeitura', stop: '📍 Av. Nações Unidas, Quadra 25', dist: '6 min carro', color: '#168821' }
+    ] : [
+      { badge: '0m • AQUI', name: 'Praça da República (Jardim de Baixo)', stop: '📍 Você está aqui • Centro Histórico', dist: 'Neste Ponto', color: '#168821' },
+      { badge: '150m • 2m', name: 'Praça da Matriz (N. Sra. do Patrocínio)', stop: '📍 Subindo a Rua Edgard Ferraz (Centro)', dist: '2 min a pé', color: '#168821' },
+      { badge: '650m • 8m', name: 'Santa Casa & Farmácia Municipal 24h', stop: '📍 Rua Riachuelo, 480 — Centro', dist: '8 min a pé', color: '#168821' },
+      { badge: '1,2 km', name: 'Terminal Rodoviário Municipal de Jaú', stop: '📍 Rua Quintino Bocaiúva, s/n — Centro', dist: '15 min a pé', color: '#d97706' }
+    ]);
 
     lines.forEach((l, i) => {
       const ly = startY + 70 + i * 155;
@@ -2087,7 +3110,7 @@ class Totem3DViewer {
       ctx.fillStyle = hc ? '#000000' : '#0c326f';
       ctx.fillRect(offX + 14, ly + 26, 112, 86);
       ctx.fillStyle = hc ? '#ffff00' : '#ffffff';
-      ctx.font = '800 19px sans-serif';
+      ctx.font = '800 17px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(l.badge, offX + 70, ly + 75);
 
@@ -2102,7 +3125,7 @@ class Totem3DViewer {
 
       ctx.fillStyle = hc ? '#ffff00' : l.color;
       ctx.font = 'bold 18px sans-serif';
-      ctx.fillText(`● Próximo: ${l.eta}  •  Escaneie o QR do Ponto ➔`, offX + 142, ly + 106);
+      ctx.fillText(`● Distância: ${l.dist}  •  Escaneie o QR do Mapa ➔`, offX + 142, ly + 106);
 
       // Mini QR Code visual no lado direito do card indicando onde é o ponto
       const qrSize = 86;
@@ -2141,16 +3164,32 @@ class Totem3DViewer {
   drawShoesScreen(ctx, w, startY, hc) {
     const offX = 166;
     const cw = w - offX - 16;
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 28px sans-serif';
-    ctx.fillText('CIRCUITO DO CALÇADO FEMININO', offX, startY + 40);
+    ctx.fillText(
+      isItapui
+        ? 'COMÉRCIO, GASTRONOMIA E INDÚSTRIA'
+        : (isBauru ? 'COMÉRCIO, SHOPPINGS E GASTRONOMIA DE BAURU' : 'CIRCUITO DO CALÇADO FEMININO'),
+      offX,
+      startY + 40
+    );
 
-    const stores = [
+    const stores = isItapui ? [
+      { title: 'Comércio da Praça da Matriz', addr: 'Lojas, bancos e vestuário em torno da praça (1 min a pé)' },
+      { title: 'Polo Gastronômico da Prainha', addr: 'Quiosques, peixarias e lazer na beira do Tietê' },
+      { title: 'Polo de Confecções & Agroindústria', addr: 'Fábricas de confecção e indústrias locais (SP-225)' }
+    ] : (isBauru ? [
+      { title: 'Calçadão da Rua Batista de Carvalho', addr: 'Quadras 1 a 7 (ao lado da Praça Rui Barbosa) • +300 lojas' },
+      { title: 'Bauru Shopping & Boulevard Shopping', addr: 'Polos regionais de compras, cinema e gastronomia' },
+      { title: 'Rota do Sanduíche Bauru Original', addr: 'Patrimônio Imaterial • Rosbife, queijo derretido no banho-maria' }
+    ] : [
       { title: 'Shopping Território do Calçado', addr: 'Av. Hermínio Pires de Oliveira Netto, 400 (+150 lojas)' },
       { title: 'Polo Comercial Rua Major Prado', addr: 'Centro Histórico de Jaú • Lojas e Calçados' },
       { title: 'Espaço Noivas & Calçados de Festa', addr: 'Rua Amaral Gurgel, 210 • Sob Medida' }
-    ];
+    ]);
 
     stores.forEach((s, i) => {
       const sy = startY + 75 + i * 195;
@@ -2179,16 +3218,34 @@ class Totem3DViewer {
   drawTourismScreen(ctx, w, startY, hc) {
     const offX = 166;
     const cw = w - offX - 16;
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 28px sans-serif';
-    ctx.fillText('TURISMO, CULTURA E LAZER EM JAÚ', offX, startY + 40);
+    ctx.fillText(
+      isItapui
+        ? 'TURISMO, LAZER E FESTAS TRADICIONAIS'
+        : (isBauru ? 'TURISMO, CULTURA E PARQUES EM BAURU' : 'TURISMO, CULTURA E LAZER EM JAÚ'),
+      offX,
+      startY + 40
+    );
 
-    const spots = [
+    const spots = isItapui ? [
+      { title: 'Prainha Municipal de Itapuí (Rio Tietê)', desc: 'Banhos, quiosques, pesca e esportes náuticos' },
+      { title: 'Praça da Matriz ("Jardim das Topiarias")', desc: 'Árvores esculpidas, coreto e Paróquia Santo Antônio' },
+      { title: 'Festa do Peão de Itapuí (Evento Tradicional)', desc: 'Tradicional rodeio com montarias em touros e grandes shows' },
+      { title: 'Quermesse da Paróquia Santo Antônio', desc: 'Festa tradicional do padroeiro em junho com comidas típicas' },
+      { title: 'Carnaval de Rua de Itapuí (Tradição Popular)', desc: 'Famoso carnaval popular com blocos e matinês familiares' }
+    ] : (isBauru ? [
+      { title: 'Parque Zoológico Municipal de Bauru', desc: 'Referência nacional em conservação e lazer • Rod. SP-300' },
+      { title: 'Jardim Botânico Municipal de Bauru', desc: 'Trilhas ecológicas, orquidário e mata nativa do Cerrado' },
+      { title: 'Parque Vitória Régia & Museu Ferroviário', desc: 'Cartão-postal na Av. Nações Unidas e história das 3 Ferrovias' }
+    ] : [
       { title: 'Parque Municipal do Rio Jaú', desc: 'Caminhada, lago, quadras e lazer • 06h às 21h' },
       { title: 'Igreja Matriz N. Sra. do Patrocínio', desc: 'Patrimônio histórico neogótico na Praça da República' },
       { title: 'Teatro Municipal Elza Munerato', desc: 'Espetáculos, cultura e eventos gratuitos' }
-    ];
+    ]);
 
     spots.forEach((sp, i) => {
       const sy = startY + 75 + i * 195;
@@ -2215,19 +3272,35 @@ class Totem3DViewer {
   drawServicesScreen(ctx, w, startY, hc) {
     const offX = 166;
     const cw = w - offX - 16;
+    const isItapui = this.currentCity === 'itapui';
+    const isBauru = this.currentCity === 'bauru';
     ctx.textAlign = 'left';
     ctx.fillStyle = hc ? '#ffff00' : '#0c326f';
     ctx.font = '800 28px sans-serif';
     ctx.fillText('SERVIÇOS PÚBLICOS & EMERGÊNCIA', offX, startY + 40);
 
-    const phones = [
+    const phones = isItapui ? [
+      { num: '192', label: 'SAMU 24h' },
+      { num: '193', label: 'BOMBEIROS' },
+      { num: '190', label: 'POLÍCIA MILITAR' },
+      { num: '3664-8040', label: 'PREFEITURA ITAPUÍ' },
+      { num: '3664-1222', label: 'HOSPITAL SÃO JOSÉ' },
+      { num: '180', label: 'APOIO À MULHER' }
+    ] : (isBauru ? [
+      { num: '192', label: 'SAMU REGIONAL 24h' },
+      { num: '193', label: 'CORPO DE BOMBEIROS' },
+      { num: '156', label: 'OUVIDORIA / PREFEITURA' },
+      { num: '0800-7710195', label: 'DAE BAURU (ÁGUA 24H)' },
+      { num: '3235-1000', label: 'PALÁCIO CEREJEIRAS' },
+      { num: '199', label: 'DEFESA CIVIL BAURU' }
+    ] : [
       { num: '192', label: 'SAMU 24h' },
       { num: '193', label: 'BOMBEIROS' },
       { num: '153', label: 'GUARDA MUNICIPAL' },
       { num: '190', label: 'POLÍCIA MILITAR' },
       { num: '199', label: 'DEFESA CIVIL' },
       { num: '180', label: 'APOIO À MULHER' }
-    ];
+    ]);
 
     const cardW = (cw - 20) / 2;
     phones.forEach((p, idx) => {
@@ -2332,7 +3405,7 @@ class Totem3DViewer {
         id: 'solar',
         num: '1',
         title: 'Placa Solar 35Wp Embutida (Invisível de Frente)',
-        desc: 'Painel monocristalino de 64×21 cm (35 Wp) embutido na parte plana traseira do topo (atrás da quina frontal arredondada). Alimenta LEDs, sensores PIR, telemetria solar e mantém a bateria LiFePO4 de backup 24h (SOS), operando em sistema híbrido com a rede elétrica 220V municipal para a tela 43".',
+        desc: 'Painel monocristalino de 64×21 cm (35 Wp) embutido na parte plana traseira do topo (atrás da quina frontal arredondada). Mantém a bateria LiFePO4 de backup 24h carregada, operando em sistema híbrido com a rede elétrica 220V municipal para a tela 43".',
         pos: new THREE.Vector3(0.0, 2.21, -0.04),
         cam: { theta: 0.18, phi: 0.42, radius: 1.95, targetY: 1.95 }
       },
@@ -2347,24 +3420,24 @@ class Totem3DViewer {
       {
         id: 'screen',
         num: '3',
-        title: 'Tela Touchscreen 43" Full HD (IP65)',
-        desc: 'Monitor multi-touch de alto brilho (1500 nits) protegido por vidro temperado antivandalismo de 8mm e interface acessível (Libras, Voz e Modo Cadeirante).',
-        pos: new THREE.Vector3(0.28, 1.25, 0.19),
+        title: 'Tela-Computador 43" All-in-One Rebaixada ~2,5 cm (IP65)',
+        desc: 'A própria tela de 43" (1500 nits) JÁ É O COMPUTADOR (placa-mãe SoC, memória e touch embutidos dentro da espessura fina do próprio visor, sem computador externo). Montada com rebaixo frontal de ~2,5 cm para dentro do chassi para proteger contra sol direto e chuva.',
+        pos: new THREE.Vector3(0.28, 1.25, 0.165),
         cam: { theta: 0.0, phi: 1.48, radius: 2.20, targetY: 1.18 }
       },
       {
         id: 'structure',
         num: '4',
-        title: 'Chassi Monobloco em Metal Cru (Aço Escovado)',
-        desc: 'Corpo monolítico maciço (0,70m × 2,20m × 0,35m) em chapa de ferro/metal cru industrial sem pintura, quina arredondada e base limpa sem adereços.',
+        title: 'Chassi Monobloco Selado (Dissipação Passiva IP66)',
+        desc: 'Corpo monolítico estanque (0,70m × 2,20m × 0,35m) com nicho frontal rebaixado em 3 cm, sem furos de som e sem aberturas de ar para suportar chuva, sol e poeira no tempo.',
         pos: new THREE.Vector3(-0.36, 1.15, 0.05),
         cam: { theta: -1.52, phi: 1.38, radius: 2.85, targetY: 1.12 }
       },
       {
         id: 'rear',
         num: '5',
-        title: 'Carcaça Oca & Tampão Traseiro de Acesso (Porta 105°)',
-        desc: 'Carcaça em chapa de aço dobrado (2,5mm) com tampão traseiro de abertura lateral em 105° sobre 3 dobradiças reforçadas, puxador vertical, 2 fechaduras tubulares antivandalismo, pistão a gás e vedação perimetral de borracha EPDM IP65.',
+        title: 'Porta Traseira Cega & Fechadura Embutida Inox 316',
+        desc: 'Porta traseira totalmente lisa e selada com borracha EPDM (dobradiças internas ocultas, sem frestas de ventilação e sem alça saliente), travada por Fechadura Embutida em Aço Inox 316.',
         pos: new THREE.Vector3(0.0, 1.25, -0.19),
         cam: { theta: Math.PI, phi: 1.40, radius: 2.65, targetY: 1.15 }
       },
@@ -2378,105 +3451,65 @@ class Totem3DViewer {
       }
     ];
 
-    // PONTOS TÉCNICOS ESPECÍFICOS DO HARDWARE INTERNO (RAIO-X & TAMPÃO ABERTO)
+    // PONTOS TÉCNICOS ESPECÍFICOS DO HARDWARE INTERNO ULTRA-ENXUTO (1 A 6)
     this.hardwareHotspotsData = [
       {
         id: 'hw-ipc',
         num: '1',
-        tag: 'OPÇÃO RECOMENDADA • ALL-IN-ONE (PC ACOPLADO)',
-        title: 'Tela Touch 43" c/ Computador Acoplado (Módulo OPS)',
-        desc: 'Sim! Não é obrigatório ter um Mini-PC separado no rack: podemos comprar a Tela Touch 43" Industrial já com o Computador Acoplado na própria tela (All-in-One / Slot Industrial OPS). O módulo PC encaixa como uma gaveta direto atrás do monitor, eliminando cabos HDMI e USB soltos e deixando o interior muito mais limpo.',
-        wires: 'Zero cabos de vídeo/touch externos! Vídeo HDMI, USB Touch e Áudio passam direto pelo conector interno de 80 pinos da tela. Liga apenas 12V DC e telemetria solar.',
-        pos: new THREE.Vector3(0.0, 1.26, 0.11),
-        cam: { theta: Math.PI + 0.18, phi: 1.38, radius: 1.75, targetY: 1.28 }
+        tag: 'A PRÓPRIA TELA JÁ É O COMPUTADOR • REBAIXO 2,5 CM',
+        title: 'Tela-Computador 43" All-in-One (Zero PC Externo)',
+        desc: 'Smart Display Industrial 43" (1500 nits) rebaixado 2,5 cm para dentro da face frontal: o processador, memória, armazenamento e controlador touch já vêm integrados dentro da própria placa fina da tela. Elimina 100% o computador externo, a caixa OPS saliente e os cabos HDMI/USB.',
+        wires: 'Apenas 1 único cabo de alimentação 12V DC ligado na borda inferior da própria tela.',
+        pos: new THREE.Vector3(0.0, 1.20, 0.125),
+        cam: { theta: Math.PI + 0.15, phi: 1.38, radius: 1.75, targetY: 1.20 }
       },
       {
         id: 'hw-din',
         num: '2',
-        tag: 'QUADRO ELÉTRICO DIN',
-        title: 'Quadro DIN: Disjuntor 16A, DPS 40kA e DR 30mA',
-        desc: 'Centro de proteção e comando elétrico montado em trilho DIN TS-35. Contém Disjuntor Bipolar 16A Curva C, Protetor de Surtos DPS Classe II (275V/40kA) contra raios/descargas atmosféricas e Interruptor DR de 30mA para proteção contra choque elétrico conforme NR-10 e NBR 5410.',
-        wires: 'Entrada: Cabos AC 220V 2,5mm² (Marrom Fase + Azul Neutro). Saída: Fase e Neutro protegidos para a Fonte SMPS. Terra: Barramento PE.',
-        pos: new THREE.Vector3(-0.11, 1.05, -0.02),
-        cam: { theta: Math.PI - 0.20, phi: 1.42, radius: 1.55, targetY: 1.05 }
+        tag: 'PROTEÇÃO ELÉTRICA (TRILHO DIN ÚNICO)',
+        title: 'Disjuntor 16A, DPS Anti-Raio 40kA e DR 30mA',
+        desc: 'Proteção elétrica obrigatória montada no trilho DIN único inferior: Disjuntor Bipolar 16A, Protetor de Surtos DPS 40kA (contra descargas atmosféricas na praça) e DR 30mA (contra choque elétrico NR-10 / NBR 5410).',
+        wires: 'Entrada: Cabos AC 220V subterrâneos. Saída protegida para a Fonte 12V ao lado.',
+        pos: new THREE.Vector3(-0.165, 0.74, -0.01),
+        cam: { theta: Math.PI - 0.18, phi: 1.42, radius: 1.55, targetY: 0.74 }
       },
       {
         id: 'hw-smps',
         num: '3',
-        tag: 'CONVERSÃO DE ENERGIA',
-        title: 'Fonte Chaveada Industrial MeanWell 12V 20A (240W)',
-        desc: 'Fonte industrial metálica perfurada tipo gaiola com PFC ativo e 90% de eficiência. Converte 100~240V AC da rede pública em 12V DC contínuo estabilizado com proteção contra sobrecarga, curto-circuito e sobretensão para alimentar o computador, tela e exaustores.',
-        wires: 'Entrada: 220V AC (L, N, PE) do quadro DIN. Saída: Barramento DC 12V estabilizado (cabos Vermelho + / Preto - 2,5mm² flexível).',
-        pos: new THREE.Vector3(-0.14, 0.76, 0.02),
-        cam: { theta: Math.PI - 0.25, phi: 1.45, radius: 1.55, targetY: 0.76 }
-      },
-      {
-        id: 'hw-screen-backend',
-        num: '4',
-        tag: 'PAINEL TOUCH & DISPLAY',
-        title: 'Chassi Traseiro da Tela Touch 43" (1500 nits)',
-        desc: 'Estrutura traseira blindada do painel LCD 43" de alto brilho (1500 nits) com vidro temperado antivandalismo de 8mm (IK10). Possui gaveta integrada para o Computador Acoplado (Slot OPS All-in-One) ou conexões HDMI/USB caso opte por Mini-PC separado.',
-        wires: 'No modo Touch c/ PC Acoplado (All-in-One), a tela e o computador formam uma peça única alimentada por 12V/24V DC, sem cabos HDMI expostos.',
-        pos: new THREE.Vector3(0.14, 1.15, 0.13),
-        cam: { theta: 0.35, phi: 1.45, radius: 1.85, targetY: 1.25 }
-      },
-      {
-        id: 'hw-mppt',
-        num: '5',
-        tag: 'SISTEMA SOLAR ESG',
-        title: 'Controlador de Carga Solar MPPT 20A Inteligente',
-        desc: 'Módulo eletrônico de alta eficiência (99%) com algoritmo de rastreamento de máxima potência (MPPT). Gerencia a energia captada pela placa solar fotovoltaica do teto, carrega a bateria LiFePO4 com curva de três estágios (Bulk, Absorption, Float) e faz a gestão híbrida com a rede.',
-        wires: 'Entrada Solar: Cabos solares 4mm² MC4 (Laranja/Vermelho + / Preto -). Bateria: Cabos flexíveis 10mm² para terminais da bateria LiFePO4.',
-        pos: new THREE.Vector3(0.12, 0.76, 0.02),
-        cam: { theta: Math.PI + 0.22, phi: 1.45, radius: 1.55, targetY: 0.76 }
+        tag: 'FONTE + GESTÃO SOLAR INTEGRADOS',
+        title: 'Fonte Industrial 12V + Controlador Solar MPPT 20A',
+        desc: 'Montados lado a lado no mesmo trilho DIN inferior: a Fonte MeanWell converte o 220V da praça em 12V DC seguro para a Tela-Computador, enquanto o Controlador MPPT gerencia a energia limpa que desce da Placa Solar do teto.',
+        wires: 'Entrada: 220V AC (Fonte) e Cabo Solar 4mm² do teto (MPPT). Saída: 12V DC único para a Tela 43".',
+        pos: new THREE.Vector3(0.08, 0.74, -0.01),
+        cam: { theta: Math.PI + 0.18, phi: 1.42, radius: 1.55, targetY: 0.74 }
       },
       {
         id: 'hw-battery',
-        num: '6',
-        tag: 'BACKUP SUSTENTÁVEL',
-        title: 'Banco de Baterias LiFePO4 12,8V 40Ah (480 Wh)',
-        desc: 'Bateria de Lítio-Ferro-Fosfato de alta densidade e segurança intrínseca (não inflama) com BMS interno inteligente. Garante mais de 3.500 ciclos de vida útil e autonomia de backup para o computador, iluminação e botão SOS caso falte energia na rede 220V de Jaú.',
-        wires: 'Conexão: Cabos automotivos 10mm² Vermelho (+) e Preto (-) com fusível de lâmina 30A e terminais olhais M6 estanhados.',
-        pos: new THREE.Vector3(0.0, 0.28, 0.0),
-        cam: { theta: Math.PI, phi: 1.35, radius: 1.65, targetY: 0.28 }
-      },
-      {
-        id: 'hw-modem',
-        num: '7',
-        tag: 'TELEMETRIA SOLAR & ENERGIA',
-        title: 'Módulo de Comunicação Solar & Telemetria MPPT',
-        desc: 'Módulo de comunicação e telemetria inteligente interligando o painel solar fotovoltaico, o banco de bateria de backup e o computador do totem. Permite leitura contínua da geração solar, nível de carga da bateria e status da rede elétrica 220V.',
-        wires: 'Comunicação: Cabo blindado de telemetria serial RS485 ligado ao controlador MPPT solar. Alimentação: 12V DC da bateria.',
-        pos: new THREE.Vector3(0.0, 1.75, 0.0),
-        cam: { theta: Math.PI, phi: 1.40, radius: 1.60, targetY: 1.75 }
-      },
-      {
-        id: 'hw-thermal',
-        num: '8',
-        tag: 'GESTÃO TÉRMICA & HVAC',
-        title: 'Sistema de Exaustão Dupla 120mm & Termostato DIN',
-        desc: 'Dois exaustores industriais de alto fluxo com rolamento duplo de esferas (Dual Ball Bearing) nas venezianas superiores traseiras, acionados automaticamente por termostato graduável (ativado se temp > 35°C). Ar fresco entra pela grelha com filtro de poeira G4 na base.',
-        wires: 'Alimentação: 12V DC (1A) ligado aos contatos NA (normalmente abertos) do termostato bimetálico.',
-        pos: new THREE.Vector3(0.0, 1.95, -0.06),
-        cam: { theta: Math.PI, phi: 1.32, radius: 1.65, targetY: 1.95 }
+        num: '4',
+        tag: 'EXCLUSIVA P/ A PLACA SOLAR',
+        title: 'Bateria Compacta LiFePO4 12,8V (Armazenamento Solar)',
+        desc: 'Exatamente como planejado: esta bateria compacta na base fria existe apenas por causa da Placa Solar de 35Wp do topo (para armazenar a carga gerada pelo sol e estabilizar variações de nuvens). Se o totem fosse ligado apenas no 220V sem placa solar, nem esta bateria nem o MPPT seriam necessários.',
+        wires: 'Cabos 10mm² ligados diretamente ao Controlador Solar MPPT logo acima.',
+        pos: new THREE.Vector3(0.06, 0.27, 0.0),
+        cam: { theta: Math.PI, phi: 1.35, radius: 1.65, targetY: 0.30 }
       },
       {
         id: 'hw-grounding',
-        num: '9',
-        tag: 'ATERRAMENTO E FIAÇÃO',
-        title: 'Barramento de Aterramento PE & Canaletas de Cabos',
-        desc: 'Barramento de cobre maciço eletrolítico interligando em estrela todas as partes metálicas (carcaça estrutural, tampão traseiro, suporte da tela, trilhos DIN e fonte) com cordoalha de aterramento verde-amarela de 4mm².',
-        wires: 'Aterramento equipotencial PE conforme NBR 5410 com impedância menor que 10 ohms medida no chumbador da base.',
-        pos: new THREE.Vector3(-0.08, 0.55, -0.03),
-        cam: { theta: Math.PI - 0.35, phi: 1.42, radius: 1.75, targetY: 0.55 }
+        num: '5',
+        tag: 'SEGURANÇA NR-10',
+        title: 'Barramento PE de Aterramento em Cobre',
+        desc: 'Aterra a estrutura metálica, a porta traseira e o trilho DIN na haste de cobre da fundação, garantindo segurança absoluta contra choques na praça pública.',
+        wires: 'Cabo verde-amarelo 4mm² conectado à haste de aterramento na base.',
+        pos: new THREE.Vector3(-0.14, 0.48, 0.0),
+        cam: { theta: Math.PI - 0.30, phi: 1.42, radius: 1.65, targetY: 0.48 }
       },
       {
         id: 'hw-cabinet-door',
-        num: '10',
-        tag: 'CARCAÇA & TAMPÃO TRASEIRO DE ACESSO',
-        title: 'Tampão Traseiro (Porta c/ 3 Dobradiças) & Carcaça Oca',
-        desc: 'Acesso total por trás da máquina: a carcaça é um gabinete oco em chapa de aço dobrada de 2,5mm com quadro de borracha EPDM. O Tampão Traseiro abre 105° para a esquerda sobre 3 dobradiças externas reforçadas, possuindo puxador vertical, 2 fechaduras tubulares com linguetas internas, 3 costelas Ômega de reforço, porta-documentos e pistão a gás.',
-        wires: 'Aterramento da porta: Cordoalha flexível de cobre entre o tampão traseiro e a carcaça para proteção NR-10. Vedação IP65 contra chuva e poeira.',
+        num: '6',
+        tag: 'VEDAÇÃO AO TEMPO (IP66)',
+        title: 'Porta Traseira Selada + Fechadura Inox 316',
+        desc: 'Porta traseira 100% cega (sem frestas de ar, sem coolers e sem dobradiças externas expostas), vedada com borracha EPDM e fechadura embutida Inox 316.',
+        wires: 'Gabinete 100% fechado com dissipação térmica passiva pelo próprio corpo metálico.',
         pos: new THREE.Vector3(-0.38, 1.15, -0.45),
         cam: { theta: Math.PI + 0.38, phi: 1.36, radius: 2.95, targetY: 1.10 }
       }
@@ -2577,9 +3610,81 @@ class Totem3DViewer {
   }
 
   // =========================================================================
-  // CONTROLES DE ARRASTAR 360° (MOUSE + TOUCH + ZOOM)
+  // CONTROLES DE ARRASTAR 360° (MOUSE + TOUCH + ZOOM) + DOIS CLIQUES NA PORTA TRASEIRA 3D
   // =========================================================================
+  isObjectVisible(obj) {
+    let cur = obj;
+    while (cur) {
+      if (cur.visible === false) return false;
+      cur = cur.parent;
+    }
+    return true;
+  }
+
+  isInsideRearDoor(obj) {
+    let cur = obj;
+    while (cur) {
+      if (cur === this.rearDoorHingeGroup) return true;
+      cur = cur.parent;
+    }
+    return false;
+  }
+
+  isPointOnRearDoor(clientX, clientY, domElement) {
+    if (!this.rearDoorHingeGroup || !this.camera || !domElement) return false;
+    if (!this.raycaster) this.raycaster = new THREE.Raycaster();
+    if (!this.mouseNDC) this.mouseNDC = new THREE.Vector2();
+
+    const rect = domElement.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return false;
+
+    this.mouseNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouseNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouseNDC, this.camera);
+
+    // Verifica se o raio acerta alguma peça da porta traseira (chapa, dobradiças, fechadura inox, nervuras)
+    const doorHits = this.raycaster.intersectObject(this.rearDoorHingeGroup, true);
+    if (!doorHits || doorHits.length === 0) return false;
+
+    const isDoorCurrentlyOpen = Math.abs(this.targetDoorAngle) > 0.1;
+    // Se a porta já estiver aberta para fora, qualquer duplo clique direto nela é válido
+    if (isDoorCurrentlyOpen) return true;
+
+    // Se a porta estiver fechada, garante que o usuário está olhando pelas costas/lateral (z < 0.05)
+    // ou que a porta é o objeto visível mais próximo do clique (não clicando através da tela frontal)
+    if (this.camera.position.z < 0.05) return true;
+
+    if (this.totemGroup) {
+      const allHits = this.raycaster.intersectObjects(this.totemGroup.children, true);
+      const firstVisible = allHits.find(h => this.isObjectVisible(h.object));
+      if (firstVisible && this.isInsideRearDoor(firstVisible.object)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  handleRearDoorDoubleClick() {
+    const now = performance.now();
+    const elapsed = now - (this._lastDoorStateChangeTime || 0);
+    if (elapsed < 300) return;
+
+    this._lastDoorStateChangeTime = now;
+    const isDoorCurrentlyOpen = Math.abs(this.targetDoorAngle) > 0.1;
+    if (isDoorCurrentlyOpen) {
+      this.closeRearDoor();
+    } else {
+      this.openRearDoor(false);
+    }
+  }
+
   setupInteractionEvents(domElement) {
+    this._pointerDownPos = { x: 0, y: 0 };
+    this._pointerMovedDist = 0;
+    this._lastDoorStateChangeTime = 0;
+    this._lastTouchTapTime = 0;
+
     domElement.addEventListener('mousedown', (e) => {
       if (e.button === 0) {
         this.isDragging = true;
@@ -2589,16 +3694,27 @@ class Totem3DViewer {
       } else if (e.button === 2) {
         this.isPanning = true;
       }
+      this._pointerDownPos = { x: e.clientX, y: e.clientY };
+      this._pointerMovedDist = 0;
       this.prevMouse = { x: e.clientX, y: e.clientY };
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!this.isDragging && !this.isPanning) return;
+      if (!this.isDragging && !this.isPanning) {
+        // Muda o cursor para mãozinha (pointer) ao passar o mouse sobre a porta traseira
+        if (e.target === domElement) {
+          const overDoor = this.isPointOnRearDoor(e.clientX, e.clientY, domElement);
+          domElement.style.cursor = overDoor ? 'pointer' : 'grab';
+        }
+        return;
+      }
       const dx = e.clientX - this.prevMouse.x;
       const dy = e.clientY - this.prevMouse.y;
+      this._pointerMovedDist += Math.hypot(dx, dy);
       this.prevMouse = { x: e.clientX, y: e.clientY };
 
       if (this.isDragging) {
+        domElement.style.cursor = 'grabbing';
         this.camState.targetTheta -= dx * 0.0085;
         this.camState.targetPhi = Math.max(0.18, Math.min(1.62, this.camState.targetPhi - dy * 0.0065));
       } else if (this.isPanning) {
@@ -2611,36 +3727,50 @@ class Totem3DViewer {
       this.isPanning = false;
     });
 
+    // SOMENTE DOIS CLIQUES (dblclick) na porta traseira -> Abre (para fora) ou Fecha a porta
+    domElement.addEventListener('dblclick', (e) => {
+      if (this.isPointOnRearDoor(e.clientX, e.clientY, domElement)) {
+        e.preventDefault();
+        this.handleRearDoorDoubleClick();
+      }
+    });
+
+    domElement.style.touchAction = 'none';
     domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Zoom suave no scroll do mouse
+    // Zoom suave no scroll do mouse (sem dar zoom na página do navegador)
     domElement.addEventListener('wheel', (e) => {
       e.preventDefault();
       this.camState.targetRadius = Math.max(1.35, Math.min(6.0, this.camState.targetRadius + e.deltaY * 0.0022));
     }, { passive: false });
 
-    // Suporte Touch (Celular / Tablet / Tela Touch)
+    // Suporte Touch (Tablet / Celular / Tela Touch) — trava o zoom da página e faz zoom apenas na câmera 3D
     domElement.addEventListener('touchstart', (e) => {
+      if (e.cancelable) e.preventDefault();
       if (e.touches.length === 1) {
         this.isDragging = true;
         this.autoRotate = false;
+        this._pointerDownPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        this._pointerMovedDist = 0;
         this.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      } else if (e.touches.length === 2) {
+      } else if (e.touches.length >= 2) {
         this.isDragging = false;
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         this.pinchStartDist = Math.hypot(dx, dy);
       }
-    }, { passive: true });
+    }, { passive: false });
 
     domElement.addEventListener('touchmove', (e) => {
+      if (e.cancelable) e.preventDefault();
       if (e.touches.length === 1 && this.isDragging) {
         const dx = e.touches[0].clientX - this.prevMouse.x;
         const dy = e.touches[0].clientY - this.prevMouse.y;
+        this._pointerMovedDist += Math.hypot(dx, dy);
         this.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         this.camState.targetTheta -= dx * 0.009;
         this.camState.targetPhi = Math.max(0.18, Math.min(1.62, this.camState.targetPhi - dy * 0.007));
-      } else if (e.touches.length === 2) {
+      } else if (e.touches.length >= 2) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.hypot(dx, dy);
@@ -2648,10 +3778,28 @@ class Totem3DViewer {
         this.pinchStartDist = dist;
         this.camState.targetRadius = Math.max(1.35, Math.min(6.0, this.camState.targetRadius + delta * 0.008));
       }
-    }, { passive: true });
+    }, { passive: false });
 
-    domElement.addEventListener('touchend', () => {
+    domElement.addEventListener('touchend', (e) => {
+      const wasDragging = this.isDragging;
+      const movedDist = this._pointerMovedDist;
       this.isDragging = false;
+
+      // SOMENTE DOIS TOQUES RÁPIDOS (Double-Tap < 360ms) na porta traseira no tablet/celular
+      if (wasDragging && movedDist < 12 && e.changedTouches && e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        const now = performance.now();
+        if (this.isPointOnRearDoor(touch.clientX, touch.clientY, domElement)) {
+          if (now - (this._lastTouchTapTime || 0) < 360) {
+            this._lastTouchTapTime = 0;
+            this.handleRearDoorDoubleClick();
+          } else {
+            this._lastTouchTapTime = now;
+          }
+        } else {
+          this._lastTouchTapTime = 0;
+        }
+      }
     });
   }
 
@@ -2750,7 +3898,7 @@ class Totem3DViewer {
         this.isNightMode = !this.isNightMode;
         this.applyDayNightMode();
         btnNight.classList.toggle('active', this.isNightMode);
-        btnNight.textContent = this.isNightMode ? '🌙 Noite (LEDs)' : '☀️ Dia / Noite';
+        btnNight.textContent = this.isNightMode ? '🌙 Modo Noite' : '☀️ Dia / Noite';
       });
     }
 
@@ -2764,7 +3912,7 @@ class Totem3DViewer {
       });
     }
 
-    // 9. Controles Específicos de Raio-X / Lado Interno / Tampão Traseiro / Arquitetura PC
+    // 9. Controles Específicos de Raio-X / Lado Interno / Tampão Traseiro
     this.setupHardwareControls();
   }
 
@@ -2772,12 +3920,11 @@ class Totem3DViewer {
   // CONTROLES E MODOS DO LADO INTERNO / RAIO-X (2ª BOLINHA & MENU 360°)
   // =========================================================================
   setupHardwareControls() {
-    // 1. Modos de Visão Interna (Raio-X Translúcido, Porta Aberta 105°, Vista Explodida)
+    // 1. Modos de Visão Interna (Raio-X Translúcido, Porta Aberta 105°)
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
       btn.addEventListener('click', () => {
         const mode = btn.getAttribute('data-hw-view');
         if (this.isHardwareMode && this.hardwareViewMode === mode) {
-          // Se clicar novamente no modo já ativo, volta ao totem externo normal
           this.setHardwareMode(false);
           const orbXray = document.getElementById('btn-orb-xray');
           if (orbXray) orbXray.classList.remove('active');
@@ -2790,7 +3937,7 @@ class Totem3DViewer {
       });
     });
 
-    // 1B. Botão direto de Abrir / Fechar o Tampão Traseiro (Porta de Acesso às Costas)
+    // 2. Botão direto de Abrir / Fechar o Tampão Traseiro (Porta de Acesso às Costas)
     const btnToggleDoor = document.getElementById('btn-toggle-rear-door');
     if (btnToggleDoor) {
       btnToggleDoor.addEventListener('click', () => {
@@ -2798,41 +3945,7 @@ class Totem3DViewer {
       });
     }
 
-    // 1C. Botões de Escolha da Arquitetura Computacional (Touch c/ PC Acoplado All-in-One vs Mini-PC Separado)
-    document.querySelectorAll('[data-pc-arch]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const arch = btn.getAttribute('data-pc-arch');
-        this.setPcArchitecture(arch, true);
-      });
-    });
-
-    // 2. Destacar Chicote Elétrico (AC 220V e DC 12V)
-    const btnGlowPower = document.getElementById('btn-hw-glow-power');
-    if (btnGlowPower) {
-      btnGlowPower.addEventListener('click', () => {
-        if (!this.isHardwareMode) {
-          this.setHardwareMode(true);
-          const orbXray = document.getElementById('btn-orb-xray');
-          if (orbXray) orbXray.classList.add('active');
-        }
-        this.toggleGlowPower();
-      });
-    }
-
-    // 3. Destacar Cabos de Dados (HDMI, USB Touch, Telemetria RS485)
-    const btnGlowData = document.getElementById('btn-hw-glow-data');
-    if (btnGlowData) {
-      btnGlowData.addEventListener('click', () => {
-        if (!this.isHardwareMode) {
-          this.setHardwareMode(true);
-          const orbXray = document.getElementById('btn-orb-xray');
-          if (orbXray) orbXray.classList.add('active');
-        }
-        this.toggleGlowData();
-      });
-    }
-
-    // 4. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 10)
+    // 3. Mostrar/Ocultar Hotspots Técnicos do Hardware (1 a 7)
     const btnHwHotspots = document.getElementById('btn-hw-hotspots');
     if (btnHwHotspots) {
       btnHwHotspots.addEventListener('click', () => {
@@ -2845,7 +3958,7 @@ class Totem3DViewer {
       });
     }
 
-    // 5. Abrir/Fechar Modal da Parte Técnica (3ª Bolinha)
+    // 4. Abrir/Fechar Modal da Parte Técnica (3ª Bolinha)
     const modalSchematics = document.getElementById('modal-hardware-schematics');
     const orbTech = document.getElementById('btn-orb-tech');
     const openSchematics = () => {
@@ -2891,86 +4004,45 @@ class Totem3DViewer {
     });
   }
 
-  toggleRearDoor() {
-    const isDoorCurrentlyOpen = Math.abs(this.targetDoorAngle) > 0.1;
-    if (isDoorCurrentlyOpen) {
-      // Fecha o tampão traseiro
-      this.targetDoorAngle = 0;
-      if (!this.isHardwareMode) {
-        if (this.internalHardwareGroup) this.internalHardwareGroup.visible = false;
-      }
-      const btnDoor = document.getElementById('btn-toggle-rear-door');
-      if (btnDoor) {
-        btnDoor.classList.remove('active');
-        btnDoor.textContent = '🚪 Abrir Tampão Traseiro (105°)';
-      }
-    } else {
-      // Abre o tampão traseiro em 105° mostrando a carcaça oca e o interior da máquina
-      this.autoRotate = false;
-      const btnAuto = document.getElementById('btn-3d-autorotate');
-      if (btnAuto) btnAuto.classList.remove('active');
+  openRearDoor(moveCamera = false) {
+    this.autoRotate = false;
+    const btnAuto = document.getElementById('btn-3d-autorotate');
+    if (btnAuto) btnAuto.classList.remove('active');
 
-      if (this.mainCabinetMesh) this.mainCabinetMesh.visible = false;
-      if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = true;
-      if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
+    if (this.mainCabinetMesh) this.mainCabinetMesh.visible = false;
+    if (this.hollowCabinetGroup) this.hollowCabinetGroup.visible = true;
+    if (this.internalHardwareGroup) this.internalHardwareGroup.visible = true;
 
-      this.targetDoorAngle = -Math.PI * 0.58; // 105 graus aberto
+    this.targetDoorAngle = Math.PI * 0.58; // +105 graus para fora!
+    if (moveCamera) {
       this.camState.targetTheta = Math.PI + 0.32;
       this.camState.targetPhi = 1.38;
       this.camState.targetRadius = 3.25;
       this.camState.targetLookY = 1.08;
+    }
 
-      const btnDoor = document.getElementById('btn-toggle-rear-door');
-      if (btnDoor) {
-        btnDoor.classList.add('active');
-        btnDoor.textContent = '🚪 Fechar Tampão Traseiro';
-      }
+    const btnDoor = document.getElementById('btn-toggle-rear-door');
+    if (btnDoor) {
+      btnDoor.classList.add('active');
+      btnDoor.textContent = '🚪 Fechar Porta';
     }
   }
 
-  setPcArchitecture(arch = 'allinone', focusOnChange = false) {
-    this.pcArchitecture = arch === 'minipc' ? 'minipc' : 'allinone';
-    const isAllInOne = this.pcArchitecture === 'allinone';
-
-    if (this.allInOnePcGroup) this.allInOnePcGroup.visible = isAllInOne;
-    if (this.separateMiniPcGroup) this.separateMiniPcGroup.visible = !isAllInOne;
-
-    // Atualiza o Hotspot #1 (Cérebro Computacional) de acordo com a opção escolhida
-    if (this.hardwareHotspotsData && this.hardwareHotspotsData.length > 0) {
-      const ipcSpot = this.hardwareHotspotsData.find(h => h.id === 'hw-ipc');
-      if (ipcSpot) {
-        if (isAllInOne) {
-          ipcSpot.tag = 'OPÇÃO RECOMENDADA • ALL-IN-ONE (PC ACOPLADO NA TELA)';
-          ipcSpot.title = 'Tela Touch 43" c/ Computador Acoplado (Módulo OPS)';
-          ipcSpot.desc = 'Sim! Não é obrigatório ter um Mini-PC separado no rack: podemos comprar a Tela Touch 43" Industrial já com o Computador Acoplado na própria tela (All-in-One / Slot Industrial OPS). O módulo PC encaixa como uma gaveta direto atrás do monitor, eliminando cabos HDMI e USB soltos e deixando o interior muito mais limpo.';
-          ipcSpot.wires = 'Zero cabos de vídeo/touch externos! Vídeo HDMI, USB Touch e Áudio passam direto pelo conector interno de 80 pinos da tela. Liga apenas 12V DC e telemetria solar.';
-          ipcSpot.pos = new THREE.Vector3(0.0, 1.26, 0.11);
-          ipcSpot.cam = { theta: Math.PI + 0.18, phi: 1.38, radius: 1.75, targetY: 1.28 };
-        } else {
-          ipcSpot.tag = 'OPÇÃO MODULAR • MINI-PC SEPARADO NO RACK';
-          ipcSpot.title = 'Mini-PC Industrial Fanless Separado (Core i5 / IPC)';
-          ipcSpot.desc = 'Arquitetura modular tradicional: a Tela Touch 43" funciona apenas como monitor touch e o Mini-PC Fanless fica fixado separadamente no trilho do rack interno. Vantagem: caso queira substituir apenas o computador ou apenas a tela no futuro por qualquer marca, as peças são independentes.';
-          ipcSpot.wires = 'Alimentação: 12V DC (5A). Vídeo: Cabo HDMI 2.1 ligando o Mini-PC à Placa AD da tela. Touch: Cabo USB 3.0 blindado ligando a tela ao Mini-PC.';
-          ipcSpot.pos = new THREE.Vector3(0.06, 1.38, 0.03);
-          ipcSpot.cam = { theta: Math.PI + 0.15, phi: 1.38, radius: 1.65, targetY: 1.38 };
-        }
-      }
+  closeRearDoor() {
+    this.targetDoorAngle = 0;
+    const btnDoor = document.getElementById('btn-toggle-rear-door');
+    if (btnDoor) {
+      btnDoor.classList.remove('active');
+      btnDoor.textContent = '🚪 Abrir Porta';
     }
+  }
 
-    document.querySelectorAll('[data-pc-arch]').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-pc-arch') === this.pcArchitecture);
-    });
-
-    this.renderHotspotPins();
-
-    if (focusOnChange) {
-      if (!this.isHardwareMode) {
-        this.setHardwareMode(true);
-        const orbXray = document.getElementById('btn-orb-xray');
-        if (orbXray) orbXray.classList.add('active');
-      }
-      const ipcSpot = this.hardwareHotspotsData.find(h => h.id === 'hw-ipc');
-      if (ipcSpot) this.focusHotspot(ipcSpot);
+  toggleRearDoor() {
+    const isDoorCurrentlyOpen = Math.abs(this.targetDoorAngle) > 0.1;
+    if (isDoorCurrentlyOpen) {
+      this.closeRearDoor();
+    } else {
+      this.openRearDoor(true);
     }
   }
 
@@ -3012,7 +4084,7 @@ class Totem3DViewer {
       const btnDoor = document.getElementById('btn-toggle-rear-door');
       if (btnDoor) {
         btnDoor.classList.remove('active');
-        btnDoor.textContent = '🚪 Abrir Tampão Traseiro (105°)';
+        btnDoor.textContent = '🚪 Abrir Porta';
       }
       const card = document.getElementById('totem-3d-info-card');
       if (card) card.classList.add('hidden');
@@ -3049,16 +4121,15 @@ class Totem3DViewer {
     this.targetExplodeOffset = 0;
 
     if (mode === 'door') {
-      // Carcaça 100% sólida com o Tampão Traseiro aberto em 105 graus mostrando o acesso por trás
-      this.targetDoorAngle = -Math.PI * 0.58;
+      // Carcaça 100% sólida com o Tampão Traseiro aberto PARA FORA (+105 graus) mostrando o acesso por trás
+      this.targetDoorAngle = Math.PI * 0.58;
       this.camState.targetTheta = Math.PI + 0.32;
       this.camState.targetPhi = 1.38;
       this.camState.targetRadius = 3.25;
       this.camState.targetLookY = 1.08;
     } else if (mode === 'xray') {
-      // Raio-X + Carcaça Visível (48% opacidade) + Tampão Traseiro Sólido ABERTO em 105°!
-      // Assim o usuário enxerga claramente a CARCAÇA, o TAMPÃO TRASEIRO aberto na dobradiça e os componentes lá dentro!
-      this.targetDoorAngle = -Math.PI * 0.58;
+      // Raio-X + Carcaça Visível (48% opacidade) + Tampão Traseiro Sólido ABERTO PARA FORA (+105°)!
+      this.targetDoorAngle = Math.PI * 0.58;
       ['body', 'headerSign'].forEach(matKey => {
         const mat = this.dynamicMaterials[matKey];
         if (mat) {
@@ -3068,7 +4139,7 @@ class Totem3DViewer {
           mat.needsUpdate = true;
         }
       });
-      // O Tampão Traseiro (rearDoor) permanece 100% opaco e aberto ao lado para evidenciar a porta de manutenção
+      // O Tampão Traseiro (rearDoor) permanece 100% opaco e aberto para fora ao lado para evidenciar a porta de manutenção
       if (this.dynamicMaterials.rearDoor) {
         this.dynamicMaterials.rearDoor.transparent = false;
         this.dynamicMaterials.rearDoor.opacity = 1.0;
@@ -3080,8 +4151,8 @@ class Totem3DViewer {
       this.camState.targetRadius = 3.35;
       this.camState.targetLookY = 1.06;
     } else if (mode === 'exploded') {
-      // Vista explodida em camadas (Carcaça deslocada + Tampão aberto)
-      this.targetDoorAngle = -Math.PI * 0.50;
+      // Vista explodida em camadas (Carcaça deslocada + Tampão aberto para fora)
+      this.targetDoorAngle = Math.PI * 0.50;
       this.targetExplodeOffset = 0.36;
       this.camState.targetTheta = Math.PI + 0.65;
       this.camState.targetPhi = 1.28;
@@ -3093,7 +4164,7 @@ class Totem3DViewer {
     if (btnDoor) {
       const doorOpen = Math.abs(this.targetDoorAngle) > 0.1;
       btnDoor.classList.toggle('active', doorOpen);
-      btnDoor.textContent = doorOpen ? '🚪 Fechar Tampão Traseiro' : '🚪 Abrir Tampão Traseiro (105°)';
+      btnDoor.textContent = doorOpen ? '🚪 Fechar Porta' : '🚪 Abrir Porta';
     }
 
     document.querySelectorAll('[data-hw-view]').forEach(btn => {
@@ -3407,6 +4478,11 @@ class Totem3DViewer {
     this.dynamicMaterials.body.metalness = lum > 0.82 ? 0.18 : 0.30;
     this.dynamicMaterials.body.roughness = lum < 0.18 ? 0.36 : 0.42;
 
+    if (this.dynamicMaterials.lowerCrest) {
+      this.dynamicMaterials.lowerCrest.metalness = lum > 0.82 ? 0.22 : 0.36;
+      this.dynamicMaterials.lowerCrest.roughness = lum < 0.18 ? 0.32 : 0.36;
+    }
+
     // Atualiza chanfros estruturais, frisos laterais e flange da base em tom harmônico
     const seamHex = this.shiftColorBrightness(cleanHex, -0.22);
     const stripHex = this.shiftColorBrightness(cleanHex, -0.10);
@@ -3414,7 +4490,7 @@ class Totem3DViewer {
     if (this.dynamicMaterials.ledStrip) this.dynamicMaterials.ledStrip.color.set(stripHex);
     if (this.dynamicMaterials.flange) this.dynamicMaterials.flange.color.set(seamHex);
 
-    // Atualiza a Placa Superior de Jaú, a Placa Inferior de Jaú e a Parte de Ferro das Costas
+    // Atualiza a Placa Superior de Jaú, o Brasão em Baixo-Relevo Inferior e a Parte de Ferro das Costas
     this.updateMetalPlatesTextures(cleanHex);
 
     // Atualiza preview e rótulo na Tabela de Cores
@@ -3470,7 +4546,16 @@ class Totem3DViewer {
     if (stateObj.isVLibrasActive !== undefined) this.showVLibrasBox = stateObj.isVLibrasActive;
     if (stateObj.vlibrasSub !== undefined) this.vlibrasSub = stateObj.vlibrasSub;
     if (stateObj.isInterpretingLibras !== undefined) this.isInterpretingLibras = stateObj.isInterpretingLibras;
-    if (stateObj.librasPose !== undefined) this.librasPose = stateObj.librasPose;
+    if (stateObj.currentCity !== undefined) {
+      this.currentCity = stateObj.currentCity === 'itapui' ? 'itapui' : (stateObj.currentCity === 'bauru' ? 'bauru' : 'jau');
+      this.updateMetalPlatesTextures(this.currentMetalHex || '#8e96a0');
+    }
+    this.updateScreenTexture();
+  }
+
+  setCity(cityKey) {
+    this.currentCity = cityKey === 'itapui' ? 'itapui' : (cityKey === 'bauru' ? 'bauru' : 'jau');
+    this.updateMetalPlatesTextures(this.currentMetalHex || '#8e96a0');
     this.updateScreenTexture();
   }
 
@@ -3562,6 +4647,7 @@ class Totem3DViewer {
     if (!this.isHardwareMode && Math.abs(this.targetDoorAngle) < 0.01 && Math.abs(this.currentDoorAngle) < 0.015) {
       if (this.mainCabinetMesh && !this.mainCabinetMesh.visible) this.mainCabinetMesh.visible = true;
       if (this.hollowCabinetGroup && this.hollowCabinetGroup.visible) this.hollowCabinetGroup.visible = false;
+      if (this.internalHardwareGroup && this.internalHardwareGroup.visible) this.internalHardwareGroup.visible = false;
     }
 
     // Animação suave de vista explodida
@@ -3571,6 +4657,9 @@ class Totem3DViewer {
     }
     if (this.hollowCabinetGroup) {
       this.hollowCabinetGroup.position.x = this.currentExplodeOffset;
+    }
+    if (this.lowerCrestMesh) {
+      this.lowerCrestMesh.position.x = this.currentExplodeOffset;
     }
     if (this.rearDoorHingeGroup) {
       this.rearDoorHingeGroup.position.z = -0.178 - this.currentExplodeOffset * 1.5;

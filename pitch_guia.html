@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roteiro de Pitch (5 Minutos) - Linhas & Palavras de Impacto | Totemize Jaú</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', Helvetica, Arial, sans-serif;
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 64px 16px 32px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .top-bar a, .top-bar button {
+      background: #dc2626;
+      color: #ffffff;
+      text-decoration: none;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .sheet {
+      max-width: 820px;
+      margin: 0 auto 24px;
+      background: #ffffff;
+      padding: 28px 34px;
+      border: 2px solid #0f172a;
+      page-break-after: always;
+    }
+
+    .sheet:last-child {
+      page-break-after: auto;
+    }
+
+    .header-line {
+      border-top: 4px solid #0f172a;
+      border-bottom: 2px solid #0f172a;
+      padding: 8px 0;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .header-line h1 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .header-line span {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #b91c1c;
+    }
+
+    .rule-bar {
+      background: #f1f5f9;
+      border: 1px solid #1351b4;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      margin-bottom: 16px;
+    }
+
+    .act-block {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    .act-head {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .act-head .action-cue {
+      color: #fde047;
+    }
+
+    .impact-box {
+      background: #fef2f2;
+      border-left: 4px solid #dc2626;
+      padding: 7px 12px;
+      margin: 6px 0 8px;
+    }
+
+    .impact-word {
+      font-size: 0.86rem;
+      font-weight: 900;
+      color: #dc2626;
+      text-transform: uppercase;
+    }
+
+    .impact-pain {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+
+    .fast-lines {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-left: 4px;
+    }
+
+    .fast-lines li {
+      font-size: 0.83rem;
+      line-height: 1.35;
+    }
+
+    .fast-lines strong {
+      color: #0f172a;
+      text-transform: uppercase;
+    }
+
+    .qa-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .qa-list li {
+      font-size: 0.81rem;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 4px;
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { background: #fff; padding: 0; }
+      .top-bar { display: none !important; }
+      .sheet { border: none; padding: 0; margin: 0; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <strong>ROTEIRO DE REUNIÃO (5 MIN) — LINHAS CLARAS & PALAVRAS DE IMPACTO</strong>
+    <div>
+      <a href="Pitch_Guia_Totemize.pdf" download="Pitch_Guia_Totemize.pdf">Baixar PDF Direto (Pitch_Guia_Totemize.pdf)</a>
+      <button onclick="window.print()">Imprimir / Salvar PDF</button>
+    </div>
+  </div>
+
+  <!-- PÁGINA 1 -->
+  <section class="sheet">
+    <div class="header-line">
+      <h1>ROTEIRO DE PITCH (5 MINUTOS) — TOTEMIZE JAÚ</h1>
+      <span>[FOLHA 01/02 • NÃO LER: USAR COMO GATILHO]</span>
+    </div>
+
+    <div class="rule-bar">
+      <strong>DINÂMICA DA REUNIÃO:</strong> 1º Jogue a <strong>PALAVRA DE IMPACTO / DOR</strong> do nada —&gt; 2º Gere identificação ("Você sente isso") —&gt; 3º Clique e mostre a Solução.
+    </div>
+
+    <!-- ATO 1 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 1 (0:00 a 0:45) — ABERTURA & CONTEXTO DE JAÚ</span>
+        <span class="action-cue">[NA TELA: VISÃO 3D INICIAL]</span>
+      </div>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (JOGAR DO NADA): "INVISÍVEL. PERDIDO DEBAIXO DO SOL."</div>
+        <div class="impact-pain">Você está sendo impactado por isso: ficar no ponto no sol de 32°C sem saber se o ônibus já passou ou se vai demorar 1 hora.</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>DUPLA FORÇA DE JAÚ:</strong> Estância Turística + Capital Nacional do Calçado Feminino (milhares de visitantes/semana).</li>
+        <li>• <strong>AS 3 DORES DA RUA HOJE:</strong> 1. Ônibus sem previsão clara | 2. Panfleto impresso que vira lixo | 3. Zero acessibilidade.</li>
+        <li>• <strong>A RESPOSTA (TOTEMIZE):</strong> Mobiliário urbano autônomo, solar híbrido, 100% digital e inclusivo no calçadão com piso tátil.</li>
+      </ul>
+    </div>
+
+    <!-- ATO 2 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 2 (0:45 a 2:00) — INTERFACE TOUCH 2D & OS 4 PILARES</span>
+        <span class="action-cue">[CLICAR: 1ª BOLINHA AZUL "TELA"]</span>
+      </div>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (NO MEIO DA FALA): "DINHEIRO QUE VAI EMBORA. LIXO NO BUEIRO."</div>
+        <div class="impact-pain">O comprador vem para o Território do Calçado, não conhece o Centro, pega um panfleto que suja a calçada e vai embora sem consumir.</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>TOPO MUNICIPAL:</strong> Clima e Hora ao vivo + Alerta da Defesa Civil (vacinação/tempo) + Botão "QR Code: Onde é o Ponto".</li>
+        <li>• <strong>PILAR 1 — ÔNIBUS (TEMPO REAL):</strong> Filtro Centro/Bairros • 4 Linhas (Jd. de Baixo, Matriz, Rodoviária, Parque Rio Jaú) • QR no celular.</li>
+        <li>• <strong>PILAR 2 — CIRCUITO DO CALÇADO:</strong> Shopping Território do Calçado (+150 lojas), Polo Major Prado, Noivas & Festa • Rota no mapa.</li>
+        <li>• <strong>PILAR 3 — TURISMO & CULTURA:</strong> Parque Municipal do Rio Jaú, Igreja Matriz N. Sra. do Patrocínio e Teatro Elza Munerato.</li>
+        <li>• <strong>PILAR 4 — SERVIÇOS & ZELADORIA:</strong> Ouvidoria 156 (iluminação, tapa-buraco e limpeza sem fila via QR Code) + Farmácia 24h.</li>
+      </ul>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (NO RODAPÉ): "DESAMPARO NO SEGUNDO DO PÂNICO."</div>
+        <div class="impact-pain">Numa urgência médica na praça ou violência contra a mulher/criança, o desespero trava a pessoa. Aqui o socorro está a 1 toque.</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>BOTÃO DE SOCORRO (RODAPÉ):</strong> Emergência 24h (192 SAMU, 193 Bombeiros, 190 PM, 153 GCM) + Direitos Humanos (180, 100, 188, Plantão).</li>
+        <li>• <strong>GATILHO FINANCEIRO (DOOH):</strong> Anúncio Parceiro rotativo no rodapé —&gt; <strong>IMPACTO: "CUSTO ZERO. O TOTEM SE PAGA SOZINHO."</strong></li>
+      </ul>
+    </div>
+
+    <!-- ATO 3 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 3 (2:00 a 2:50) — ACESSIBILIDADE UNIVERSAL (ABNT NBR 9050)</span>
+        <span class="action-cue">[CLICAR: BARRA LATERAL "ACESSO"]</span>
+      </div>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (DO NADA): "EXCLUSÃO SILENCIOSA. A CIDADE QUE TE IGNORA."</div>
+        <div class="impact-pain">Imagine ser surdo, cadeirante ou ter baixa visão diante de uma tela alta e muda. Você sente na pele que a cidade não foi feita para você.</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>1. LIBRAS AO VIVO (ARTICULADO):</strong> Boneco Ícaro com 5 dedos e expressão facial • <strong>TRADUZ PALAVRA POR PALAVRA</strong> onde tocar.</li>
+        <li>• <strong>2. MODO ALCANCE CADEIRANTE:</strong> Rebaixa toda a tela para a faixa ergonômica (0,80m a 1,20m do chão — NBR 9050 / Lei 13.146).</li>
+        <li>• <strong>3. ALTO CONTRASTE & FONTE A+:</strong> Preto e Amarelo + Letra ampliada em +40% • Inclusão visual <strong>COM ZERO POLUIÇÃO SONORA</strong> na praça.</li>
+        <li>• <strong>4. SÍNTESE DE VOZ & PISO TÁTIL:</strong> Narração nativa em português (pt-BR) + Piso tátil direcional e de alerta amarelo no entorno 3D.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PÁGINA 2 -->
+  <section class="sheet">
+    <div class="header-line">
+      <h1>ROTEIRO DE PITCH (CONTINUAÇÃO) — ESG, ENGENHARIA & FECHAMENTO</h1>
+      <span>[FOLHA 02/02 • PARTE FINAL]</span>
+    </div>
+
+    <!-- ATO 4 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 4 (2:50 a 3:35) — SUSTENTABILIDADE, ENERGIA SOLAR & ESG</span>
+        <span class="action-cue">[CLICAR: BOTÃO VERDE "ESG" NO TOPO]</span>
+      </div>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (DO NADA): "TOTEM QUE VIRA SUCATA. DINHEIRO PÚBLICO QUEIMADO."</div>
+        <div class="impact-pain">Você já viu terminal público parado porque a bobina de papel travou, ou gastando luz a madrugada inteira para ninguém?</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>E (AMBIENTAL — 100% PAPERLESS):</strong> Zero impressora térmica, zero bobina, zero lixo nas ruas (cumpre a Lei Federal 12.305/2010 — PNRS).</li>
+        <li>• <strong>ENERGIA SOLAR HÍBRIDA + NO-BREAK:</strong> Painel Solar no topo + Rede 220V + Controlador MPPT 20A + Bateria LiFePO4 (autonomia de 24h sem luz).</li>
+        <li>• <strong>SENSOR DE PRESENÇA PIR (ECONOMIA):</strong> <strong>145W</strong> (uso normal) —&gt; <strong>75W</strong> (Modo Vitrine após 45s) —&gt; <strong>15W</strong> (Standby Noturno: -90% de consumo).</li>
+        <li>• <strong>S & G (GOVERNANÇA & LGPD):</strong> 100% adequado à LGPD (Lei 13.709/18: zero coleta de CPF/dados) + Atende ODS 7, 9, 11 e 12 da ONU.</li>
+      </ul>
+    </div>
+
+    <!-- ATO 5 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 5 (3:35 a 4:35) — ENGENHARIA PESADA: RAIO-X, TÉCNICO & ESTRUTURA</span>
+        <span class="action-cue">[CLICAR: BOLINHAS 2, 3 E 4]</span>
+      </div>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA DE IMPACTO (MEIO DA ENGENHARIA): "RUA NÃO TEM AR-CONDICIONADO. OU BLINDA, OU QUEIMA."</div>
+        <div class="impact-pain">Qualquer monitor comum apaga sob o sol do meio-dia, cozinha no calor de Jaú ou quebra na primeira chuva e vandalismo.</div>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>2ª BOLINHA ("RAIO-X" — CARCAÇA & PORTA):</strong> Aço galvanizado 2,5mm (2,20×0,70×0,35m) • IP65 (borracha EPDM) + IK10 (antivandalismo). Tampão Traseiro (0,62×1,82m) abre 105° com 3 dobradiças reforçadas, 2 fechaduras tubulares e pistão a gás.</li>
+        <li>• <strong>3ª BOLINHA ("TÉCNICO" — TELA, PC & ELÉTRICA):</strong> Display Industrial 43" de 1.500 nits (vence o sol forte) + Vidro Temperado 8mm.<br>
+          <strong>&gt;&gt; DUAS OPÇÕES DE COMPUTADOR:</strong> 1ª Tela Touch All-in-One c/ PC Acoplado (Slot OPS: zero cabos) OU 2ª Mini-PC Fanless no rack.<br>
+          Quadro Elétrico Trilho DIN (NR-10 / NBR 5410): Disjuntor 16A + DPS 40kA (anti-raios) + DR 30mA (anti-choque) + Fonte MeanWell.</li>
+        <li>• <strong>4ª BOLINHA ("ESTRUTURA" — CAIXA DESMONTADA & FRIO):</strong> 3 Pranchas Técnicas (Escala 1:10 Maquete 22×7×3,5cm e 1:1 Laser CNC).<br>
+          Prancha 01: Molde aberto com Corte (Preto), Dobra 90° (Azul), Quina Curva 11cm (Laranja), Abas 1 a 7 e Furações F1 a F11.<br>
+          Prancha 02: Esqueleto Metalon 40×40mm + 3 Zonas Térmicas (Efeito Chaminé: Chapa Defletora isola Bateria na Base Fria + 2 Coolers).</li>
+      </ul>
+    </div>
+
+    <!-- ATO 6 -->
+    <div class="act-block">
+      <div class="act-head">
+        <span>ATO 6 (4:35 a 5:00) — MENU 360° AO VIVO & FECHAMENTO DA REUNIÃO</span>
+        <span class="action-cue">[CLICAR: BOLINHA DIREITA "360°"]</span>
+      </div>
+      <ul class="fast-lines">
+        <li>• <strong>AÇÃO VISUAL FINAL:</strong> Ativar Giro 360° Automático • Alternar Modo Dia / Noite • Mostrar Seletor de Cores da Carcaça e Chave OPS/Mini-PC.</li>
+      </ul>
+      <div class="impact-box">
+        <div class="impact-word">&gt;&gt; PALAVRA FINAL DE IMPACTO: "DIGNIDADE PARA O CIDADÃO. ECONOMIA PARA O MUNICÍPIO. JAÚ NO FUTURO."</div>
+        <div class="impact-pain">"Não trouxemos apenas uma tela: entregamos da chapa dobrada ao software em Libras, pronto para implantar e que se paga sozinho."</div>
+      </div>
+    </div>
+
+    <!-- BATE-PRONTO -->
+    <div>
+      <strong>RESPOSTAS DE 5 SEGUNDOS PARA PERGUNTAS DIFÍCEIS NA REUNIÃO (BATE-PRONTO):</strong>
+      <ul class="qa-list">
+        <li><strong>1. "E se faltar energia na praça?"</strong> —&gt; Sistema Híbrido: Placa Solar no teto + Controlador MPPT + Bateria LiFePO4 garante 24h de No-Break.</li>
+        <li><strong>2. "Precisa de PC separado?"</strong> —&gt; Temos as 2 opções: Tela 43" já com PC acoplado (Slot OPS sem cabos) OU Mini-PC Fanless no rack.</li>
+        <li><strong>3. "Como abre para manutenção?"</strong> —&gt; Tampão Traseiro (0,62×1,82m) abre 105°: 3 dobradiças, 2 fechaduras tubulares, EPDM IP65 e pistão a gás.</li>
+        <li><strong>4. "Não vai aquecer no sol de Jaú?"</strong> —&gt; 3 Zonas Térmicas (Efeito Chaminé): Chapa Defletora isola a Bateria no frio da base + 2 Coolers no topo.</li>
+        <li><strong>5. "E se chover forte ou vandalizarem?"</strong> —&gt; Grau IP65 (vedação EPDM) + Grau IK10 (Aço 2,5mm, vidro temperado 8mm e 6 chumbadores Parabolt).</li>
+        <li><strong>6. "Quais leis e normas atende?"</strong> —&gt; NBR 9050 (Acessibilidade), Lei 12.305 (PNRS Zero Papel), Lei 13.709 (LGPD), NR-10 e NBR 5410.</li>
+      </ul>
+    </div>
+  </section>
+
+</body>
+</html>
