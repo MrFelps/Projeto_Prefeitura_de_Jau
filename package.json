@@ -5,16 +5,13 @@
   "description": "Totem Inteligente de Utilidade Pública - Estância Turística de Jaú (100% Offline / Front-end Interativo)",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "build": "echo 'Static front-end ready for Vercel'"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",
     "@types/three": "^0.169.0",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.8"
+    "typescript": "^5.6.3"
   },
   "keywords": [
     "totem",
