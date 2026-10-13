@@ -523,7 +523,7 @@
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
       </svg>
       <span class="orb-tag" id="orb-city-tag">JAÚ</span>
-      <span class="orb-tooltip">Trocar Cidade (Jaú / Itapuí / Bauru)</span>
+      <span class="orb-tooltip">Trocar Cidade (Itapuí / Jaú / Bauru)</span>
     </button>
 
     <!-- POPOVER / MODAL DE ESCOLHA DA CIDADE -->
@@ -537,22 +537,7 @@
       </div>
       <p class="city-popover-sub">Altera instantaneamente o totem (Brasão em Baixo-Relevo 3D, placa superior, tela 2D/3D e dados):</p>
       <div class="city-options-list">
-        <!-- OPÇÃO 1: JAÚ / SP -->
-        <button type="button" class="city-option-card active" data-city="jau" onclick="app && app.setCity('jau')">
-          <div class="city-card-header">
-            <span class="city-flag">🏛️</span>
-            <div class="city-card-title-col">
-              <div class="city-name-row">
-                <strong>Jaú / SP</strong>
-                <span class="city-status-pill active-pill">CIDADE ATIVA</span>
-              </div>
-              <span class="city-card-subtitle">Brasão de Jaú em Baixo-Relevo • Capital do Calçado</span>
-            </div>
-          </div>
-          <p class="city-card-desc">Brasão Oficial (Peixe Jaú, Rio Jaú, Águia/Hélice de Ribeiro de Barros, Perobeira e Café) em baixo-relevo frontal.</p>
-        </button>
-
-        <!-- OPÇÃO 2: ITAPUÍ / SP -->
+        <!-- OPÇÃO 1: ITAPUÍ / SP -->
         <button type="button" class="city-option-card" data-city="itapui" onclick="app && app.setCity('itapui')">
           <div class="city-card-header">
             <span class="city-flag">🌴</span>
@@ -565,6 +550,21 @@
             </div>
           </div>
           <p class="city-card-desc">Brasão Oficial (Bica de Pedra, Rio Tietê, Sol Radiante, Café e Cana) em baixo-relevo na chapa frontal inferior.</p>
+        </button>
+
+        <!-- OPÇÃO 2: JAÚ / SP -->
+        <button type="button" class="city-option-card active" data-city="jau" onclick="app && app.setCity('jau')">
+          <div class="city-card-header">
+            <span class="city-flag">🏛️</span>
+            <div class="city-card-title-col">
+              <div class="city-name-row">
+                <strong>Jaú / SP</strong>
+                <span class="city-status-pill active-pill">CIDADE ATIVA</span>
+              </div>
+              <span class="city-card-subtitle">Brasão de Jaú em Baixo-Relevo • Capital do Calçado</span>
+            </div>
+          </div>
+          <p class="city-card-desc">Brasão Oficial (Peixe Jaú, Rio Jaú, Águia/Hélice de Ribeiro de Barros, Perobeira e Café) em baixo-relevo frontal.</p>
         </button>
 
         <!-- OPÇÃO 3: BAURU / SP -->
