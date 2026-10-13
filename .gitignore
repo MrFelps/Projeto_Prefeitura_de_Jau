@@ -10,3 +10,9 @@ APRESENTAÇÃO/
 !Orçamentos.pdf
 textos PI/
 *.docx
+
+# Dependências e Builds Front-end
+node_modules/
+dist/
+.vercel/
+.DS_Store
