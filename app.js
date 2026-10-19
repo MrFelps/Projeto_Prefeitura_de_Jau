@@ -1116,6 +1116,7 @@ class TotemApp {
   }
 
   init() {
+    window.appInstance = this;
     this.setupTabletLock();
     this.setup3DViewer();
     this.setupClock();
@@ -1835,6 +1836,24 @@ class TotemApp {
     const btnCloseTour = document.getElementById('btn-close-tour-modal');
     const modalTour = document.getElementById('modal-tour-presentation');
     const btnOrbTour = document.getElementById('btn-orb-tour');
+
+    if (btnOrbTour) {
+      const handleOpenTour = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (window.triggerTopLeftButton) {
+          window.triggerTopLeftButton('tour');
+        } else if (modalTour) {
+          modalTour.classList.remove('hidden');
+          btnOrbTour.classList.add('active');
+          this.goToTourStep(this.currentTourStep || 1);
+        }
+      };
+      btnOrbTour.addEventListener('click', handleOpenTour);
+      btnOrbTour.addEventListener('touchend', handleOpenTour);
+    }
 
     const closeTour = () => {
       if (modalTour) modalTour.classList.add('hidden');

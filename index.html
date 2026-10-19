@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261013_v20_mobile">
+  <link rel="stylesheet" href="style.css?v=20261019_v25_tour">
   <style>
     /* Travar completamente zoom da página, rolagem vertical/horizontal e barras laterais no tablet */
     *, *::before, *::after {
@@ -512,7 +512,7 @@
     </button>
 
     <!-- 5ª Bolinha Destaque Dourada/Ciano: TOUR & APRESENTAÇÃO DA MÁQUINA POR NÚMEROS -->
-    <button type="button" id="btn-orb-tour" class="orb-btn orb-btn-tour" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('tour')" title="5. Apresentação & Tour do Totem por Partes (Passo a Passo Interativo)">
+    <button type="button" id="btn-orb-tour" class="orb-btn orb-btn-tour" onclick="if(window.triggerTopLeftButton){window.triggerTopLeftButton('tour');}else if(window.appInstance){window.appInstance.goToTourStep(1);document.getElementById('modal-tour-presentation').classList.remove('hidden');}" title="5. Apresentação & Tour do Totem por Partes (Passo a Passo Interativo)">
       <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
@@ -2989,7 +2989,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261013_v20_mobile"></script>
-  <script src="app.js?v=20261013_v20_mobile"></script>
+  <script src="totem3d.js?v=20261019_v25_tour"></script>
+  <script src="app.js?v=20261019_v25_tour"></script>
 </body>
 </html>
