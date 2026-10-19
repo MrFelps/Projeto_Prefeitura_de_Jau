@@ -1125,6 +1125,7 @@ class TotemApp {
     this.setupModals();
     this.setupLibrasClickReader();
     this.setupSimulatorControls();
+    this.setupTourPresentation();
     this.setupEnergyTimer();
     this.setupDOOHCarousel();
     this.setupFilters();
@@ -1153,8 +1154,13 @@ class TotemApp {
       }
     }, { passive: false });
 
-    // Bloqueia rolagem vertical ("subir e descer") e zoom de página em qualquer arrasto no tablet
+    // Bloqueia rolagem indesejada do fundo da tela, MAS permite rolagem fluida com toque dentro de popovers, modais e do menu 360
     document.addEventListener('touchmove', (e) => {
+      const scrollable = e.target.closest('.orb-360-popover, .popover-360-body, .modal-card, .tour-body-content, .modal-body, .color-matrix-grid, [data-scrollable]');
+      if (scrollable) {
+        // Permite rolar livremente dentro de menus, paleta de cores e modais no tablet
+        return;
+      }
       if (e.cancelable) {
         e.preventDefault();
       }
@@ -1427,11 +1433,13 @@ class TotemApp {
     const modalSchematics = document.getElementById('modal-hardware-schematics');
     const modalEstrutura = document.getElementById('modal-estrutura-blueprint');
 
-    // Os 4 Botões no Canto Superior Esquerdo
+    // Os 5 Botões no Canto Superior Esquerdo
     const btnOrbScreen = document.getElementById('btn-orb-screen');       // 1º: Visão da Tela do Totem
     const btnOrbXray = document.getElementById('btn-orb-xray');           // 2º: Totem do Lado Interno a Raio-X
     const btnOrbTech = document.getElementById('btn-orb-tech');           // 3º: Texto com a Parte Técnica
     const btnOrbEstrutura = document.getElementById('btn-orb-estrutura'); // 4º: Estrutura (Caixa Desmontada, Dobras, Furação e Interior)
+    const btnOrbTour = document.getElementById('btn-orb-tour');           // 5º: Tour Interativo e Apresentação por Partes
+    const modalTour = document.getElementById('modal-tour-presentation');
 
     // O Botão no Canto Inferior Direito (Características para o 360 do Totem)
     const btnOrb360 = document.getElementById('btn-orb-360');
@@ -1446,9 +1454,11 @@ class TotemApp {
           document.body.classList.add('menu-overlay-active');
           if (modalSchematics) modalSchematics.classList.add('hidden');
           if (modalEstrutura) modalEstrutura.classList.add('hidden');
+          if (modalTour) modalTour.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.add('active');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
           if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+          if (btnOrbTour) btnOrbTour.classList.remove('active');
           this.resetInactivityTimer();
         } else {
           if (menuOverlay) menuOverlay.classList.add('hidden');
@@ -1462,9 +1472,11 @@ class TotemApp {
         document.body.classList.remove('menu-overlay-active');
         if (modalSchematics) modalSchematics.classList.add('hidden');
         if (modalEstrutura) modalEstrutura.classList.add('hidden');
+        if (modalTour) modalTour.classList.add('hidden');
         if (btnOrbScreen) btnOrbScreen.classList.remove('active');
         if (btnOrbTech) btnOrbTech.classList.remove('active');
         if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+        if (btnOrbTour) btnOrbTour.classList.remove('active');
 
         if (!this.viewer3D && window.Totem3DViewer) {
           this.setup3DViewer();
@@ -1482,8 +1494,10 @@ class TotemApp {
           if (menuOverlay) menuOverlay.classList.add('hidden');
           document.body.classList.remove('menu-overlay-active');
           if (modalEstrutura) modalEstrutura.classList.add('hidden');
+          if (modalTour) modalTour.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+          if (btnOrbTour) btnOrbTour.classList.remove('active');
           modalSchematics.classList.remove('hidden');
           if (btnOrbTech) btnOrbTech.classList.add('active');
         } else {
@@ -1497,13 +1511,33 @@ class TotemApp {
           if (menuOverlay) menuOverlay.classList.add('hidden');
           document.body.classList.remove('menu-overlay-active');
           if (modalSchematics) modalSchematics.classList.add('hidden');
+          if (modalTour) modalTour.classList.add('hidden');
           if (btnOrbScreen) btnOrbScreen.classList.remove('active');
           if (btnOrbTech) btnOrbTech.classList.remove('active');
+          if (btnOrbTour) btnOrbTour.classList.remove('active');
           modalEstrutura.classList.remove('hidden');
           if (btnOrbEstrutura) btnOrbEstrutura.classList.add('active');
         } else {
           modalEstrutura.classList.add('hidden');
           if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+        }
+      } else if (action === 'tour') {
+        if (!modalTour) return;
+        const isHidden = modalTour.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOverlay) menuOverlay.classList.add('hidden');
+          document.body.classList.remove('menu-overlay-active');
+          if (modalSchematics) modalSchematics.classList.add('hidden');
+          if (modalEstrutura) modalEstrutura.classList.add('hidden');
+          if (btnOrbScreen) btnOrbScreen.classList.remove('active');
+          if (btnOrbTech) btnOrbTech.classList.remove('active');
+          if (btnOrbEstrutura) btnOrbEstrutura.classList.remove('active');
+          modalTour.classList.remove('hidden');
+          if (btnOrbTour) btnOrbTour.classList.add('active');
+          this.goToTourStep(this.currentTourStep || 1);
+        } else {
+          modalTour.classList.add('hidden');
+          if (btnOrbTour) btnOrbTour.classList.remove('active');
         }
       }
     };
@@ -1561,6 +1595,24 @@ class TotemApp {
         });
       }
 
+      const btnJumpColor = document.getElementById('btn-jump-to-color');
+      if (btnJumpColor) {
+        btnJumpColor.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const rowColor = document.getElementById('row-cor-carcaca');
+          if (rowColor) {
+            rowColor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            rowColor.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+            rowColor.style.borderColor = '#38bdf8';
+            rowColor.style.boxShadow = '0 0 15px rgba(56, 189, 248, 0.5)';
+            setTimeout(() => {
+              rowColor.style.borderColor = 'rgba(148, 163, 184, 0.14)';
+              rowColor.style.boxShadow = 'none';
+            }, 1800);
+          }
+        });
+      }
+
       popover360.addEventListener('click', (e) => e.stopPropagation());
 
       // Fechar popover do 360° ao clicar fora
@@ -1597,6 +1649,368 @@ class TotemApp {
     const sleepOverlay = document.getElementById('screen-sleep-overlay');
     if (idleOverlay) idleOverlay.addEventListener('click', () => this.resetInactivityTimer());
     if (sleepOverlay) sleepOverlay.addEventListener('click', () => this.resetInactivityTimer());
+  }
+
+  // 5.1 TOUR INTERATIVO & APRESENTAÇÃO DA MÁQUINA POR PARTES (NEXUS JAÚ)
+  setupTourPresentation() {
+    this.currentTourStep = 1;
+    this.tourSteps = [
+      {
+        num: 1,
+        navTitle: "1. Visão Geral",
+        title: "1. A Máquina por Completo & Proporção Urbana (Nexus Jaú)",
+        tag: "VISÃO GERAL • ESCALA HUMANA",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/1.png",
+        fallbackImg: "Foto%20Totem/image_a4b68322.jpg",
+        specs: [
+          { lbl: "Altura Total", val: "2,20 metros (Escala Humana)" },
+          { lbl: "Largura Frontal", val: "0,70 metros (Slim)" },
+          { lbl: "Profundidade", val: "0,28m (Base Firme Chumbada)" },
+          { lbl: "Acabamento", val: "Aço Carbono / Grafite & Ciano" }
+        ],
+        impact: "INVISÍVEL NUNCA MAIS: O MOBILIÁRIO INTELIGENTE QUE TRANSFORMA A PRAÇA EM UM PONTO DE REFERÊNCIA 24 HORAS.",
+        speech: [
+          "Apresentamos o Totem Urbano Inteligente Nexus Jaú, projetado exatamente na escala urbana humana (2,20m x 0,70m), moderno e imponente sem obstruir a visão do comércio.",
+          "Integração total com a identidade de Jaú: Estância Turística e Capital Nacional do Calçado Feminino, acolhendo tanto o morador quanto os milhares de compradores semanais.",
+          "Presença física nobre no calçadão, substituindo totens velhos de papelão e placas desatualizadas por tecnologia perene e de alto padrão."
+        ],
+        qa: {
+          q: "Qual o impacto visual do equipamento nas praças históricas de Jaú?",
+          a: "O design monolítico slim e a altura de 2,20m foram calculados para se harmonizar com o mobiliário urbano sem gerar poluição visual ou bloquear as fachadas comerciais do centro."
+        },
+        camPreset: "perspective"
+      },
+      {
+        num: 2,
+        navTitle: "2. Carcaça & Formato",
+        title: "2. Carcaça Industrial, Dobras CNC & Vedação Total IP66",
+        tag: "BLINDAGEM FÍSICA • IP66",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/2.png",
+        fallbackImg: "Foto%20Totem/image_efe76ee6.jpg",
+        specs: [
+          { lbl: "Chapa Estrutural", val: "Aço 2,5mm Corte a Laser" },
+          { lbl: "Pintura Eletrostática", val: "Pó Poliéster Anti-UV" },
+          { lbl: "Vedação Climática", val: "Grau IP66 (Chuva Torrencial)" },
+          { lbl: "Saia de Fixação", val: "Chumbadores Mecânicos Ocultos" }
+        ],
+        impact: "CUSTO ZERO DE MANUTENÇÃO EXTERNA: ESTRUTURA BLINDADA PARA RESISTIR AO SOL FORTE DE JAÚ E TEMPESTADES DE VENTO.",
+        speech: [
+          "Carcaça construída em chapa industrial de aço de 2,5mm dobrada em peça única, com reforços internos anti-deformação e fechadura de segurança Inox 316.",
+          "Gabinete 100% blindado passivo: ZERO rasgos ou frestas abertas na traseira. A água da chuva não entra e a poeira não penetra nos componentes.",
+          "Pintura eletrostática a pó curada a 200°C que protege contra ferrugem, calor e perda de brilho por mais de 10 anos ao relento."
+        ],
+        qa: {
+          q: "E se chover forte de vento, não corre o risco de entrar água ou queimar?",
+          a: "Não. A vedação perimetral em EPDM e o design sem venezianas abertas garantem certificação IP66. A dissipação de calor é passiva pela massa do chassi metálico."
+        },
+        camPreset: "side"
+      },
+      {
+        num: 3,
+        navTitle: "3. Tela 43\" & Vidro",
+        title: "3. Display Touch 43\" Alto Brilho & Vidro de Segurança 8mm",
+        tag: "INTERFACE TOUCH • IK10",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/3.png",
+        fallbackImg: "Foto%20Totem/image_14e9276c.jpg",
+        specs: [
+          { lbl: "Tamanho da Tela", val: "43\" Vertical Full HD (96x55cm)" },
+          { lbl: "Brilho Solar", val: "1500 Nits (Visível sob Sol)" },
+          { lbl: "Proteção de Impacto", val: "Vidro Temperado 8mm IK10" },
+          { lbl: "Rebaixo Frontal", val: "2,5 cm Recuado na Carcaça" }
+        ],
+        impact: "LEITURA PERFEITA DEBAIXO DO SOL DE 35°C E PROTEÇÃO TOTAL CONTRA QUALQUER TENTATIVA DE IMPACTO.",
+        speech: [
+          "Display industrial de 43 polegadas com 1500 nits: enquanto telas comuns de TV ficam apagadas de dia, o display do Nexus permanece vibrante sob luz solar direta.",
+          "Vidro temperado de segurança com espessura real de 8mm e certificação IK10, resistente a impactos severos de pedras, vandalismo e objetos cortantes.",
+          "Nicho da tela rebaixado 2,5 cm para dentro da moldura de aço, impossibilitando que vândalos forcem alavancas ou danifiquem as bordas da tela."
+        ],
+        qa: {
+          q: "Se um vândalo der um soco ou atirar uma pedra na tela?",
+          a: "O vidro temperado de 8mm com padrão antivandalismo IK10 absorve o impacto e o rebaixo mecânico de 2,5cm impede que qualquer canto ou quina frágil fique exposto."
+        },
+        camPreset: "front"
+      },
+      {
+        num: 4,
+        navTitle: "4. Hardware Offline",
+        title: "4. Coração da Máquina: Computador Fanless 100% Offline",
+        tag: "HARDWARE INDUSTRIAL • RESILIÊNCIA",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/4.png",
+        fallbackImg: "Foto%20Totem/image_4c88b9ef.jpg",
+        specs: [
+          { lbl: "Processamento", val: "Octa-Core Industrial Fanless" },
+          { lbl: "Armazenamento", val: "SSD 256GB Gravado Localmente" },
+          { lbl: "Autonomia Lógica", val: "100% Funcional Sem Internet" },
+          { lbl: "Proteção Elétrica", val: "DPS Classe II + Disjuntores DIN" }
+        ],
+        impact: "SE A INTERNET DA CIDADE CAIR, O TOTEM CONTINUA OPERANDO 100% SEM TRAVAR OU MOSTRAR TELA AZUL.",
+        speech: [
+          "Arquitetura Fanless (sem ventoinhas móveis): zero acúmulo de poeira interna, garantindo que o processador não sobreaqueça mesmo operando 24 horas ininterruptas.",
+          "Armazenamento local completo: todos os horários de ônibus, telefones de socorro e rotas do calçado estão gravados dentro do SSD de alta velocidade do totem.",
+          "Quadro elétrico interno seguro com barramento DIN, protetor contra surtos atmosféricos (raios) e cabeamento certificado contra curto-circuito."
+        ],
+        qa: {
+          q: "E se a operadora de internet tiver uma pane em Jaú?",
+          a: "O totem não fica fora do ar. Todo o sistema do cidadão, consultas de ônibus, emergência e turismo roda localmente no hardware da máquina, de forma 100% autônoma."
+        },
+        camPreset: "back"
+      },
+      {
+        num: 5,
+        navTitle: "5. 5G & Emergência",
+        title: "5. Conectividade Urbana 5G, Câmeras & Socorro SAMU/Bombeiros",
+        tag: "SMART CITY • SEGURANÇA 24H",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/5.png",
+        fallbackImg: "Foto%20Totem/image_b239d623.jpg",
+        specs: [
+          { lbl: "Módulo de Dados", val: "5G Ultra-Rápido & Wi-Fi 6" },
+          { lbl: "Socorro Imediato", val: "SAMU 192 • Bombeiros 193" },
+          { lbl: "Segurança Pública", val: "GCM 153 • Polícia Militar 190" },
+          { lbl: "Direitos Humanos", val: "Disque 180 (Mulher) & 100" }
+        ],
+        impact: "DESAMPARO NO SEGUNDO DO PÂNICO NUNCA MAIS: ACIONAMENTO DE SOCORRO MÉDICO E POLICIAL A UM TOQUE NO CALÇADÃO.",
+        speech: [
+          "O Totem Nexus Jaú atua como um posto avançado de cidadania e segurança nas praças de maior circulação da cidade.",
+          "Módulo de emergência tátil com chamada direta e indicação exata do ponto onde o cidadão se encontra, acelerando a chegada do SAMU ou da Guarda Municipal em minutos.",
+          "Capacidade de roteamento de Wi-Fi público de alta velocidade para os munícipes e integração com o sistema de câmeras da Secretaria de Segurança Pública."
+        ],
+        qa: {
+          q: "Como o totem ajuda a reduzir ocorrências no centro?",
+          a: "A iluminação noturna, o ponto de socorro visível e as câmeras inibem roubos e depredações, além de acolher mulheres e idosos em situação de vulnerabilidade com canal 180 imediato."
+        },
+        camPreset: "front"
+      },
+      {
+        num: 6,
+        navTitle: "6. Rotas & Calçado",
+        title: "6. O Sistema: Rotas de Ônibus, Território do Calçado & Ouvidoria 156",
+        tag: "SOFTWARE MUNICIPAL • SERVIÇOS",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/6.png",
+        fallbackImg: "Foto%20Totem/APRESENTA%C3%87%C3%83O/passo a passo das ucs.png",
+        specs: [
+          { lbl: "Linhas de Ônibus", val: "Horários & Itinerários Atualizados" },
+          { lbl: "QR Code Celular", val: "Leve o Mapa e o Ponto no Bolso" },
+          { lbl: "Polo Calçadista", val: "+150 Fábricas & Lojas de Jaú" },
+          { lbl: "Zeladoria 156", val: "Tapa-Buraco, Iluminação e Limpeza" }
+        ],
+        impact: "DINHEIRO QUE FICA EM JAÚ: FORTALECIMENTO DIRETO DAS LOJAS LOCAIS E FIM DOS PANFLETOS QUE SUJAM A RUA.",
+        speech: [
+          "Linhas de ônibus completas com busca por bairros, horários de saída e botão 'QR Code' para o passageiro escanear e acompanhar o ônibus no próprio celular.",
+          "Guia comercial completo do Circuito do Calçado Feminino: o turista que chega em Jaú descobre instantaneamente onde comprar, como chegar e quais lojas estão abertas.",
+          "Canal de Zeladoria e Ouvidoria 156 na tela, permitindo que o cidadão registre demandas urbanas sem burocracia e com protocolo digital imediato."
+        ],
+        qa: {
+          q: "Pessoas idosas ou sem familiaridade com celular conseguem navegar?",
+          a: "Sim, os botões têm tipografia extra grande e alto contraste. O sistema tem modo acessível para cadeirantes e avatar com intérprete em Libras."
+        },
+        camPreset: "front"
+      },
+      {
+        num: 7,
+        navTitle: "7. Retorno & Marketing",
+        title: "7. Viabilidade Econômica, Patrocínio DOOH & Pontuação ESG",
+        tag: "CUSTO ZERO • PONTUAÇÃO ESG",
+        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/7.png",
+        fallbackImg: "Foto%20Totem/APRESENTA%C3%87%C3%83O/10.png",
+        specs: [
+          { lbl: "Custo p/ Município", val: "Possibilidade de CUSTO ZERO" },
+          { lbl: "Modelo Financeiro", val: "Patrocínio DOOH (Mídia Legal)" },
+          { lbl: "Índice de Sustentabilidade", val: "ESG Municipal + Cidade Inteligente" },
+          { lbl: "Economia de Papel", val: "100% Informativo Ecológico Digital" }
+        ],
+        impact: "INOVAÇÃO QUE SE PAGA SOZINHA: A ADMINISTRAÇÃO ENTREGA MODERNIDADE SEM ONERAR O ORÇAMENTO MUNICIPAL.",
+        speech: [
+          "O projeto pode ser implantado e mantido com custo zero para a Prefeitura por meio de concessão ou cotas de patrocínio privado para comércio e bancos locais.",
+          "O rodapé de publicidade legal (DOOH) gera receita e visibilidade qualificada, valorizando as marcas jauenses em um canal digital de altíssimo tráfego.",
+          "Conquista de pontuação máxima em metas ESG (Ambiental, Social e Governança), posicionando Jaú como referência estadual em Cidades Inteligentes."
+        ],
+        qa: {
+          q: "Qual o custo que isso vai gerar para os cofres públicos?",
+          a: "O projeto pode ter custo ZERO se adotado o modelo de concessão de mídia privada DOOH, onde os parceiros comerciais custeiam a estrutura e a manutenção em troca de visibilidade."
+        },
+        camPreset: "perspective"
+      }
+    ];
+
+    const btnCloseTour = document.getElementById('btn-close-tour-modal');
+    const modalTour = document.getElementById('modal-tour-presentation');
+    const btnOrbTour = document.getElementById('btn-orb-tour');
+
+    const closeTour = () => {
+      if (modalTour) modalTour.classList.add('hidden');
+      if (btnOrbTour) btnOrbTour.classList.remove('active');
+    };
+    if (btnCloseTour) btnCloseTour.addEventListener('click', closeTour);
+    if (modalTour) {
+      modalTour.addEventListener('click', (e) => {
+        if (e.target === modalTour) closeTour();
+      });
+    }
+
+    const prevBtns = [document.getElementById('btn-tour-prev'), document.getElementById('btn-tour-prev-top')];
+    const nextBtns = [document.getElementById('btn-tour-next'), document.getElementById('btn-tour-next-top')];
+
+    prevBtns.forEach(btn => {
+      if (btn) btn.addEventListener('click', () => this.goToTourStep(this.currentTourStep - 1));
+    });
+
+    nextBtns.forEach(btn => {
+      if (btn) btn.addEventListener('click', () => this.goToTourStep(this.currentTourStep + 1));
+    });
+
+    document.querySelectorAll('.tour-step-btn[data-step]').forEach(stepBtn => {
+      stepBtn.addEventListener('click', () => {
+        const stepNum = parseInt(stepBtn.getAttribute('data-step'), 10);
+        if (!isNaN(stepNum)) this.goToTourStep(stepNum);
+      });
+    });
+
+    const btnTour3D = document.getElementById('btn-tour-view-3d');
+    if (btnTour3D) {
+      btnTour3D.addEventListener('click', () => {
+        const step = this.tourSteps.find(s => s.num === this.currentTourStep);
+        if (step) {
+          this.applyTour3DAction(step);
+          if (modalTour) modalTour.classList.add('hidden');
+          if (btnOrbTour) btnOrbTour.classList.remove('active');
+        }
+      });
+    }
+
+    const contentEl = document.getElementById('tour-body-content');
+    if (contentEl) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      contentEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      contentEl.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+            if (deltaX < 0) {
+              this.goToTourStep(this.currentTourStep + 1);
+            } else {
+              this.goToTourStep(this.currentTourStep - 1);
+            }
+          }
+        }
+      }, { passive: true });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (modalTour && !modalTour.classList.contains('hidden')) {
+        if (e.key === 'ArrowRight') this.goToTourStep(this.currentTourStep + 1);
+        else if (e.key === 'ArrowLeft') this.goToTourStep(this.currentTourStep - 1);
+        else if (e.key === 'Escape') closeTour();
+      }
+    });
+
+    this.goToTourStep(1);
+  }
+
+  goToTourStep(stepNum) {
+    if (!this.tourSteps || this.tourSteps.length === 0) return;
+    const clamped = Math.max(1, Math.min(this.tourSteps.length, stepNum));
+    this.currentTourStep = clamped;
+    const step = this.tourSteps.find(s => s.num === clamped) || this.tourSteps[0];
+
+    document.querySelectorAll('.tour-step-btn').forEach(btn => {
+      const bNum = parseInt(btn.getAttribute('data-step'), 10);
+      btn.classList.toggle('active', bNum === clamped);
+    });
+
+    const titleEl = document.getElementById('tour-modal-title');
+    const counterEl = document.getElementById('tour-step-counter');
+    if (titleEl) titleEl.textContent = step.title;
+    if (counterEl) counterEl.textContent = `PARTE ${clamped} DE ${this.tourSteps.length}`;
+
+    const isFirst = clamped === 1;
+    const isLast = clamped === this.tourSteps.length;
+    ['btn-tour-prev', 'btn-tour-prev-top'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = isFirst;
+    });
+    ['btn-tour-next', 'btn-tour-next-top'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = isLast;
+    });
+
+    const btnTour3D = document.getElementById('btn-tour-view-3d');
+    if (btnTour3D) {
+      btnTour3D.textContent = `🧊 Posicionar 3D: ${step.navTitle}`;
+    }
+
+    const container = document.getElementById('tour-body-content');
+    if (container) {
+      container.innerHTML = `
+        <div class="tour-slide-layout">
+          <div class="tour-col-media">
+            <div class="tour-image-card">
+              <span class="tour-tag-overlay">${step.tag}</span>
+              <img src="${step.image}" alt="${step.title}" onerror="this.onerror=null; this.src='${step.fallbackImg}';" />
+            </div>
+            <div class="tour-specs-strip">
+              ${step.specs.map(sp => `
+                <div class="tour-spec-item">
+                  <span class="tour-spec-lbl">${sp.lbl}</span>
+                  <span class="tour-spec-val">${sp.val}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="tour-col-script">
+            <div class="tour-block-card tour-block-impact">
+              <span class="tour-impact-badge">⚡ Palavra de Impacto (Gatilho Verbal)</span>
+              <div class="tour-impact-text">"${step.impact}"</div>
+            </div>
+
+            <div class="tour-block-card tour-block-speech">
+              <span class="tour-speech-badge">🗣️ O que Falar para a Prefeitura (Pontos-Chave)</span>
+              <ul class="tour-speech-list">
+                ${step.speech.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="tour-block-card tour-block-qa">
+              <span class="tour-qa-badge">🛡️ Pergunta Difícil que Podem Fazer &amp; Como Responder</span>
+              <div class="tour-qa-q">❓ "${step.qa.q}"</div>
+              <div class="tour-qa-a"><strong>Resposta Sugerida:</strong> ${step.qa.a}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      container.scrollTop = 0;
+    }
+
+    if (this.viewer3D) {
+      this.applyTour3DAction(step);
+    }
+  }
+
+  applyTour3DAction(step) {
+    if (!this.viewer3D || !step) return;
+    try {
+      if (step.camPreset && typeof this.viewer3D.setCameraPreset === 'function') {
+        this.viewer3D.setCameraPreset(step.camPreset);
+      }
+      if (step.num === 4) {
+        if (typeof this.viewer3D.openRearDoor === 'function') this.viewer3D.openRearDoor();
+      } else {
+        if (typeof this.viewer3D.closeRearDoor === 'function') this.viewer3D.closeRearDoor();
+      }
+      if (step.num === 6) {
+        if (typeof this.viewer3D.setScreenView === 'function') this.viewer3D.setScreenView('bus');
+      }
+    } catch (e) {
+      console.warn("Tour 3D sync:", e);
+    }
   }
 
   // 6. CARROSSEL DOOH (PUBLICIDADE DE PARCEIROS)

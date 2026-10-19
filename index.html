@@ -510,6 +510,16 @@
       <span class="orb-tag" style="font-size:8px !important;">ESTRUTURA</span>
       <span class="orb-tooltip">Estrutura (Caixa Desmontada & Interior)</span>
     </button>
+
+    <!-- 5ª Bolinha Destaque Dourada/Ciano: TOUR & APRESENTAÇÃO DA MÁQUINA POR NÚMEROS -->
+    <button type="button" id="btn-orb-tour" class="orb-btn orb-btn-tour" onclick="window.triggerTopLeftButton && window.triggerTopLeftButton('tour')" title="5. Apresentação & Tour do Totem por Partes (Passo a Passo Interativo)">
+      <svg class="orb-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
+      </svg>
+      <span class="orb-tag" style="font-size:8.5px !important; color:#38bdf8; font-weight:900;">TOUR</span>
+      <span class="orb-tooltip">Tour da Máquina (Passo a Passo)</span>
+    </button>
   </nav>
 
   <!-- =================================================================== -->
@@ -1821,7 +1831,10 @@
               <span class="popover-badge">MENU 360° • ACESSO DIRETO EM LINHA</span>
               <h4>Características do Totem 360°</h4>
             </div>
-            <button id="btn-close-360-popover" class="btn-close-popover" aria-label="Fechar opções 360">✕</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button type="button" id="btn-jump-to-color" class="btn-jump-color-pill" title="Rolar direto até a Paleta de Cores">🎨 Paleta de Cores</button>
+              <button id="btn-close-360-popover" class="btn-close-popover" aria-label="Fechar opções 360">✕</button>
+            </div>
           </div>
 
           <div class="popover-360-body">
@@ -1896,7 +1909,7 @@
             </div>
 
             <!-- LINHA 6: COR DA CARCAÇA (100% EXPOSTA DIRETO NO MENU, SEM RAMIFICAÇÃO) -->
-            <div class="popover-line-row">
+            <div class="popover-line-row" id="row-cor-carcaca">
               <div class="popover-line-head">
                 <span class="line-title">6. Cor da Carcaça, Placa & Brasão</span>
                 <div class="color-inline-status">
@@ -1965,6 +1978,78 @@
           </svg>
           <span class="orb-360-tag">360°</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL / TOUR INTERATIVO DO TOTEM NEXUS JAÚ (APRESENTAÇÃO POR PARTES) -->
+  <!-- (Abre na 5ª Bolinha do Canto Superior Esquerdo "TOUR")               -->
+  <!-- =================================================================== -->
+  <div id="modal-tour-presentation" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tour-modal-title">
+    <div class="modal-card modal-card-tour">
+      <div class="modal-head tour-head">
+        <div class="tour-head-info">
+          <div class="tour-badges-row">
+            <span class="tour-badge-pill">APRESENTAÇÃO OFICIAL PREFEITURA</span>
+            <span class="tour-step-counter" id="tour-step-counter">PARTE 1 DE 7</span>
+          </div>
+          <h3 id="tour-modal-title" class="tour-title">Totem Urbano Nexus Jaú — Visão Geral &amp; Proporção</h3>
+        </div>
+        <div class="tour-head-nav-top">
+          <button type="button" id="btn-tour-prev-top" class="btn-tour-nav btn-tour-prev" title="Parte Anterior">◀ Anterior</button>
+          <button type="button" id="btn-tour-next-top" class="btn-tour-nav btn-tour-next" title="Próxima Parte">Próximo ▶</button>
+          <button type="button" id="btn-close-tour-modal" class="btn-close-modal" aria-label="Fechar Apresentação">✕</button>
+        </div>
+      </div>
+
+      <!-- Barra de Números (1 a 7) com Títulos de cada Parte -->
+      <div class="tour-stepper-bar" id="tour-stepper-bar">
+        <button type="button" class="tour-step-btn active" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-txt">Visão Geral</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-txt">Carcaça &amp; Formato</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-txt">Tela 43" &amp; Vidro</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-txt">Hardware Offline</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="5">
+          <span class="step-num">5</span>
+          <span class="step-txt">5G &amp; Emergência</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="6">
+          <span class="step-num">6</span>
+          <span class="step-txt">Rotas &amp; Calçado</span>
+        </button>
+        <button type="button" class="tour-step-btn" data-step="7">
+          <span class="step-num">7</span>
+          <span class="step-txt">Retorno &amp; Marketing</span>
+        </button>
+      </div>
+
+      <!-- Corpo da Apresentação da Parte Selecionada -->
+      <div class="tour-body-content" id="tour-body-content">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+
+      <!-- Rodapé com Navegação Principal e Ações de Apoio -->
+      <div class="modal-foot tour-foot">
+        <div class="tour-foot-left">
+          <button type="button" id="btn-tour-view-3d" class="btn-tour-action-3d">🧊 Ver no Simulador 3D</button>
+          <a href="pitch_guia.html" target="_blank" class="tour-link-doc">📄 Roteiro de Pitch Completo</a>
+        </div>
+        <div class="tour-foot-right">
+          <button type="button" id="btn-tour-prev" class="btn-tour-nav btn-tour-prev">◀ Anterior</button>
+          <button type="button" id="btn-tour-next" class="btn-tour-nav btn-tour-next">Próxima Parte ▶</button>
+        </div>
       </div>
     </div>
   </div>
