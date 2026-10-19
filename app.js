@@ -1657,73 +1657,71 @@ class TotemApp {
   }
 
   // 5.1 TOUR INTERATIVO & APRESENTAÇÃO DA MÁQUINA POR PARTES (NEXUS JAÚ)
+  // 5.1 TOUR INTERATIVO AO VIVO & APRESENTAÇÃO DA MÁQUINA POR PARTES (NEXUS JAÚ)
   setupTourPresentation() {
     this.currentTourStep = 1;
     this.tourSteps = [
       {
         num: 1,
-        navTitle: "1. Visão Geral",
-        title: "1. A Máquina por Completo & Proporção Urbana (Nexus Jaú)",
-        tag: "VISÃO GERAL • ESCALA HUMANA",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/1.png",
-        fallbackImg: "Foto%20Totem/image_a4b68322.jpg",
+        navTitle: "1. Medidas",
+        title: "1. Medidas Reais & Escala Urbana (2,20m x 0,70m x 0,35m)",
+        tag: "MEDIDAS 3D • ESCALA HUMANA",
+        status3D: "📐 Mostrando no Totem 3D: Linhas métricas reais (2,20m x 0,70m x 0,35m) ativadas ao redor da máquina!",
         specs: [
           { lbl: "Altura Total", val: "2,20 metros (Escala Humana)" },
           { lbl: "Largura Frontal", val: "0,70 metros (Slim)" },
-          { lbl: "Profundidade", val: "0,28m (Base Firme Chumbada)" },
-          { lbl: "Acabamento", val: "Aço Carbono / Grafite & Ciano" }
+          { lbl: "Profundidade", val: "0,35 metros (Base Firme)" },
+          { lbl: "Base Chumbada", val: "1,05m x 0,55m Parabolts M12" }
         ],
-        impact: "INVISÍVEL NUNCA MAIS: O MOBILIÁRIO INTELIGENTE QUE TRANSFORMA A PRAÇA EM UM PONTO DE REFERÊNCIA 24 HORAS.",
+        impact: "INVISÍVEL NUNCA MAIS: O MOBILIÁRIO URBANO INTELIGENTE QUE TRANSFORMA A PRAÇA EM PONTO DE REFERÊNCIA 24 HORAS.",
         speech: [
-          "Apresentamos o Totem Urbano Inteligente Nexus Jaú, projetado exatamente na escala urbana humana (2,20m x 0,70m), moderno e imponente sem obstruir a visão do comércio.",
-          "Integração total com a identidade de Jaú: Estância Turística e Capital Nacional do Calçado Feminino, acolhendo tanto o morador quanto os milhares de compradores semanais.",
-          "Presença física nobre no calçadão, substituindo totens velhos de papelão e placas desatualizadas por tecnologia perene e de alto padrão."
+          "Apresentamos o Totem Urbano Nexus Jaú, projetado rigorosamente na escala urbana humana (2,20m x 0,70m), moderno e imponente sem obstruir a visão dos pedestres nem as vitrines dos lojistas.",
+          "Instalação sobre o calçadão histórico de Jaú com piso tátil integrado de acessibilidade e pedestal metálico reforçado.",
+          "Presença física nobre no calçadão, substituindo totens de papelão e placas desatualizadas por tecnologia perene e de alto padrão."
         ],
         qa: {
-          q: "Qual o impacto visual do equipamento nas praças históricas de Jaú?",
-          a: "O design monolítico slim e a altura de 2,20m foram calculados para se harmonizar com o mobiliário urbano sem gerar poluição visual ou bloquear as fachadas comerciais do centro."
+          q: "Esse totem não vai poluir visualmente a praça ou atrapalhar os pedestres?",
+          a: "O perfil slim de 0,35m e a altura de 2,20m foram calculados para se harmonizar com o mobiliário urbano sem gerar poluição visual ou bloquear as fachadas comerciais do centro."
         },
-        camPreset: "perspective"
+        camPreset: "front"
       },
       {
         num: 2,
-        navTitle: "2. Carcaça & Formato",
-        title: "2. Carcaça Industrial, Dobras CNC & Vedação Total IP66",
-        tag: "BLINDAGEM FÍSICA • IP66",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/2.png",
-        fallbackImg: "Foto%20Totem/image_efe76ee6.jpg",
+        navTitle: "2. Carcaça",
+        title: "2. Carcaça em Aço Escovado (#8E96A0) & Vedação IP66",
+        tag: "CHASSI BLINDADO • IP66",
+        status3D: "🛡️ Mostrando no Totem 3D: Perspectiva 3/4 destacando carcaça em aço escovado e topo curvo sem marquise.",
         specs: [
-          { lbl: "Chapa Estrutural", val: "Aço 2,5mm Corte a Laser" },
-          { lbl: "Pintura Eletrostática", val: "Pó Poliéster Anti-UV" },
+          { lbl: "Chapa Estrutural", val: "Aço Carbono 2,5mm Corte CNC" },
+          { lbl: "Acabamento", val: "Aço Escovado Acetinado (#8E96A0)" },
           { lbl: "Vedação Climática", val: "Grau IP66 (Chuva Torrencial)" },
-          { lbl: "Saia de Fixação", val: "Chumbadores Mecânicos Ocultos" }
+          { lbl: "Perfil Superior", val: "Canto Curvo Suave (Sem Marquise)" }
         ],
-        impact: "CUSTO ZERO DE MANUTENÇÃO EXTERNA: ESTRUTURA BLINDADA PARA RESISTIR AO SOL FORTE DE JAÚ E TEMPESTADES DE VENTO.",
+        impact: "CUSTO ZERO DE MANUTENÇÃO EXTERNA: ESTRUTURA BLINDADA PARA RESISTIR AO CALOR DE 35°C DE JAÚ E TEMPESTADES DE VENTO.",
         speech: [
-          "Carcaça construída em chapa industrial de aço de 2,5mm dobrada em peça única, com reforços internos anti-deformação e fechadura de segurança Inox 316.",
-          "Gabinete 100% blindado passivo: ZERO rasgos ou frestas abertas na traseira. A água da chuva não entra e a poeira não penetra nos componentes.",
-          "Pintura eletrostática a pó curada a 200°C que protege contra ferrugem, calor e perda de brilho por mais de 10 anos ao relento."
+          "Carcaça construída em chapa industrial de aço de 2,5mm com corte a laser e acabamento em aço escovado acetinado neutro (#8E96A0).",
+          "Gabinete 100% monolítico e vertical: ZERO marquises, abas projetadas ou telhados salientes que possam acumular sujeira ou sofrer com rajadas de vento.",
+          "Vedação perimetral em borracha EPDM grau IP66 que protege contra chuvas torrenciais e sol forte por mais de 10 anos ao relento."
         ],
         qa: {
           q: "E se chover forte de vento, não corre o risco de entrar água ou queimar?",
           a: "Não. A vedação perimetral em EPDM e o design sem venezianas abertas garantem certificação IP66. A dissipação de calor é passiva pela massa do chassi metálico."
         },
-        camPreset: "side"
+        camPreset: "perspective"
       },
       {
         num: 3,
-        navTitle: "3. Tela 43\" & Vidro",
-        title: "3. Display Touch 43\" Alto Brilho & Vidro de Segurança 8mm",
-        tag: "INTERFACE TOUCH • IK10",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/3.png",
-        fallbackImg: "Foto%20Totem/image_14e9276c.jpg",
+        navTitle: "3. Tela 43\"",
+        title: "3. Display Touch 43\" de 1500 Nits & Brasão em Relevo",
+        tag: "TELA TOUCH • IK10",
+        status3D: "📱 Mostrando no Totem 3D: Câmera aproximada na tela Full HD rebaixada 2,5cm e brasão gravado no metal.",
         specs: [
           { lbl: "Tamanho da Tela", val: "43\" Vertical Full HD (96x55cm)" },
-          { lbl: "Brilho Solar", val: "1500 Nits (Visível sob Sol)" },
+          { lbl: "Brilho Solar", val: "1500 Nits (Visível sob Sol Direto)" },
           { lbl: "Proteção de Impacto", val: "Vidro Temperado 8mm IK10" },
-          { lbl: "Rebaixo Frontal", val: "2,5 cm Recuado na Carcaça" }
+          { lbl: "Nicho da Tela", val: "Rebaixado 2,5cm na Carcaça" }
         ],
-        impact: "LEITURA PERFEITA DEBAIXO DO SOL DE 35°C E PROTEÇÃO TOTAL CONTRA QUALQUER TENTATIVA DE IMPACTO.",
+        impact: "LEITURA PERFEITA DEBAIXO DO SOL DO MEIO-DIA E PROTEÇÃO TOTAL CONTRA QUALQUER TENTATIVA DE IMPACTO.",
         speech: [
           "Display industrial de 43 polegadas com 1500 nits: enquanto telas comuns de TV ficam apagadas de dia, o display do Nexus permanece vibrante sob luz solar direta.",
           "Vidro temperado de segurança com espessura real de 8mm e certificação IK10, resistente a impactos severos de pedras, vandalismo e objetos cortantes.",
@@ -1731,28 +1729,27 @@ class TotemApp {
         ],
         qa: {
           q: "Se um vândalo der um soco ou atirar uma pedra na tela?",
-          a: "O vidro temperado de 8mm com padrão antivandalismo IK10 absorve o impacto e o rebaixo mecânico de 2,5cm impede que qualquer canto ou quina frágil fique exposto."
+          a: "O vidro temperado de 8mm com padrão antivandalismo IK10 absorve o impacto e o rebaixo mecânico de 2,5cm no aço impede que qualquer canto ou quina frágil fique exposto."
         },
-        camPreset: "front"
+        camPreset: "screen"
       },
       {
         num: 4,
-        navTitle: "4. Hardware Offline",
-        title: "4. Coração da Máquina: Computador Fanless 100% Offline",
-        tag: "HARDWARE INDUSTRIAL • RESILIÊNCIA",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/4.png",
-        fallbackImg: "Foto%20Totem/image_4c88b9ef.jpg",
+        navTitle: "4. Interior",
+        title: "4. Porta de Manutenção Aberta & Hardware Fanless Offline",
+        tag: "HARDWARE INTERNO • TRILHO DIN",
+        status3D: "🚪 Mostrando no Totem 3D: Porta traseira aberta em 3D com pistões a gás, Mini-PC e fiação organizada!",
         specs: [
-          { lbl: "Processamento", val: "Octa-Core Industrial Fanless" },
-          { lbl: "Armazenamento", val: "SSD 256GB Gravado Localmente" },
-          { lbl: "Autonomia Lógica", val: "100% Funcional Sem Internet" },
-          { lbl: "Proteção Elétrica", val: "DPS Classe II + Disjuntores DIN" }
+          { lbl: "Processador", val: "Mini-PC Industrial Fanless (15W)" },
+          { lbl: "Acesso Técnico", val: "Porta Traseira com Pistões a Gás" },
+          { lbl: "Montagem", val: "Padrão Modular Trilho DIN 35mm" },
+          { lbl: "Proteção", val: "Disjuntores + DPS Classe II Surtos" }
         ],
         impact: "SE A INTERNET DA CIDADE CAIR, O TOTEM CONTINUA OPERANDO 100% SEM TRAVAR OU MOSTRAR TELA AZUL.",
         speech: [
+          "Vejam no modelo 3D a porta traseira de manutenção aberta: com pistões industriais e chave de segurança Inox 316 para inspeção rápida.",
           "Arquitetura Fanless (sem ventoinhas móveis): zero acúmulo de poeira interna, garantindo que o processador não sobreaqueça mesmo operando 24 horas ininterruptas.",
-          "Armazenamento local completo: todos os horários de ônibus, telefones de socorro e rotas do calçado estão gravados dentro do SSD de alta velocidade do totem.",
-          "Quadro elétrico interno seguro com barramento DIN, protetor contra surtos atmosféricos (raios) e cabeamento certificado contra curto-circuito."
+          "Armazenamento local completo: todos os horários de ônibus, telefones de socorro e rotas do calçado estão gravados dentro do SSD de alta velocidade do totem."
         ],
         qa: {
           q: "E se a operadora de internet tiver uma pane em Jaú?",
@@ -1762,47 +1759,45 @@ class TotemApp {
       },
       {
         num: 5,
-        navTitle: "5. 5G & Emergência",
-        title: "5. Conectividade Urbana 5G, Câmeras & Socorro SAMU/Bombeiros",
-        tag: "SMART CITY • SEGURANÇA 24H",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/5.png",
-        fallbackImg: "Foto%20Totem/image_b239d623.jpg",
+        navTitle: "5. Solar ESG",
+        title: "5. Painel Solar Superior & Banco de Baterias LiFePO4",
+        tag: "ENERGIA SUSTENTÁVEL • NO-BREAK 24H",
+        status3D: "☀️ Mostrando no Totem 3D: Câmera focada no topo plano com placa solar embutida e no-break 24h.",
         specs: [
-          { lbl: "Módulo de Dados", val: "5G Ultra-Rápido & Wi-Fi 6" },
-          { lbl: "Socorro Imediato", val: "SAMU 192 • Bombeiros 193" },
-          { lbl: "Segurança Pública", val: "GCM 153 • Polícia Militar 190" },
-          { lbl: "Direitos Humanos", val: "Disque 180 (Mulher) & 100" }
+          { lbl: "Placa Fotovoltaica", val: "Monocristalina 120Wp Embutida" },
+          { lbl: "Banco de Baterias", val: "Lítio LiFePO4 12,8V / 40Ah (480Wh)" },
+          { lbl: "Controlador", val: "MPPT Inteligente de Carga" },
+          { lbl: "Autonomia Noturna", val: "Até 24h em Apagão na Rede" }
         ],
-        impact: "DESAMPARO NO SEGUNDO DO PÂNICO NUNCA MAIS: ACIONAMENTO DE SOCORRO MÉDICO E POLICIAL A UM TOQUE NO CALÇADÃO.",
+        impact: "EMERGÊNCIA E SERVIÇOS NUNCA APAGAM: ENERGIA SOLAR QUE REDUZ A CONTA DA PREFEITURA E OPERA EM APAGÕES.",
         speech: [
-          "O Totem Nexus Jaú atua como um posto avançado de cidadania e segurança nas praças de maior circulação da cidade.",
-          "Módulo de emergência tátil com chamada direta e indicação exata do ponto onde o cidadão se encontra, acelerando a chegada do SAMU ou da Guarda Municipal em minutos.",
-          "Capacidade de roteamento de Wi-Fi público de alta velocidade para os munícipes e integração com o sistema de câmeras da Secretaria de Segurança Pública."
+          "No topo plano do totem está embutido o painel solar monocristalino de 120Wp, conectado a baterias de Lítio LiFePO4 de longa vida útil.",
+          "O equipamento funciona como um No-Break sustentável: economiza energia da prefeitura durante o dia e garante que em caso de apagão no centro, a máquina continue ligada por até 24h.",
+          "Pontuação máxima em metas ESG (Ambiental, Social e Governança) para a gestão pública municipal de Jaú."
         ],
         qa: {
-          q: "Como o totem ajuda a reduzir ocorrências no centro?",
-          a: "A iluminação noturna, o ponto de socorro visível e as câmeras inibem roubos e depredações, além de acolher mulheres e idosos em situação de vulnerabilidade com canal 180 imediato."
+          q: "Se faltar energia elétrica no centro ou der um temporal à noite, o totem desliga?",
+          a: "Não. O banco de baterias LiFePO4 garante autonomia completa de até 24 horas para iluminação, botões de socorro e serviços essenciais."
         },
-        camPreset: "front"
+        camPreset: "solar"
       },
       {
         num: 6,
-        navTitle: "6. Rotas & Calçado",
-        title: "6. O Sistema: Rotas de Ônibus, Território do Calçado & Ouvidoria 156",
-        tag: "SOFTWARE MUNICIPAL • SERVIÇOS",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/6.png",
-        fallbackImg: "Foto%20Totem/APRESENTA%C3%87%C3%83O/passo a passo das ucs.png",
+        navTitle: "6. Software",
+        title: "6. Rotas, Comércio Local, Ouvidoria 156 & Modo Acessível",
+        tag: "SISTEMA DA CIDADE • INCLUSÃO",
+        status3D: "🗺️ Mostrando no Totem 3D: Tela do totem operando com mapa do Polo Calçadista de Jaú.",
         specs: [
-          { lbl: "Linhas de Ônibus", val: "Horários & Itinerários Atualizados" },
-          { lbl: "QR Code Celular", val: "Leve o Mapa e o Ponto no Bolso" },
-          { lbl: "Polo Calçadista", val: "+150 Fábricas & Lojas de Jaú" },
-          { lbl: "Zeladoria 156", val: "Tapa-Buraco, Iluminação e Limpeza" }
+          { lbl: "Rotas de Ônibus", val: "Linhas & Itinerários Atualizados" },
+          { lbl: "Polo Calçadista", val: "+150 Lojas do Circuito Feminino" },
+          { lbl: "Acessibilidade", val: "Modo Cadeirante + VLibras Avatar" },
+          { lbl: "Botão Socorro", val: "SAMU 192 • Bombeiros 193 • GCM 153" }
         ],
         impact: "DINHEIRO QUE FICA EM JAÚ: FORTALECIMENTO DIRETO DAS LOJAS LOCAIS E FIM DOS PANFLETOS QUE SUJAM A RUA.",
         speech: [
-          "Linhas de ônibus completas com busca por bairros, horários de saída e botão 'QR Code' para o passageiro escanear e acompanhar o ônibus no próprio celular.",
+          "O software foi desenhado sob medida para Jaú: horários de ônibus por bairro com QR Code para acompanhar no celular.",
           "Guia comercial completo do Circuito do Calçado Feminino: o turista que chega em Jaú descobre instantaneamente onde comprar, como chegar e quais lojas estão abertas.",
-          "Canal de Zeladoria e Ouvidoria 156 na tela, permitindo que o cidadão registre demandas urbanas sem burocracia e com protocolo digital imediato."
+          "Acessibilidade total: botão que rebaixa os controles para a altura de cadeirantes (ABNT NBR 9050), alto contraste e intérprete em Libras."
         ],
         qa: {
           q: "Pessoas idosas ou sem familiaridade com celular conseguem navegar?",
@@ -1812,22 +1807,21 @@ class TotemApp {
       },
       {
         num: 7,
-        navTitle: "7. Retorno & Marketing",
-        title: "7. Viabilidade Econômica, Patrocínio DOOH & Pontuação ESG",
-        tag: "CUSTO ZERO • PONTUAÇÃO ESG",
-        image: "Foto%20Totem/APRESENTA%C3%87%C3%83O/7.png",
-        fallbackImg: "Foto%20Totem/APRESENTA%C3%87%C3%83O/10.png",
+        navTitle: "7. DOOH & ESG",
+        title: "7. Viabilidade Financeira: Custo Zero por Concessão DOOH",
+        tag: "VIABILIDADE • RETORNO",
+        status3D: "🔄 Mostrando no Totem 3D: Giro orbital suave 360° com iluminação sobre o calçadão.",
         specs: [
           { lbl: "Custo p/ Município", val: "Possibilidade de CUSTO ZERO" },
           { lbl: "Modelo Financeiro", val: "Patrocínio DOOH (Mídia Legal)" },
-          { lbl: "Índice de Sustentabilidade", val: "ESG Municipal + Cidade Inteligente" },
-          { lbl: "Economia de Papel", val: "100% Informativo Ecológico Digital" }
+          { lbl: "Índice Smart City", val: "Pontuação Máxima em ESG Municipal" },
+          { lbl: "Economia de Papel", val: "100% Paperless com QR Code" }
         ],
         impact: "INOVAÇÃO QUE SE PAGA SOZINHA: A ADMINISTRAÇÃO ENTREGA MODERNIDADE SEM ONERAR O ORÇAMENTO MUNICIPAL.",
         speech: [
           "O projeto pode ser implantado e mantido com custo zero para a Prefeitura por meio de concessão ou cotas de patrocínio privado para comércio e bancos locais.",
           "O rodapé de publicidade legal (DOOH) gera receita e visibilidade qualificada, valorizando as marcas jauenses em um canal digital de altíssimo tráfego.",
-          "Conquista de pontuação máxima em metas ESG (Ambiental, Social e Governança), posicionando Jaú como referência estadual em Cidades Inteligentes."
+          "Conquista de pontuação máxima em metas ESG, posicionando Jaú como referência estadual em Cidades Inteligentes."
         ],
         qa: {
           q: "Qual o custo que isso vai gerar para os cofres públicos?",
@@ -1840,17 +1834,28 @@ class TotemApp {
     const btnCloseTour = document.getElementById('btn-close-tour-modal');
     const modalTour = document.getElementById('modal-tour-presentation');
     const btnOrbTour = document.getElementById('btn-orb-tour');
+    const btnToggleCollapse = document.getElementById('btn-tour-toggle-collapse');
+    const tourCard = document.getElementById('tour-card-element');
+
+    if (btnToggleCollapse && tourCard) {
+      btnToggleCollapse.addEventListener('click', () => {
+        const isCollapsed = tourCard.classList.toggle('collapsed');
+        btnToggleCollapse.textContent = isCollapsed ? '👁️ Mostrar' : '👁️ Ocultar';
+      });
+    }
 
     const closeTour = () => {
       if (modalTour) modalTour.classList.add('hidden');
       if (btnOrbTour) btnOrbTour.classList.remove('active');
+      if (this.viewer3D) {
+        if (typeof this.viewer3D.setDimensionsVisible === 'function') this.viewer3D.setDimensionsVisible(false);
+        if (typeof this.viewer3D.closeRearDoor === 'function') this.viewer3D.closeRearDoor();
+        this.viewer3D.autoRotate = false;
+        if (typeof this.viewer3D.setCameraPreset === 'function') this.viewer3D.setCameraPreset('perspective');
+        if (typeof this.viewer3D.syncFromApp === 'function') this.viewer3D.syncFromApp({ screenState: 'home' });
+      }
     };
     if (btnCloseTour) btnCloseTour.addEventListener('click', closeTour);
-    if (modalTour) {
-      modalTour.addEventListener('click', (e) => {
-        if (e.target === modalTour) closeTour();
-      });
-    }
 
     const prevBtns = [document.getElementById('btn-tour-prev'), document.getElementById('btn-tour-prev-top')];
     const nextBtns = [document.getElementById('btn-tour-next'), document.getElementById('btn-tour-next-top')];
@@ -1876,36 +1881,8 @@ class TotemApp {
         const step = this.tourSteps.find(s => s.num === this.currentTourStep);
         if (step) {
           this.applyTour3DAction(step);
-          if (modalTour) modalTour.classList.add('hidden');
-          if (btnOrbTour) btnOrbTour.classList.remove('active');
         }
       });
-    }
-
-    const contentEl = document.getElementById('tour-body-content');
-    if (contentEl) {
-      let touchStartX = 0;
-      let touchStartY = 0;
-      contentEl.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          touchStartX = e.touches[0].clientX;
-          touchStartY = e.touches[0].clientY;
-        }
-      }, { passive: true });
-
-      contentEl.addEventListener('touchend', (e) => {
-        if (e.changedTouches.length === 1) {
-          const deltaX = e.changedTouches[0].clientX - touchStartX;
-          const deltaY = e.changedTouches[0].clientY - touchStartY;
-          if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-            if (deltaX < 0) {
-              this.goToTourStep(this.currentTourStep + 1);
-            } else {
-              this.goToTourStep(this.currentTourStep - 1);
-            }
-          }
-        }
-      }, { passive: true });
     }
 
     document.addEventListener('keydown', (e) => {
@@ -1948,46 +1925,43 @@ class TotemApp {
 
     const btnTour3D = document.getElementById('btn-tour-view-3d');
     if (btnTour3D) {
-      btnTour3D.textContent = `🧊 Posicionar 3D: ${step.navTitle}`;
+      btnTour3D.textContent = `🧊 Re-focar 3D: ${step.navTitle}`;
     }
 
     const container = document.getElementById('tour-body-content');
     if (container) {
       container.innerHTML = `
-        <div class="tour-slide-layout">
-          <div class="tour-col-media">
-            <div class="tour-image-card">
-              <span class="tour-tag-overlay">${step.tag}</span>
-              <img src="${step.image}" alt="${step.title}" onerror="this.onerror=null; this.src='${step.fallbackImg}';" />
-            </div>
-            <div class="tour-specs-strip">
-              ${step.specs.map(sp => `
-                <div class="tour-spec-item">
-                  <span class="tour-spec-lbl">${sp.lbl}</span>
-                  <span class="tour-spec-val">${sp.val}</span>
-                </div>
-              `).join('')}
-            </div>
+        <div class="tour-hud-content">
+          <div class="tour-3d-status-pill">
+            <span class="tour-pulse-dot"></span>
+            <span class="tour-status-txt">${step.status3D}</span>
           </div>
 
-          <div class="tour-col-script">
-            <div class="tour-block-card tour-block-impact">
-              <span class="tour-impact-badge">⚡ Palavra de Impacto (Gatilho Verbal)</span>
-              <div class="tour-impact-text">"${step.impact}"</div>
-            </div>
+          <div class="tour-specs-strip">
+            ${step.specs.map(sp => `
+              <div class="tour-spec-item">
+                <span class="tour-spec-lbl">${sp.lbl}</span>
+                <span class="tour-spec-val">${sp.val}</span>
+              </div>
+            `).join('')}
+          </div>
 
-            <div class="tour-block-card tour-block-speech">
-              <span class="tour-speech-badge">🗣️ O que Falar para a Prefeitura (Pontos-Chave)</span>
-              <ul class="tour-speech-list">
-                ${step.speech.map(item => `<li>${item}</li>`).join('')}
-              </ul>
-            </div>
+          <div class="tour-block-card tour-block-impact">
+            <span class="tour-impact-badge">⚡ Palavra de Impacto</span>
+            <div class="tour-impact-text">"${step.impact}"</div>
+          </div>
 
-            <div class="tour-block-card tour-block-qa">
-              <span class="tour-qa-badge">🛡️ Pergunta Difícil que Podem Fazer &amp; Como Responder</span>
-              <div class="tour-qa-q">❓ "${step.qa.q}"</div>
-              <div class="tour-qa-a"><strong>Resposta Sugerida:</strong> ${step.qa.a}</div>
-            </div>
+          <div class="tour-block-card tour-block-speech">
+            <span class="tour-speech-badge">🗣️ O que Falar para a Prefeitura (Pontos-Chave)</span>
+            <ul class="tour-speech-list">
+              ${step.speech.map(item => `<li>${item}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="tour-block-card tour-block-qa">
+            <span class="tour-qa-badge">🛡️ Pergunta Difícil &amp; Como Responder</span>
+            <div class="tour-qa-q">❓ "${step.qa.q}"</div>
+            <div class="tour-qa-a"><strong>Resposta:</strong> ${step.qa.a}</div>
           </div>
         </div>
       `;
@@ -2002,16 +1976,41 @@ class TotemApp {
   applyTour3DAction(step) {
     if (!this.viewer3D || !step) return;
     try {
+      // 1. Controle das Cotas Métricas 3D (Medidas 2,20m x 0,70m x 0,35m)
+      if (step.num === 1) {
+        if (typeof this.viewer3D.setDimensionsVisible === 'function') {
+          this.viewer3D.setDimensionsVisible(true);
+        }
+      } else {
+        if (typeof this.viewer3D.setDimensionsVisible === 'function') {
+          this.viewer3D.setDimensionsVisible(false);
+        }
+      }
+
+      // 2. Controle de Câmera 3D
       if (step.camPreset && typeof this.viewer3D.setCameraPreset === 'function') {
         this.viewer3D.setCameraPreset(step.camPreset);
       }
+
+      // 3. Controle da Porta Traseira
       if (step.num === 4) {
-        if (typeof this.viewer3D.openRearDoor === 'function') this.viewer3D.openRearDoor();
+        if (typeof this.viewer3D.openRearDoor === 'function') this.viewer3D.openRearDoor(true);
       } else {
         if (typeof this.viewer3D.closeRearDoor === 'function') this.viewer3D.closeRearDoor();
       }
+
+      // 4. Giro Orbital 360 no Passo 7
+      if (step.num === 7) {
+        this.viewer3D.autoRotate = true;
+      } else {
+        this.viewer3D.autoRotate = false;
+      }
+
+      // 5. Interface da Tela do Totem
       if (step.num === 6) {
-        if (typeof this.viewer3D.setScreenView === 'function') this.viewer3D.setScreenView('bus');
+        if (typeof this.viewer3D.syncFromApp === 'function') this.viewer3D.syncFromApp({ screenState: 'shoes' });
+      } else {
+        if (typeof this.viewer3D.syncFromApp === 'function') this.viewer3D.syncFromApp({ screenState: 'home' });
       }
     } catch (e) {
       console.warn("Tour 3D sync:", e);

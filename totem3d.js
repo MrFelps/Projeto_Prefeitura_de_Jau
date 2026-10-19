@@ -3803,6 +3803,40 @@ class Totem3DViewer {
     });
   }
 
+  // Métodos Públicos para Controle de Câmera e Modos (usados pelo Tour Interativo da Máquina)
+  setCameraPreset(key) {
+    const presets = {
+      'front': { theta: 0.0, phi: 1.50, radius: 3.40, targetY: 1.06 },
+      'perspective': { theta: 0.48, phi: 1.38, radius: 3.50, targetY: 1.06 },
+      'side': { theta: 1.57, phi: 1.46, radius: 3.35, targetY: 1.06 },
+      'back': { theta: Math.PI, phi: 1.44, radius: 3.40, targetY: 1.06 },
+      'solar': { theta: 0.0, phi: 0.32, radius: 2.15, targetY: 1.85 },
+      'screen': { theta: 0.0, phi: 1.45, radius: 2.10, targetY: 1.18 }
+    };
+    const p = presets[key];
+    if (!p) return;
+
+    this.autoRotate = false;
+    const btnAuto = document.getElementById('btn-3d-autorotate');
+    if (btnAuto) btnAuto.classList.remove('active');
+
+    this.camState.targetTheta = p.theta;
+    this.camState.targetPhi = p.phi;
+    this.camState.targetRadius = p.radius;
+    this.camState.targetLookY = p.targetY;
+
+    document.querySelectorAll('[data-cam-preset]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-cam-preset') === key);
+    });
+  }
+
+  setDimensionsVisible(visible) {
+    this.showDimensions = !!visible;
+    if (this.dimensionGroup) this.dimensionGroup.visible = this.showDimensions;
+    const btnDims = document.getElementById('btn-3d-dimensions');
+    if (btnDims) btnDims.classList.toggle('active', this.showDimensions);
+  }
+
   // =========================================================================
   // BOTÕES DA INTERFACE DO ESTÚDIO 3D (CÂMERAS, GIRO 360°, TEMA, DIA/NOITE)
   // =========================================================================

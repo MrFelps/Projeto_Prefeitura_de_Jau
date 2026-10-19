@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Three.js via CDN para renderização do Totem em 3D 360° -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261019_v26_tour_fixed">
+  <link rel="stylesheet" href="style.css?v=20261019_v30_live_3d_tour">
   <style>
     /* Travar completamente zoom da página, rolagem vertical/horizontal e barras laterais no tablet */
     *, *::before, *::after {
@@ -1987,18 +1987,17 @@
   <!-- (Abre na 5ª Bolinha do Canto Superior Esquerdo "TOUR")               -->
   <!-- =================================================================== -->
   <div id="modal-tour-presentation" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tour-modal-title">
-    <div class="modal-card modal-card-tour">
+    <div class="modal-card modal-card-tour" id="tour-card-element">
       <div class="modal-head tour-head">
         <div class="tour-head-info">
           <div class="tour-badges-row">
-            <span class="tour-badge-pill">APRESENTAÇÃO OFICIAL PREFEITURA</span>
+            <span class="tour-badge-pill">APRESENTAÇÃO PREFEITURA</span>
             <span class="tour-step-counter" id="tour-step-counter">PARTE 1 DE 7</span>
           </div>
-          <h3 id="tour-modal-title" class="tour-title">Totem Urbano Nexus Jaú — Visão Geral &amp; Proporção</h3>
+          <h3 id="tour-modal-title" class="tour-title">1. Dimensões Reais &amp; Escala Urbana (2,20m x 0,70m x 0,35m)</h3>
         </div>
         <div class="tour-head-nav-top">
-          <button type="button" id="btn-tour-prev-top" class="btn-tour-nav btn-tour-prev" title="Parte Anterior">◀ Anterior</button>
-          <button type="button" id="btn-tour-next-top" class="btn-tour-nav btn-tour-next" title="Próxima Parte">Próximo ▶</button>
+          <button type="button" id="btn-tour-toggle-collapse" class="btn-tour-nav btn-tour-minimize" title="Minimizar / Mostrar Painel de Fala">👁️ Ocultar</button>
           <button type="button" id="btn-close-tour-modal" class="btn-close-modal" aria-label="Fechar Apresentação">✕</button>
         </div>
       </div>
@@ -2007,35 +2006,35 @@
       <div class="tour-stepper-bar" id="tour-stepper-bar">
         <button type="button" class="tour-step-btn active" data-step="1">
           <span class="step-num">1</span>
-          <span class="step-txt">Visão Geral</span>
+          <span class="step-txt">Medidas</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="2">
           <span class="step-num">2</span>
-          <span class="step-txt">Carcaça &amp; Formato</span>
+          <span class="step-txt">Carcaça</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="3">
           <span class="step-num">3</span>
-          <span class="step-txt">Tela 43" &amp; Vidro</span>
+          <span class="step-txt">Tela 43"</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="4">
           <span class="step-num">4</span>
-          <span class="step-txt">Hardware Offline</span>
+          <span class="step-txt">Interior</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="5">
           <span class="step-num">5</span>
-          <span class="step-txt">5G &amp; Emergência</span>
+          <span class="step-txt">Solar ESG</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="6">
           <span class="step-num">6</span>
-          <span class="step-txt">Rotas &amp; Calçado</span>
+          <span class="step-txt">Software</span>
         </button>
         <button type="button" class="tour-step-btn" data-step="7">
           <span class="step-num">7</span>
-          <span class="step-txt">Retorno &amp; Marketing</span>
+          <span class="step-txt">DOOH</span>
         </button>
       </div>
 
-      <!-- Corpo da Apresentação da Parte Selecionada -->
+      <!-- Corpo da Apresentação da Parte Selecionada (sem fotos estáticas, 100% focado no que mostrar no 3D) -->
       <div class="tour-body-content" id="tour-body-content">
         <!-- Inserido dinamicamente via JS -->
       </div>
@@ -2043,8 +2042,8 @@
       <!-- Rodapé com Navegação Principal e Ações de Apoio -->
       <div class="modal-foot tour-foot">
         <div class="tour-foot-left">
-          <button type="button" id="btn-tour-view-3d" class="btn-tour-action-3d">🧊 Ver no Simulador 3D</button>
-          <a href="pitch_guia.html" target="_blank" class="tour-link-doc">📄 Roteiro de Pitch Completo</a>
+          <button type="button" id="btn-tour-view-3d" class="btn-tour-action-3d">🧊 Re-enquadrar 3D</button>
+          <a href="pitch_guia.html" target="_blank" class="tour-link-doc">📄 Roteiro de Apoio</a>
         </div>
         <div class="tour-foot-right">
           <button type="button" id="btn-tour-prev" class="btn-tour-nav btn-tour-prev">◀ Anterior</button>
@@ -2989,7 +2988,7 @@
     </div>
   </div>
 
-  <script src="totem3d.js?v=20261019_v26_tour_fixed"></script>
-  <script src="app.js?v=20261019_v26_tour_fixed"></script>
+  <script src="totem3d.js?v=20261019_v30_live_3d_tour"></script>
+  <script src="app.js?v=20261019_v30_live_3d_tour"></script>
 </body>
 </html>
