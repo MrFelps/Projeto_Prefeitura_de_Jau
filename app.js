@@ -1447,7 +1447,11 @@ class TotemApp {
     const popover360 = document.getElementById('orb-360-popover');
     const btnClosePopover360 = document.getElementById('btn-close-360-popover');
 
+    let lastOrbTriggerTime = 0;
     window.triggerTopLeftButton = (action) => {
+      const now = Date.now();
+      if (now - lastOrbTriggerTime < 300) return;
+      lastOrbTriggerTime = now;
       if (action === 'screen') {
         const isCurrentlyHidden = menuOverlay ? menuOverlay.classList.contains('hidden') : true;
         if (isCurrentlyHidden) {
@@ -1836,24 +1840,6 @@ class TotemApp {
     const btnCloseTour = document.getElementById('btn-close-tour-modal');
     const modalTour = document.getElementById('modal-tour-presentation');
     const btnOrbTour = document.getElementById('btn-orb-tour');
-
-    if (btnOrbTour) {
-      const handleOpenTour = (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        if (window.triggerTopLeftButton) {
-          window.triggerTopLeftButton('tour');
-        } else if (modalTour) {
-          modalTour.classList.remove('hidden');
-          btnOrbTour.classList.add('active');
-          this.goToTourStep(this.currentTourStep || 1);
-        }
-      };
-      btnOrbTour.addEventListener('click', handleOpenTour);
-      btnOrbTour.addEventListener('touchend', handleOpenTour);
-    }
 
     const closeTour = () => {
       if (modalTour) modalTour.classList.add('hidden');
